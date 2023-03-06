@@ -60,6 +60,7 @@ XPATHS = Prodict.from_dict({
 })
 
 COUNTER = 0
+WAIT_TIME = 13
 
 def login(retry = False):
     global COUNTER
@@ -113,10 +114,10 @@ def get_data(requested_cars: [Car]):
         print(f"Requesting {requested_car}...")
 
         if not cold_start:
-            print("Already logged in, waiting 20+20 sec...")
-            time.sleep(20)
+            print(f"Already logged in, waiting {WAIT_TIME}+{WAIT_TIME} sec...")
+            time.sleep(WAIT_TIME)
             driver.get("https://magyarorszag.hu/jszp_szuf")
-            time.sleep(20)
+            time.sleep(WAIT_TIME)
 
         WebDriverWait(driver, 30).until(
             ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
@@ -233,6 +234,7 @@ def get_data(requested_cars: [Car]):
         tmp = car.color.split(" ")
         car.color = tmp[1]
 
+        time.sleep(1)
         driver.find_element(By.XPATH, XPATHS.get("restrictions_tab")).click()
         print(f"CLICKED: Restrictions")
         time.sleep(1)
@@ -275,7 +277,12 @@ def get_data(requested_cars: [Car]):
     return car_data
 
 if __name__ == '__main__':
-    requested_cars = ['IWA527', 'SFZ531', 'AAFK670']
+    requested_cars = [
+        # 'YES880',
+        'LLU750',
+        # 'SUTYI1',
+        'AAKZ462'
+    ]
     cars: [Car] = []
 
     load_dotenv(dotenv_path="he.env")
