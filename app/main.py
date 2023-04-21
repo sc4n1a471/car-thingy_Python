@@ -4,14 +4,13 @@ from app.src.get_data import get_data
 from app.data import settings
 
 if __name__ == '__main__':
-    settings.init()
 
     requested_cars = [
         # 'YES880',
         # 'LLU750',
         # 'SUTYI1',
         # 'AAKZ462',
-        # 'RRZ538',
+        'RRZ538',
         # 'SHB600',
         'KHB860',
         # 'GSM140',
@@ -28,7 +27,6 @@ if __name__ == '__main__':
 
     settings.driver.get("https://magyarorszag.hu/jszp_szuf")
 
-    # login()
     try:
         login()
     except Exception as e:
