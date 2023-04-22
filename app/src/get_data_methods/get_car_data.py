@@ -6,6 +6,7 @@ import time
 import app.data.settings as settings
 import app.data.xpaths as xpaths
 from app.src.get_data_methods.get_accidents import get_accidents
+from app.src.get_data_methods.get_images import get_images
 from app.src.get_data_methods.get_mileage import get_mileage
 from app.src.get_data_methods.get_restrictions import get_restrictions
 
@@ -67,15 +68,34 @@ def get_car_data(car):
     tmp = car.color.split(" ")
     car.color = tmp[1]
 
-    time.sleep(1)
-    get_restrictions(car)
+    time.sleep(settings.wait_time_tab_change)
+    try:
+        get_restrictions(car)
+    except Exception as exc:
+        raise Exception(f'GET_RESTRICTIONS_ERROR: {exc}')
 
     settings.driver.find_element(By.XPATH, xpaths.XPATHS.get("mileage_tab")).click()
     print(f"CLICKED: Mileage")
-    time.sleep(1)
-    get_mileage(car)
+    time.sleep(settings.wait_time_tab_change)
+    try:
+        get_mileage(car)
+    except Exception as exc:
+        raise Exception(f'GET_MILEAGE_ERROR: {exc}')
 
     settings.driver.find_element(By.XPATH, xpaths.XPATHS.get("accidents_tab")).click()
     print(f"CLICKED: Accidents")
-    time.sleep(1)
-    get_accidents(car)
+    time.sleep(settings.wait_time_tab_change)
+    try:
+        get_accidents(car)
+    except Exception as exc:
+        raise Exception(f'GET_ACCIDENTS_ERROR: {exc}')
+
+    settings.driver.find_element(By.XPATH, xpaths.XPATHS.get("condition_inspections_tab")).click()
+    print(f"CLICKED: Condition Inspections")
+    time.sleep(settings.wait_time_tab_change)
+    try:
+        get_images(car)
+    except Exception as exc:
+        raise Exception(f'GET_IMAGES_ERROR: {exc}')
+
+    asd = 0

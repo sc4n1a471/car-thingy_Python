@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Car:
+    license_plate: str = "",
     brand: str = "",
     model: str = "",
     type_code: str = "",
@@ -18,3 +19,4 @@ class Car:
     restrictions: [str] = None,
     mileage: dict = None
     accidents: dict = None
+    images: [dict] = None
