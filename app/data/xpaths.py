@@ -1,4 +1,6 @@
 XPATHS = {
+    'main_frame': '//*[@id="main"]/iframe',
+
     'brand': '//*[contains(@id, "Gyartmany") and string-length(text())]',
     'model': '//*[contains(@id, "Kerleiras") and string-length(text())]',
     'type_code': '//*[contains(@id, "Tipus") and string-length(text())]',
@@ -22,10 +24,12 @@ XPATHS = {
     'accidents_tab': '//*[@id="tabitem-BiztositasKartortenet"]',
     'accidents': '//*[@id="datatable-Karesemeny"]/tbody',
 
-    'condition_inspections_tab': '//*[@id="tabitem-MuszakiAllapot"]',
-    # 'condition_inspections': '//*[contains(@id, "_collapsible-set-1-MuszakiAllapot")]',
-    'condition_inspections': '//a[contains(@href, "_collapsible-MuszakiAllapot")]',
-    'condition_inspections_show_pictures': '//button[contains(@id, "MuszakiAllapot_Kepek_megjelenitese")]',
+    'inspections_tab': '//*[@id="tabitem-MuszakiAllapot"]',
+    'inspections': '//a[contains(@href, "_collapsible-MuszakiAllapot")]',
+    'inspections_show_pictures': '//button[contains(@id, "MuszakiAllapot_Kepek_megjelenitese")]',
+    'inspections_pictures_dialog_frame': '//*[@id="dialog_frame"]',
+    'inspections_pictures': '//img[contains(@title, " kép")]',
+    'inspections_close_button': '//button[@id="button-bezaras"]',
 
     'error_modal': '//h4[contains(text(), "Hiba")]',
     'error_modal_button': '//*[@id="snap-dialog-ok-button"]',
