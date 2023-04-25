@@ -1,16 +1,18 @@
+from app.nyeh import nyeh
 from app.src.login import login
 from app.models.Car import Car
 from app.src.get_data import get_data
 from app.data import settings
 
 if __name__ == '__main__':
+    # nyeh()
 
     requested_cars = [
         # 'YES880',
         # 'LLU750',
         # 'SUTYI1',
         # 'AAKZ462',
-        'RRZ538',
+        # 'RRZ538',
         # 'SHB600',
         'KHB860',
         # 'GSM140',

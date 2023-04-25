@@ -18,6 +18,8 @@ def get_data(requested_cars: [Car]):
     car_data: [Car] = []
     for requested_car in requested_cars:
         car = Car()
+        car.license_plate = requested_car
+
         counter = 0
         print(f"Requesting {requested_car}...")
 

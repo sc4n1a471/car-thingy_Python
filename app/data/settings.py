@@ -2,6 +2,7 @@ from selenium import webdriver
 
 counter = 0
 wait_time = 13
+wait_time_tab_change = 0.5
 
 chromedriver = "/chromedriver"
 option = webdriver.ChromeOptions()
