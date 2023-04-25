@@ -61,12 +61,15 @@ def get_images(car):
 
 
 def save_images(license_plate, images):
+    print("Saving images...")
 
-    try:
-        os.mkdir('downloaded_images')
-    except Exception as exc:
-        print(f"Folder creation for downloaded_images failed, error: {exc}")
-        return
+    if not os.path.exists('downloaded_images'):
+        print("downloaded_images folder does not exist, creating one...")
+        try:
+            os.mkdir('downloaded_images')
+        except Exception as exc:
+            print(f"Folder creation for downloaded_images failed, error: {exc}")
+            return
 
     license_plate_path = os.path.join('downloaded_images', license_plate)
     try:
