@@ -3,18 +3,17 @@ import urllib.request
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
-import app.data.settings as settings
-import app.data.xpaths as xpaths
+from ...data import settings
+from ...data.xpaths import XPATHS
 from selenium.webdriver.common.by import By
 import time
-import itertools
 import os
 
 def get_images(car):
 
     car_inspections = []
 
-    inspections = settings.driver.find_elements(By.XPATH, xpaths.XPATHS.get("condition_inspections"))
+    inspections = settings.driver.find_elements(By.XPATH, XPATHS.get("condition_inspections"))
 
     for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
         if i != 0:  # the first inspection is open on tab change

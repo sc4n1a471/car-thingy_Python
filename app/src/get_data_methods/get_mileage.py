@@ -1,9 +1,9 @@
 from selenium.webdriver.common.by import By
 
-import app.data.settings as settings
-import app.data.xpaths as xpaths
+from ...data import settings
+from ...data.xpaths import XPATHS
 def get_mileage(car):
-    mileage_tbody = settings.driver.find_element(By.XPATH, xpaths.XPATHS.get("mileage"))
+    mileage_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("mileage"))
     mileage_rows = mileage_tbody.find_elements(By.TAG_NAME, "tr")
     print(f"FOUND: Mileage data")
     car.mileage = {}

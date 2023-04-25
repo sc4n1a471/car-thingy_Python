@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as ec
 import os
 from dotenv import load_dotenv, find_dotenv
 
-from app.data import settings
+from ..data import settings
 
 
 def login(retry = False):

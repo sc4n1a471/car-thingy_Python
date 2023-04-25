@@ -3,12 +3,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 import time
 
-import app.data.settings as settings
-import app.data.xpaths as xpaths
-from app.src.get_data_methods.get_accidents import get_accidents
-from app.src.get_data_methods.get_images import get_images
-from app.src.get_data_methods.get_mileage import get_mileage
-from app.src.get_data_methods.get_restrictions import get_restrictions
+from ...data import settings
+from ...data import xpaths
+from ..get_data_methods.get_accidents import get_accidents
+from ..get_data_methods.get_images import get_images
+from ..get_data_methods.get_mileage import get_mileage
+from ..get_data_methods.get_restrictions import get_restrictions
 
 
 def get_car_data(car):
