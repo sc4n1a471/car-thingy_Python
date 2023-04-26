@@ -2,9 +2,8 @@ import time
 
 from selenium.webdriver.common.by import By
 
-from ..data.xpaths import XPATHS
-from ..data import settings
-
+from app.data import settings
+from app.data.xpaths import XPATHS
 
 def logout():
     print("Logging out...")
