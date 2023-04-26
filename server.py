@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/<license_plate>")
 def get_license_plate(license_plate):
-    if len(license_plate) != 6 or len(license_plate != 7):
+    if len(license_plate) < 6 or len(license_plate) > 7:
         message = 'License plate is not valid, should be 6 or 7 characters'
         status = 'fail'
     else:
@@ -22,5 +22,5 @@ def get_license_plate(license_plate):
         'message': message
     })
 
-# if __name__ == '__main__':
-#     get_license_plate("RRZ538")
+if __name__ == '__main__':
+    get_license_plate("AAA111")

@@ -46,6 +46,8 @@ def get_data(requested_cars: [Car]):
         # print(len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))))
         while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0:
 
+            print("Error occurred")
+
             print("Getting throttled...")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
             time.sleep(1)
