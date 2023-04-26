@@ -1,6 +1,16 @@
 XPATHS = {
     'main_frame': '//*[@id="main"]/iframe',
 
+    'login_methods': '//form[@id="urn:eksz.gov.hu:1.0:azonositas:kau:1:uk:uidpwd"]',
+    'login_method': '//form[@id="urn:eksz.gov.hu:1.0:azonositas:kau:1:uk:uidpwd"]',
+    'username_field': '//input[@id="fldUser"]',
+    'password_field': '//input[@id="fldPass"]',
+    'login_button': '//button[@name="submit"]',
+
+    'accident_record_ckeckbox': '//input[@id="checkbox-BiztositasKartortenet"]',
+
+    'search_input': '//input[@id="input-rendszam"]',
+
     'brand': '//*[contains(@id, "Gyartmany") and string-length(text())]',
     'model': '//*[contains(@id, "Kerleiras") and string-length(text())]',
     'type_code': '//*[contains(@id, "Tipus") and string-length(text())]',
@@ -32,6 +42,8 @@ XPATHS = {
     'inspections_close_button': '//button[@id="button-bezaras"]',
 
     'error_modal': '//h4[contains(text(), "Hiba")]',
+    'no_accident_record': '//p[contains(text(), "A jármű kártörténetéről nem szolgáltatható adat.")]',
+    'try_again_later': '//p[contains(text(), "Kérjük, adatigénylését ismételje meg később.")]',
     'error_modal_button': '//*[@id="snap-dialog-ok-button"]',
 
     'logout_button': '//*[@id="kijelentkezes"]'

@@ -1,7 +1,8 @@
+import traceback
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-import time
 
 from application.data import settings
 from application.data.xpaths import XPATHS
@@ -9,9 +10,15 @@ from ..get_data_methods.get_accidents import get_accidents
 from ..get_data_methods.get_images import get_images
 from ..get_data_methods.get_mileage import get_mileage
 from ..get_data_methods.get_restrictions import get_restrictions
+from ...models.GetDataException import GetDataException
 
 
 def get_car_data(car):
+    """Gets all information on the requested car
+
+    Attributes:
+        car -- car object
+    """
     car.brand = settings.driver.find_element(By.XPATH, XPATHS.get("brand")).text
     print(f"FOUND: Brand {car.brand}")
 
@@ -29,7 +36,8 @@ def get_car_data(car):
     settings.driver.switch_to.frame(iframe)
     print("Switched to selected iframe")
 
-    WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("first_reg"))))
+    WebDriverWait(settings.driver, 10).until(
+        ec.presence_of_element_located((By.XPATH, XPATHS.get("first_reg"))))
     car.first_reg = settings.driver.find_elements(By.XPATH, XPATHS.get("first_reg"))[0].text
     print(f"FOUND: First_reg {car.first_reg}")
 
@@ -50,8 +58,14 @@ def get_car_data(car):
         print(f"FOUND: Engine_size {car.engine_size}")
         car.engine_size = car.engine_size.replace(" ", "").replace("cm³", "")
 
-    if car.brand == '' and car.model == '' and car.status == '' and car.type_code == '' and car.first_reg == '' and car.first_reg_hun == '' and car.num_of_owners == '':
-        raise Exception("All found data is empty")
+    if car.brand == '' and \
+            car.model == '' and \
+            car.status == '' and \
+            car.type_code == '' and \
+            car.first_reg == '' and \
+            car.first_reg_hun == '' and \
+            car.num_of_owners == '':
+        raise GetDataException("All found data is empty")
 
     car.performance = settings.driver.find_elements(By.XPATH, XPATHS.get("performance"))[0].text
     print(f"FOUND: Performance {car.performance}")
@@ -68,32 +82,26 @@ def get_car_data(car):
     tmp = car.color.split(" ")
     car.color = tmp[1]
 
-    time.sleep(settings.wait_time_tab_change)
-    try:
-        get_restrictions(car)
-    except Exception as exc:
-        raise Exception(f'GET_RESTRICTIONS_ERROR: {exc}')
+    if car.has_restriction_record:
+        try:
+            get_restrictions(car)
+        except Exception as exc:
+            raise GetDataException(f'GET_RESTRICTIONS_ERROR: {traceback.format_exc()}') from exc
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("mileage_tab")).click()
-    print(f"CLICKED: Mileage")
-    time.sleep(settings.wait_time_tab_change)
-    try:
-        get_mileage(car)
-    except Exception as exc:
-        raise Exception(f'GET_MILEAGE_ERROR: {exc}')
+    if car.has_mileage_record:
+        try:
+            get_mileage(car)
+        except Exception as exc:
+            raise GetDataException(f'GET_MILEAGE_ERROR: {traceback.format_exc()}') from exc
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("accidents_tab")).click()
-    print(f"CLICKED: Accidents")
-    time.sleep(settings.wait_time_tab_change)
-    try:
-        get_accidents(car)
-    except Exception as exc:
-        raise Exception(f'GET_ACCIDENTS_ERROR: {exc}')
+    if car.has_accident_record:
+        try:
+            get_accidents(car)
+        except Exception as exc:
+            raise GetDataException(f'GET_ACCIDENTS_ERROR: {traceback.format_exc()}') from exc
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
-    print(f"CLICKED: Condition Inspections")
-    time.sleep(settings.wait_time_tab_change)
-    try:
-        get_images(car)
-    except Exception as exc:
-        raise Exception(f'GET_IMAGES_ERROR: {exc}')
+    if car.has_inspection_record:
+        try:
+            get_images(car)
+        except Exception as exc:
+            raise GetDataException(f'GET_IMAGES_ERROR: {traceback.format_exc()}') from exc

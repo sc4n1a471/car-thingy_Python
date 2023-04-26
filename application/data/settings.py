@@ -2,10 +2,9 @@ import os
 
 from selenium import webdriver
 
-counter = 0
-wait_time = 13
-wait_time_tab_change = 0.5
-first_run = True
+COUNTER = 0
+WAIT_TIME = 13
+WAIT_TIME_TAB_CHANGE = 0.5
 
 if os.getenv("RUN_ON_SERVER"):
     from selenium.webdriver.chrome.options import Options
@@ -21,7 +20,7 @@ if os.getenv("RUN_ON_SERVER"):
     #
     # driver = webdriver.Remote('http://10.11.12.169:4444/wd/hub', DesiredCapabilities.CHROME)
 
-    # TODO: Figure out why f.ing chrome crashed in the docker container
+    # TODO: Figure out why f.ing chrome crashes in the docker container
     # Running the selenium container and connecting to that one does not work either...
     # chromedriver is running flawlessly on an brand new Ubuntu vm but crashes in the docker container
 else:
@@ -38,4 +37,4 @@ else:
     # driver = webdriver.Safari()
 
 
-credentials_location = "../../credentials.env"
+CREDENTIALS_LOCATION = "../../credentials.env"
