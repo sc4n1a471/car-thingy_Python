@@ -6,12 +6,17 @@ app = Flask(__name__)
 
 @app.route("/<license_plate>")
 def get_license_plate(license_plate):
-    try:
-        message = request_car([license_plate])
-        status = 'success'
-    except Exception as exc:
+    if len(license_plate) != 6 or len(license_plate != 7):
+        message = 'License plate is not valid, should be 6 or 7 characters'
         status = 'fail'
-        message = str(traceback.format_exc())
+    else:
+        try:
+            message = request_car([license_plate])
+            status = 'success'
+        except Exception as exc:
+            status = 'fail'
+            message = str(traceback.format_exc())
+
     return jsonify({
         'status:': status,
         'message': message
