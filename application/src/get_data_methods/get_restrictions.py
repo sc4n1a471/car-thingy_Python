@@ -1,8 +1,8 @@
 from selenium.webdriver.common.by import By
 import time
 
-from app.data import settings
-from app.data.xpaths import XPATHS
+from application.data import settings
+from application.data.xpaths import XPATHS
 def get_restrictions(car):
     settings.driver.find_element(By.XPATH, XPATHS.get("restrictions_tab")).click()
     print(f"CLICKED: Restrictions")

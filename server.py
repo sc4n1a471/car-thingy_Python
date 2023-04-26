@@ -1,11 +1,6 @@
 from flask import Flask, jsonify
 import traceback
-try:
-    from app.request_car import request_car
-    print("request_car imported from .request_car")
-except Exception as exc:
-    import app.request_car
-    print("request_car imported from request_car")
+from application.request_car import request_car
 
 app = Flask(__name__)
 
@@ -22,5 +17,5 @@ def get_license_plate(license_plate):
         'message': message
     })
 
-if __name__ == '__main__':
-    get_license_plate("RRZ538")
+# if __name__ == '__main__':
+#     get_license_plate("RRZ538")

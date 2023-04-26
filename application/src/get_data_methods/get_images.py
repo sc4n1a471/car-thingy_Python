@@ -3,8 +3,8 @@ import urllib.request
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
-from app.data import settings
-from app.data.xpaths import XPATHS
+from application.data import settings
+from application.data.xpaths import XPATHS
 from selenium.webdriver.common.by import By
 import time
 import os

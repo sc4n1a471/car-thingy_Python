@@ -1,22 +1,22 @@
-try:
-    from .src.login import login
-except ImportError as exc:
-    import src.login
+# try:
+from .src.login import login
+# except ImportError as exc:
+# import src.login as login
 
-try:
-    from .models.Car import Car
-except ImportError as exc:
-    import models.Car
+# try:
+from .models.Car import Car
+# except ImportError as exc:
+# import models.Car as Car
 
-try:
-    from .src.get_data import get_data
-except ImportError as exc:
-    import src.get_data
+# try:
+from .src.get_data import get_data
+# except ImportError as exc:
+# import src.get_data as get_data
 
-try:
-    from .data import settings
-except ImportError as exc:
-    import data.settings
+# try:
+from .data import settings
+# except ImportError as exc:
+# import data.settings as settings
 
 import traceback
 
@@ -29,15 +29,20 @@ def request_car(license_plates):
         login()
     except Exception as exc:
         print(f"LOGIN ERROR: {traceback.format_exc()}")
+        settings.driver.close()
+        settings.driver.quit()
         raise Exception(f"LOGIN ERROR: {traceback.format_exc()}")
 
     try:
         cars = get_data(license_plates)
     except Exception as e:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
+        settings.driver.close()
+        settings.driver.quit()
         raise Exception(f"GET_DATA ERROR: {traceback.format_exc()}")
 
     settings.driver.close()
+    settings.driver.quit()
 
     return cars
 

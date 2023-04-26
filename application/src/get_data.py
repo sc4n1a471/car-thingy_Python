@@ -5,9 +5,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
-from app.data import settings
-from app.data.xpaths import XPATHS
-from app.models.Car import Car
+from application.data import settings
+from application.data.xpaths import XPATHS
+from application.models.Car import Car
 from .get_data_methods.get_car_data import get_car_data
 from .login import login
 from .logout import logout

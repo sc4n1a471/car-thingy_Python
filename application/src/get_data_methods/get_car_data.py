@@ -3,8 +3,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 import time
 
-from app.data import settings
-from app.data.xpaths import XPATHS
+from application.data import settings
+from application.data.xpaths import XPATHS
 from ..get_data_methods.get_accidents import get_accidents
 from ..get_data_methods.get_images import get_images
 from ..get_data_methods.get_mileage import get_mileage

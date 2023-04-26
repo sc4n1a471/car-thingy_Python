@@ -13,6 +13,13 @@ from ..data import settings
 def login(retry = False):
     settings.credentials_location = find_dotenv('credentials.env')
     load_dotenv(dotenv_path=settings.credentials_location)
+
+    username = os.getenv("USERNAME")
+    password = os.getenv("PASSWORD")
+
+    if username is None or password is None:
+        raise Exception("No credentials were found")
+
     print("Logging in...")
 
     if retry:
@@ -34,11 +41,9 @@ def login(retry = False):
     WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, '//input[@id="fldUser"]')))
     print("FOUND: username input field")
 
-    username = os.getenv("USERNAME")
     settings.driver.find_element(By.XPATH, '//input[@id="fldUser"]').send_keys(username)
     print("FILLED: username")
 
-    password = os.getenv("PASSWORD")
     settings.driver.find_element(By.XPATH, '//input[@id="fldPass"]').send_keys(password)
     print("FILLED: password filled")
 
