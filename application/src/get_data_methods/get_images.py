@@ -3,18 +3,17 @@ import urllib.request
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
-import app.data.settings as settings
-import app.data.xpaths as xpaths
+from application.data import settings
+from application.data.xpaths import XPATHS
 from selenium.webdriver.common.by import By
 import time
-import itertools
 import os
 
 def get_images(car):
 
     car_inspections = []
 
-    inspections = settings.driver.find_elements(By.XPATH, xpaths.XPATHS.get("condition_inspections"))
+    inspections = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections'))
 
     for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
         if i != 0:  # the first inspection is open on tab change
@@ -25,7 +24,7 @@ def get_images(car):
         })
         time.sleep(0.4)
 
-    show_pictures_buttons = settings.driver.find_elements(By.XPATH, '//button[contains(@id, "MuszakiAllapot_Kepek_megjelenitese")]')
+    show_pictures_buttons = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections_show_pictures'))
     show_pictures_buttons.pop(0)
 
     for (button, i) in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
@@ -35,13 +34,12 @@ def get_images(car):
         button.click()
 
         settings.driver.switch_to.default_content()
-        dialog_frame = settings.driver.find_element(By.XPATH, '//*[@id="dialog_frame"]')
+        dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.get('inspections_pictures_dialog_frame'))
         settings.driver.switch_to.frame(dialog_frame)
         print('Switched iframe to dialog_frame')
 
-        # //img[contains(@title, " kép")]
-        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, '//img[contains(@title, " kép")]')))
-        imgs = settings.driver.find_elements(By.XPATH, '//img[contains(@title, " kép")]')
+        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_pictures'))))
+        imgs = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections_pictures'))
 
         for img in imgs:
             src = img.get_attribute('src')
@@ -50,13 +48,11 @@ def get_images(car):
 
         car_inspections[i]['images'] = images
 
-        # //button[@id="button-bezaras"]
-
-        close_dialog_button = settings.driver.find_element(By.XPATH, '//button[@id="button-bezaras"]')
+        close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.get('inspections_close_button'))
         close_dialog_button.click()
 
         settings.driver.switch_to.default_content()
-        iframe = settings.driver.find_element(By.XPATH, '//*[@id="main"]/iframe')
+        iframe = settings.driver.find_element(By.XPATH, XPATHS.get('main_frame'))
         settings.driver.switch_to.frame(iframe)
         print("Switched to main iframe")
 
@@ -65,6 +61,16 @@ def get_images(car):
 
 
 def save_images(license_plate, images):
+    print("Saving images...")
+
+    if not os.path.exists('downloaded_images'):
+        print("downloaded_images folder does not exist, creating one...")
+        try:
+            os.mkdir('downloaded_images')
+        except Exception as exc:
+            print(f"Folder creation for downloaded_images failed, error: {exc}")
+            return
+
     license_plate_path = os.path.join('downloaded_images', license_plate)
     try:
         os.mkdir(license_plate_path)
@@ -86,5 +92,3 @@ def save_images(license_plate, images):
             image_path = os.path.join(inspection_path, f'{counter}.jpg')
             urllib.request.urlretrieve(image_src, image_path)
             counter += 1
-
-    asd = 0

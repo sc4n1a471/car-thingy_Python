@@ -1,9 +1,9 @@
 from selenium.webdriver.common.by import By
 
-import app.data.settings as settings
-import app.data.xpaths as xpaths
+from application.data import settings
+from application.data.xpaths import XPATHS
 def get_accidents(car):
-    accidents_tbody = settings.driver.find_element(By.XPATH, xpaths.XPATHS.get("accidents"))
+    accidents_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("accidents"))
     accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
     print(f"FOUND: Accidents")
     car.accidents = {}
