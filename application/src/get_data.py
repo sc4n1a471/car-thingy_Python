@@ -5,9 +5,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
-from ..data import settings
-from ..data.xpaths import XPATHS
-from ..models.Car import Car
+from application.data import settings
+from application.data.xpaths import XPATHS
+from application.models.Car import Car
 from .get_data_methods.get_car_data import get_car_data
 from .login import login
 from .logout import logout
@@ -45,6 +45,8 @@ def get_data(requested_cars: [Car]):
         time.sleep(3)
         # print(len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))))
         while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0:
+
+            print("Error occurred")
 
             print("Getting throttled...")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
