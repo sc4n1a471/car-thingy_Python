@@ -5,7 +5,7 @@ Ez lenni repository for NodeJS_Thingy_Python
 - Create credentials.env file in root directory
 - Fill it with USERNAME & PASSWORD, like this:
 ```
-USERNAME="<username>"
+USERNAME=<username>
 PASSWORD=<password>
 ```
 - Run API server: `flask --app server run --host=0.0.0.0 -p 3001`
