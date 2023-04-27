@@ -5,6 +5,8 @@ from selenium import webdriver
 COUNTER = 0
 WAIT_TIME = 13
 WAIT_TIME_TAB_CHANGE = 0.5
+TESTING = False
+URL = "https://magyarorszag.hu/jszp_szuf"
 
 
 # TODO: don't use init(), use global variables, so don't init the driver every time
