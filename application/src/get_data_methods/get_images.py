@@ -4,10 +4,10 @@ import os
 
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.by import By
 
 from application.data import settings
 from application.data.xpaths import XPATHS
-from selenium.webdriver.common.by import By
 
 def get_images(car):
     """Downloads images associated to the inspections
@@ -21,57 +21,59 @@ def get_images(car):
 
     car_inspections = []
 
-    inspections = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections'))
+    if len(settings.driver.find_elements(By.XPATH, XPATHS.get('no_inspection_data'))) != 0:
+        print("NOT FOUND: Inspection data")
+    else:
+        inspections = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections'))
+        for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
+            if i != 0:  # the first inspection is open on tab change
+                inspection_data.click()
+            print(inspection_data.text)
+            car_inspections.append({
+                'inspection': inspection_data.text
+            })
+            time.sleep(0.4)
 
-    for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
-        if i != 0:  # the first inspection is open on tab change
-            inspection_data.click()
-        print(inspection_data.text)
-        car_inspections.append({
-            'inspection': inspection_data.text
-        })
-        time.sleep(0.4)
+        show_pictures_buttons = settings.driver \
+            .find_elements(By.XPATH, XPATHS.get('inspections_show_pictures'))
+        show_pictures_buttons.pop(0)
 
-    show_pictures_buttons = settings.driver\
-        .find_elements(By.XPATH, XPATHS.get('inspections_show_pictures'))
-    show_pictures_buttons.pop(0)
+        for (button, i) in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
+            images = []
+            print(button.text)
 
-    for (button, i) in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
-        images = []
-        print(button.text)
+            button.click()
 
-        button.click()
+            settings.driver.switch_to.default_content()
+            dialog_frame = settings.driver \
+                .find_element(By.XPATH, XPATHS.get('inspections_pictures_dialog_frame'))
+            settings.driver.switch_to.frame(dialog_frame)
+            print('Switched iframe to dialog_frame')
 
-        settings.driver.switch_to.default_content()
-        dialog_frame = settings.driver\
-            .find_element(By.XPATH, XPATHS.get('inspections_pictures_dialog_frame'))
-        settings.driver.switch_to.frame(dialog_frame)
-        print('Switched iframe to dialog_frame')
+            WebDriverWait(settings.driver, 10).until(
+                ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_pictures')))
+            )
+            imgs = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections_pictures'))
 
-        WebDriverWait(settings.driver, 10).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_pictures')))
-        )
-        imgs = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections_pictures'))
+            for img in imgs:
+                src = img.get_attribute('src')
+                if not images.__contains__(src):
+                    images.append(src)
 
-        for img in imgs:
-            src = img.get_attribute('src')
-            if not images.__contains__(src):
-                images.append(src)
+            car_inspections[i]['images'] = images
 
-        car_inspections[i]['images'] = images
+            close_dialog_button = settings.driver \
+                .find_element(By.XPATH, XPATHS.get('inspections_close_button'))
+            close_dialog_button.click()
 
-        close_dialog_button = settings.driver\
-            .find_element(By.XPATH, XPATHS.get('inspections_close_button'))
-        close_dialog_button.click()
+            settings.driver.switch_to.default_content()
+            iframe = settings.driver \
+                .find_element(By.XPATH, XPATHS.get('main_frame'))
+            settings.driver.switch_to.frame(iframe)
+            print("Switched to main iframe")
 
-        settings.driver.switch_to.default_content()
-        iframe = settings.driver\
-            .find_element(By.XPATH, XPATHS.get('main_frame'))
-        settings.driver.switch_to.frame(iframe)
-        print("Switched to main iframe")
-
-    car.inspections = car_inspections
-    save_images(car.license_plate, car.inspections)
+        car.inspections = car_inspections
+        save_images(car.license_plate, car.inspections)
 
 
 def save_images(license_plate, inspections):

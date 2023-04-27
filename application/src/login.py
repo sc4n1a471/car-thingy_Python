@@ -9,6 +9,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from application.data import settings
 from application.data.xpaths import XPATHS as xpaths
+from application.models.LoginException import LoginException
 
 
 def login(retry = False):
@@ -20,13 +21,13 @@ def login(retry = False):
     password = os.getenv("PASSWORD")
 
     if username is None or password is None:
-        raise Exception("No credentials were found")
+        raise LoginException("No credentials were found")
 
     print("Logging in...")
 
     if retry:
         if settings.COUNTER > 2:
-            raise Exception("Tried logging out/in too many times...")
+            raise LoginException("Tried logging out/in too many times...")
 
         settings.COUNTER += 1
         time.sleep(10)

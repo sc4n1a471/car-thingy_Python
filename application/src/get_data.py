@@ -12,6 +12,7 @@ from .get_data_methods.get_car_data import get_car_data
 from .login import login
 from .logout import logout
 from ..models.LoginException import LoginException
+from ..models.UnreleasedLicensePlate import UnreleasedLicensePlate
 
 
 def get_data(requested_cars: [Car]):
@@ -19,9 +20,8 @@ def get_data(requested_cars: [Car]):
     car_data: [Car] = []
     for requested_car in requested_cars:
         car = Car()
-        car.license_plate = requested_car
+        car.license_plate = requested_car.upper()
 
-        counter = 0
         print(f"{requested_car} is on the way...")
 
         if not cold_start:
@@ -38,53 +38,10 @@ def get_data(requested_cars: [Car]):
 
         time.sleep(3)
 
-        while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0:
-
-            if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_accident_record"))) != 0:
-                print("No accident record was found for this license plate, trying without that")
-                car.has_accident_record = False
-
-                settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
-
-                settings.driver.switch_to.default_content()
-                settings.driver.switch_to.frame(1)
-
-                settings.driver.find_element(By.XPATH, XPATHS.get("accident_record_ckeckbox")).click()
-                print("CLICKED: Disabled Biztosítás és Kártörténet")
-
-                fill_search(requested_car, 30)
-
-            elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later"))) != 0:
-                print("Getting throttled...")
-                settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
-                time.sleep(1)
-
-                if counter > 1:
-                    print("Tried too many times, logging out and back in...")
-                    counter = 0
-
-                    try:
-                        logout()
-                    except Exception as e:
-                        raise LoginException(f"LOGOUT ERROR: {e}")
-
-                    try:
-                        login(True)
-                    except Exception as e:
-                        raise LoginException(f"LOGIN ERROR: {e}")
-
-                    WebDriverWait(settings.driver, 30).until(
-                        ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
-                    print("FOUND: Jármű Szolgáltatási Platform")
-                    settings.driver.switch_to.frame(1)
-                    settings.driver.find_element(By.XPATH, '//input[@id="input-rendszam"]').send_keys(Keys.ENTER)
-                    print("Searching for license plate again...")
-                    settings.driver.switch_to.default_content()
-                    continue
-
-                fill_search(requested_car, 30)
-                counter += 1
-
+        try:
+            check_error_modal(car, requested_car)
+        except UnreleasedLicensePlate as ulp:
+            raise UnreleasedLicensePlate from ulp
 
         settings.driver.switch_to.frame(1)
 
@@ -124,3 +81,65 @@ def fill_search(requested_car, wait = 0):
     print("Searching for license plate...")
 
     settings.driver.switch_to.default_content()
+
+def check_error_modal(car, requested_car):
+    """Checks for error dialog after submitting license plate
+
+    Attributes:
+        car -- Car object that will be returned
+        requested_car -- Requested license plate
+    """
+    retries = 0
+
+    while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0:
+        print("FOUND: ERROR DIALOG")
+
+        if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_accident_record"))) != 0:
+            print("No accident record was found for this license plate, trying without that")
+            car.has_accident_record = False
+
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
+
+            settings.driver.switch_to.default_content()
+            settings.driver.switch_to.frame(1)
+
+            settings.driver.find_element(By.XPATH, XPATHS.get("accident_record_ckeckbox")).click()
+            print("CLICKED: Disabled Biztosítás és Kártörténet")
+
+            fill_search(requested_car, 30)
+
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
+            print("This license plate was not released, no car was found")
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
+            raise UnreleasedLicensePlate()
+
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later"))) != 0:
+            print("Getting throttled...")
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
+            time.sleep(1)
+
+            if retries > 1:
+                print("Tried too many times, logging out and back in...")
+                retries = 0
+
+                try:
+                    logout()
+                except Exception as e:
+                    raise LoginException(f"LOGOUT ERROR: {e}") from e
+
+                try:
+                    login(True)
+                except Exception as e:
+                    raise LoginException(f"LOGIN ERROR: {e}") from e
+
+                WebDriverWait(settings.driver, 30).until(
+                    ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
+                print("FOUND: Jármű Szolgáltatási Platform")
+                settings.driver.switch_to.frame(1)
+                settings.driver.find_element(By.XPATH, '//input[@id="input-rendszam"]').send_keys(Keys.ENTER)
+                print("Searching for license plate again...")
+                settings.driver.switch_to.default_content()
+                continue
+
+            fill_search(requested_car, 30)
+            retries += 1

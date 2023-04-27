@@ -11,6 +11,9 @@ XPATHS = {
 
     'search_input': '//input[@id="input-rendszam"]',
 
+    'no_official_data': '//p[contains(text(), "A járműhöz nem tartoznak okmányadatok.")]',
+    'no_inspection_data': '//p[contains(text(), "A járműhöz nem tartoznak a műszaki állapotára vonatkozó adatok.")]',
+
     'brand': '//*[contains(@id, "Gyartmany") and string-length(text())]',
     'model': '//*[contains(@id, "Kerleiras") and string-length(text())]',
     'type_code': '//*[contains(@id, "Tipus") and string-length(text())]',
@@ -42,6 +45,7 @@ XPATHS = {
     'inspections_close_button': '//button[@id="button-bezaras"]',
 
     'error_modal': '//h4[contains(text(), "Hiba")]',
+    'unreleased_license_plate': '//p[contains(text(), "A rendszám nem került kiadásra Magyarországon.")]',
     'no_accident_record': '//p[contains(text(), "A jármű kártörténetéről nem szolgáltatható adat.")]',
     'try_again_later': '//p[contains(text(), "Kérjük, adatigénylését ismételje meg később.")]',
     'error_modal_button': '//*[@id="snap-dialog-ok-button"]',
