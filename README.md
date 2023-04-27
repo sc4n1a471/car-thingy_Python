@@ -2,6 +2,7 @@
 Ez lenni repository for NodeJS_Thingy_Python
 
 ## Setup ##
+- Install pzthon dependencies with `pip install -r requirements.txt`
 - Create credentials.env file in root directory
 - Fill it with USERNAME & PASSWORD, like this:
 ```
