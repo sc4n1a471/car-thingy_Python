@@ -24,7 +24,7 @@ def request_car(license_plates):
     cars: [Car] = []
 
     settings.init()
-    settings.driver.get("https://magyarorszag.hu/jszp_szuf")
+    settings.driver.get(settings.URL)
 
     try:
         login()

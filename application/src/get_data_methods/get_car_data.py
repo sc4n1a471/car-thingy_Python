@@ -20,6 +20,8 @@ def get_car_data(car):
     Attributes:
         car -- car object
     """
+    WebDriverWait(settings.driver, 5).until(
+        ec.presence_of_element_located((By.XPATH, XPATHS.get("brand"))))
     car.brand = settings.driver.find_element(By.XPATH, XPATHS.get("brand")).text
     print(f"FOUND: Brand {car.brand}")
 
@@ -41,10 +43,11 @@ def get_car_data(car):
     except NoSuchElementException:
         print("NOT FOUND: Status")
 
-    settings.driver.switch_to.default_content()
-    iframe = settings.driver.find_element(By.XPATH, XPATHS.get("main_frame"))
-    settings.driver.switch_to.frame(iframe)
-    print("Switched to selected iframe")
+    if not settings.TESTING:
+        settings.driver.switch_to.default_content()
+        iframe = settings.driver.find_element(By.XPATH, XPATHS.get("main_frame"))
+        settings.driver.switch_to.frame(iframe)
+        print("Switched to selected iframe")
 
     if len(settings.driver.find_elements(By.XPATH, XPATHS.get('no_official_data'))) != 0:
         print("NOT FOUND: Official records")
@@ -113,7 +116,7 @@ def get_car_data(car):
         except Exception as exc:
             raise GetDataException(f'GET_ACCIDENTS_ERROR: {traceback.format_exc()}') from exc
 
-    if car.has_inspection_record:
+    if car.has_inspection_record and not settings.TESTING:
         try:
             get_images(car)
         except Exception as exc:
