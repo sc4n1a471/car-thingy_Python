@@ -6,6 +6,7 @@ from application.data import settings
 from application.data.xpaths import XPATHS
 
 def logout():
+    """Logs the user out by clicking logout"""
     print("Logging out...")
     time.sleep(1)
     settings.driver.switch_to.default_content()

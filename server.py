@@ -1,26 +1,21 @@
 from flask import Flask, jsonify
-import traceback
 from application.request_car import request_car
 
 app = Flask(__name__)
 
 @app.route("/<license_plate>")
 def get_license_plate(license_plate):
-    if len(license_plate) < 6 or len(license_plate) > 7:
-        message = 'License plate is not valid, should be 6 or 7 characters'
-        status = 'fail'
-    else:
-        try:
-            message = request_car([license_plate])
-            status = 'success'
-        except Exception as exc:
-            status = 'fail'
-            message = str(traceback.format_exc())
+    """Returns the requested car details
 
-    return jsonify({
-        'status:': status,
-        'message': message
-    })
+    Attributes:
+        license_plates -- Requested license plate
+    """
+    with app.app_context():
+        return_data = request_car([license_plate])
+        return jsonify(return_data)
 
-if __name__ == '__main__':
-    get_license_plate("AAA111")
+# if __name__ == '__main__':
+#     get_license_plate("aAKb294")
+#     get_license_plate("gsm140")
+#     get_license_plate("HKL138")
+# To run it not as an API server, uncomment one of these lines and run it from the IDE
