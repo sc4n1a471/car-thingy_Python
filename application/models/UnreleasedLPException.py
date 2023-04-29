@@ -1,4 +1,4 @@
-class UnreleasedLicensePlate(Exception):
+class UnreleasedLPException(Exception):
     """Exception raised for license plate that was not released
 
         Attributes:

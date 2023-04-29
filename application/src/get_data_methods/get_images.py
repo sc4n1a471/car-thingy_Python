@@ -57,7 +57,7 @@ def get_images(car):
 
             for img in imgs:
                 src = img.get_attribute('src')
-                if not images.__contains__(src):
+                if not src in images:
                     images.append(src)
 
             car_inspections[i]['images'] = images

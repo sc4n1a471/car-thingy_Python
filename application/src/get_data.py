@@ -12,7 +12,7 @@ from .get_data_methods.get_car_data import get_car_data
 from .login import login
 from .logout import logout
 from ..models.LoginException import LoginException
-from ..models.UnreleasedLicensePlate import UnreleasedLicensePlate
+from ..models.UnreleasedLPException import UnreleasedLPException
 
 
 def get_data(requested_cars: [Car]):
@@ -40,8 +40,8 @@ def get_data(requested_cars: [Car]):
 
         try:
             check_error_modal(car, requested_car)
-        except UnreleasedLicensePlate as ulp:
-            raise UnreleasedLicensePlate from ulp
+        except UnreleasedLPException as ulp:
+            raise UnreleasedLPException from ulp
 
         settings.driver.switch_to.frame(1)
 
@@ -111,7 +111,7 @@ def check_error_modal(car, requested_car):
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
             print("This license plate was not released, no car was found")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
-            raise UnreleasedLicensePlate()
+            raise UnreleasedLPException()
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later"))) != 0:
             print("Getting throttled...")
