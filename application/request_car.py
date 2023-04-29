@@ -1,8 +1,10 @@
 import traceback
 
+from selenium.common import TimeoutException
+
 from .models.GetDataException import GetDataException
 from .models.LoginException import LoginException
-from .models.UnreleasedLicensePlate import UnreleasedLicensePlate
+from .models.UnreleasedLPException import UnreleasedLPException
 from .src.login import login
 from .models.Car import Car
 from .src.get_data import get_data
@@ -35,10 +37,16 @@ def request_car(license_plates):
             "status": 'fail',
             "message": exc
         }
+    except TimeoutException as toexc:
+        settings.driver.close()
+        return {
+            "status": 'fail',
+            "message": toexc
+        }
 
     try:
         cars = get_data(license_plates)
-    except UnreleasedLicensePlate as ulp:
+    except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
         settings.driver.close()
         return {

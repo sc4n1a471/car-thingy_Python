@@ -15,9 +15,10 @@ def init():
     global driver
 
     if os.getenv("RUN_ON_SERVER"):
-        from selenium.webdriver.chrome.options import Options
-        from selenium.webdriver.chrome.service import Service
-        from webdriver_manager.chrome import ChromeDriverManager
+        pass
+        # from selenium.webdriver.chrome.options import Options
+        # from selenium.webdriver.chrome.service import Service
+        # from webdriver_manager.chrome import ChromeDriverManager
 
         # options = Options()
         # options.add_argument('--no-sandbox')
@@ -35,9 +36,14 @@ def init():
         from selenium.webdriver.chrome.service import Service
         chromedriver = "/chromedriver"
 
+        # SETUP YOUR BROWSER CONFIGURATION HERE
+
         option = webdriver.ChromeOptions()
 
-        option.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
+        try:
+            option.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
+        except:
+            print('Brave browser was not found on Mac, set your own browser up in settings.py')
 
         s = Service(chromedriver)
 
