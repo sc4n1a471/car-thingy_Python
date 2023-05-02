@@ -21,7 +21,7 @@ USERNAME=<username>
 PASSWORD=<password>
 ```
 - Setup your own browser driver in settings.py
-- Run API server: `flask --app server run --host=0.0.0.0 -p 3001`
+- Run API server by running server.py or with the following command: `flask --app server run --host=0.0.0.0 -p 3001`
 
 ## API Endpoints: ##
 | GET_BY_ID               | 
