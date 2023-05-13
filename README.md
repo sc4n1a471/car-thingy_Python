@@ -1,6 +1,8 @@
 # NodeJS_Thingy_Python
 Ez lenni repository for NodeJS_Thingy_Python
 
+---
+
 Ez a program egy API szerver mögött álló Selenium webscraper. Rendszámlekérdezést hajt végre az Ügyfélkapu rendszerén 
 keresztül és számos információt lekérdez a rendszámról.
 Egy GET kéréssel elküldjük neki a lekérdezni kívánt rendszámot, majd az bejelentkezik a megadott
@@ -11,6 +13,9 @@ azonosítási adatokkal az Ügyfélkapu rendszerébe, rákeres a rendszámra és
 - Bejelentett balesetek
 - Korlátozások
 - Műszaki vizsgálatokhoz tartozó képek base64 formátumban, illetve lokális mentéssel
+
+## FIGYELEM
+Az alkalmazás csak személyes használatra szánt projekt, egyetemi projektmunka és tanulás céljából készült! Felelősséget nem vállalok más felhasználási céljáért!
 
 ## Setup ##
 - Install python dependencies with `pip install -r requirements.txt`
