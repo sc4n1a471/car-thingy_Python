@@ -1,4 +1,6 @@
 # NodeJS-Thingy_Python
+[![Build, Publish, Redeploy](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml/badge.svg?branch=main&event=workflow_run)](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml)
+
 Ez lenni repository for NodeJS_Thingy_Python
 
 ---
@@ -32,6 +34,7 @@ Az alkalmazás csak személyes használatra szánt projekt, egyetemi projektmunk
       APP_USERNAME: default
       APP_PASSWORD: default
       APP_GRID_IP: 'http://<selenium_docker_ip>:<port>/wd/hub'
+      RUN_ON_SERVER: True
 ```
 - Run the image with this command: `docker compose up -d --name=NodeJS-Thingy_Python`
 ### Local without Docker ###
