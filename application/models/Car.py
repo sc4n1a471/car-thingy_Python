@@ -17,7 +17,7 @@ class Car:
     fuel_type: str = ""
     gearbox: str = ""
     restrictions: [str] = None
-    mileage: dict = None
+    mileage: [dict] = None
     accidents: dict = None
     inspections: [dict] = None
     has_origin_record = True
