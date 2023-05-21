@@ -20,4 +20,4 @@ def get_mileage(car):
     for row in mileage_rows:
         tmp = row.text.split(" ")
         mileage_num = ''.join(tmp[1:])
-        car.mileage[tmp[0]] = mileage_num
+        car.mileage[tmp[0]] = int(mileage_num)

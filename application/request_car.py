@@ -20,7 +20,7 @@ def request_car(license_plates):
 
     if len(license_plates[0]) < 6 or len(license_plates[0]) > 7:
         return {
-            "message": 'License plate is not valid, should be 6 or 7 characters',
+            "error": 'License plate is not valid, should be 6 or 7 characters',
             "status": 'fail'
         }
 
@@ -30,7 +30,7 @@ def request_car(license_plates):
 
     if settings.GRID_IP == 'default':
         return {
-            "message": 'Selenium Grid IP address has the default value',
+            "error": 'Selenium Grid IP address has the default value',
             "status": 'fail'
         }
 
@@ -38,7 +38,7 @@ def request_car(license_plates):
         settings.init()
     except WebDriverException as wde:
         return {
-            "message": f'Settings init failed with the following error: {wde.msg}',
+            "error": f'Settings init failed with the following error: {wde.msg}',
             "status": 'fail'
         }
 
@@ -51,13 +51,13 @@ def request_car(license_plates):
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc.message
+            "error": exc.message
         }
     except TimeoutException as toexc:
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": toexc.msg
+            "error": toexc.msg
         }
 
     try:
@@ -67,26 +67,26 @@ def request_car(license_plates):
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": ulp.args[0]
+            "error": ulp.args[0]
         }
     except GetDataException as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc.message
+            "error": exc.message
         }
     except Exception as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc.args[0]
+            "error": exc.args[0]
         }
 
     settings.driver.quit()
 
     return {
         "message": cars,
-        "status": 'success'
+        "error": 'success'
     }

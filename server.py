@@ -1,5 +1,8 @@
+import time
+
 from flask import Flask, jsonify
 from application.request_car import request_car
+from tests.test_response import RES
 
 app = Flask(__name__)
 
@@ -11,6 +14,9 @@ def get_license_plate(license_plate):
         license_plates -- Requested license plate
     """
     with app.app_context():
+        if license_plate == "TEST111":
+            time.sleep(3)
+            return jsonify(RES)
         return_data = request_car([license_plate])
         return jsonify(return_data)
 
