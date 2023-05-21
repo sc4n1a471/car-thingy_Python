@@ -1,4 +1,4 @@
-# NodeJS_Thingy_Python
+# NodeJS-Thingy_Python
 Ez lenni repository for NodeJS_Thingy_Python
 
 ---
