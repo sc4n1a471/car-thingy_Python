@@ -1,5 +1,5 @@
 # NodeJS-Thingy_Python
-[![Build, Publish, Redeploy](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml/badge.svg?branch=main&event=workflow_run)](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml)
+[![Build, Publish, Redeploy](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml/badge.svg)](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml)
 
 Ez lenni repository for NodeJS_Thingy_Python
 
