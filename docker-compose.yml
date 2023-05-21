@@ -6,5 +6,6 @@ services:
       APP_USERNAME: default
       APP_PASSWORD: default
       APP_GRID_IP: 'http://<selenium_docker_ip>:<port>/wd/hub'
+      RUN_ON_SERVER: True
     ports:
       - "3001:5000"
