@@ -62,6 +62,7 @@ APP_PASSWORD=<password>
 ```json
 {
   "status": "success",
+  "error": "message if failed",
   "message": [
     {
       "license_plate": "AAAA111",

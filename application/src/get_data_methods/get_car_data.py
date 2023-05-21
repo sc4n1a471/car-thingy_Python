@@ -60,10 +60,10 @@ def get_car_data(car):
         car.first_reg_hun = settings.driver.find_elements(By.XPATH, XPATHS.get("first_reg_hun"))[0].text
         print(f"FOUND: First_reg_hun {car.first_reg_hun}")
 
-        car.num_of_owners = settings.driver.find_elements(By.XPATH, XPATHS.get("num_of_owners"))[0].text
+        car.num_of_owners = int(settings.driver.find_elements(By.XPATH, XPATHS.get("num_of_owners"))[0].text)
         print(f"FOUND: Num_of_owners {car.num_of_owners}")
 
-        car.year = settings.driver.find_elements(By.XPATH, XPATHS.get("year"))[0].text
+        car.year = int(settings.driver.find_elements(By.XPATH, XPATHS.get("year"))[0].text)
         print(f"FOUND: Year {car.year}")
 
         car.fuel_type = settings.driver.find_elements(By.XPATH, XPATHS.get("fuel_type"))[0].text
@@ -72,7 +72,7 @@ def get_car_data(car):
         if not car.fuel_type == "ELEKTROMOS":
             car.engine_size = settings.driver.find_elements(By.XPATH, XPATHS.get("engine_size"))[0].text
             print(f"FOUND: Engine_size {car.engine_size}")
-            car.engine_size = car.engine_size.replace(" ", "").replace("cm³", "")
+            car.engine_size = int(car.engine_size.replace(" ", "").replace("cm³", ""))
 
         if car.brand == '' and \
                 car.model == '' and \
