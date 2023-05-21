@@ -88,5 +88,5 @@ def request_car(license_plates):
 
     return {
         "message": cars,
-        "error": 'success'
+        "status": 'success'
     }
