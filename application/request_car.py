@@ -1,6 +1,7 @@
+import os
 import traceback
 
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
 from .models.GetDataException import GetDataException
 from .models.LoginException import LoginException
@@ -25,50 +26,65 @@ def request_car(license_plates):
 
     cars: [Car] = []
 
-    settings.init()
+    settings.GRID_IP = os.environ["APP_GRID_IP"]
+
+    if settings.GRID_IP == 'default':
+        return {
+            "message": 'Selenium Grid IP address has the default value',
+            "status": 'fail'
+        }
+
+    try:
+        settings.init()
+    except WebDriverException as wde:
+        return {
+            "message": f'Settings init failed with the following error: {wde.msg}',
+            "status": 'fail'
+        }
+
     settings.driver.get(settings.URL)
 
     try:
         login()
     except LoginException as exc:
         print(f"LOGIN ERROR: {traceback.format_exc()}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc
+            "message": exc.message
         }
     except TimeoutException as toexc:
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
-            "message": toexc
+            "message": toexc.msg
         }
 
     try:
         cars = get_data(license_plates)
     except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
             "message": ulp.args[0]
         }
     except GetDataException as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc
+            "message": exc.message
         }
     except Exception as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc
+            "message": exc.args[0]
         }
 
-    settings.driver.close()
+    settings.driver.quit()
 
     return {
         "message": cars,

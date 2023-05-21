@@ -11,6 +11,7 @@ from application.models.Car import Car
 from .get_data_methods.get_car_data import get_car_data
 from .login import login
 from .logout import logout
+from ..models import GetDataException
 from ..models.LoginException import LoginException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
@@ -30,9 +31,12 @@ def get_data(requested_cars: [Car]):
             settings.driver.get("https://magyarorszag.hu/jszp_szuf")
             time.sleep(settings.WAIT_TIME)
 
-        WebDriverWait(settings.driver, 30).until(
-            ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
-        print("FOUND: Jármű Szolgáltatási Platform")
+        try:
+            WebDriverWait(settings.driver, 30).until(
+                ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
+            print("FOUND: Jármű Szolgáltatási Platform")
+        except Exception as e:
+            raise GetDataException from e
 
         fill_search(requested_car)
 

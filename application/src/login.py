@@ -6,7 +6,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from dotenv import load_dotenv, find_dotenv
 
 from application.data import settings
 from application.data.xpaths import XPATHS as xpaths
@@ -14,15 +13,14 @@ from application.models.LoginException import LoginException
 
 
 def login(retry = False):
-    """Logs in with the credentials found in credentials.env"""
-    settings.CREDENTIALS_LOCATION = find_dotenv('credentials.env')
-    load_dotenv(dotenv_path=settings.CREDENTIALS_LOCATION)
+    """Logs in with the credentials found as environment variables"""
 
-    username = os.getenv("USERNAME")
-    password = os.getenv("PASSWORD")
+    username = os.environ["APP_USERNAME"]
+    password = os.environ["APP_PASSWORD"]
 
-    if username is None or password is None:
-        raise LoginException("No credentials were found")
+
+    if username == 'default' or password == 'default':
+        raise LoginException("Credential env variables have default values")
 
     print("Logging in...")
 
