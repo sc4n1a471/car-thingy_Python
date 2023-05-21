@@ -32,13 +32,13 @@ def request_car(license_plates):
         login()
     except LoginException as exc:
         print(f"LOGIN ERROR: {traceback.format_exc()}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
             "message": exc
         }
     except TimeoutException as toexc:
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
             "message": toexc
@@ -48,27 +48,27 @@ def request_car(license_plates):
         cars = get_data(license_plates)
     except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
             "message": ulp.args[0]
         }
     except GetDataException as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
             "message": exc
         }
     except Exception as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
-        settings.driver.close()
+        settings.driver.quit()
         return {
             "status": 'fail',
             "message": exc
         }
 
-    settings.driver.close()
+    settings.driver.quit()
 
     return {
         "message": cars,

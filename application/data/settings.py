@@ -1,5 +1,6 @@
 import os
 
+from dotenv import load_dotenv, find_dotenv
 from selenium import webdriver
 
 COUNTER = 0
@@ -15,23 +16,15 @@ def init():
     global driver
 
     if os.getenv("RUN_ON_SERVER"):
-        pass
-        # from selenium.webdriver.chrome.options import Options
-        # from selenium.webdriver.chrome.service import Service
-        # from webdriver_manager.chrome import ChromeDriverManager
+        from selenium.webdriver.chrome.service import Service
+        from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-        # options = Options()
-        # options.add_argument('--no-sandbox')
-        # options.add_argument('--headless')
-        # options.add_argument('--disable-dev-shm-usage')
-        #
-        # from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-        #
-        # driver = webdriver.Remote('http://10.11.12.169:4444/wd/hub', DesiredCapabilities.CHROME)
+        CREDENTIALS_LOCATION = find_dotenv('credentials.env')
+        load_dotenv(dotenv_path=CREDENTIALS_LOCATION)
 
-        # TODO: Figure out why f.ing chrome crashes in the docker container
-        # Running the selenium container and connecting to that one does not work either...
-        # chromedriver is running flawlessly on an brand new Ubuntu vm but crashes in the docker container
+        grid_ip = os.getenv("GRID")
+
+        driver = webdriver.Remote(grid_ip, DesiredCapabilities.CHROME)
     else:
         from selenium.webdriver.chrome.service import Service
         chromedriver = "/chromedriver"

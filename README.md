@@ -14,10 +14,28 @@ azonosítási adatokkal az Ügyfélkapu rendszerébe, rákeres a rendszámra és
 - Korlátozások
 - Műszaki vizsgálatokhoz tartozó képek base64 formátumban, illetve lokális mentéssel
 
+---
+
 ## FIGYELEM
 Az alkalmazás csak személyes használatra szánt projekt, egyetemi projektmunka és tanulás céljából készült! Felelősséget nem vállalok más felhasználási céljáért!
 
+---
+
 ## Setup ##
+- If you want to download the images, create a folder in the root directory with the name `downloaded_images`
+- If you don't want to, don't create the folder
+### Docker ###
+- Deploy [Selenium image](https://hub.docker.com/r/selenium/standalone-chrome)
+- Create credentials.env file in root directory
+- Fill it with USERNAME & PASSWORD, like this:
+```
+GRID=http://<selenium_docker_ip>:<port>/wd/hub
+USERNAME=<username>
+PASSWORD=<password>
+```
+- Clone the project and build Docker image by running `docker build -t piton .` where `piton` will be the name of the container
+- Run the image with this command: `docker run --name piton -d --restart unless-stopped -p 3001:5000 piton`
+### Local without Docker ###
 - Install python dependencies with `pip install -r requirements.txt`
 - Create credentials.env file in root directory
 - Fill it with USERNAME & PASSWORD, like this:
@@ -28,10 +46,14 @@ PASSWORD=<password>
 - Setup your own browser driver in settings.py
 - Run API server by running server.py or with the following command: `flask --app server run --host=0.0.0.0 -p 3001`
 
+---
+
 ## API Endpoints: ##
 | GET_BY_ID               | 
 |-------------------------|
 | /:license_plate         | 
+
+---
 
 ## Response example ##
 
@@ -46,6 +68,8 @@ PASSWORD=<password>
   ]
 }
 ```
+
+---
 
 ## Code test results: ##
 - `prospector -i venv`
@@ -90,9 +114,6 @@ Check Information
 
 - `pylint application`
 ```
-************* Module /application
-/application:1:0: F0001: No module named /application (fatal)
-(venv) martinterhes@Martins-Air NodeJS_Thingy_Python % pylint application 
 ************* Module application.request_car
 application/request_car.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 application/request_car.py:55:11: W0718: Catching too general exception Exception (broad-exception-caught)

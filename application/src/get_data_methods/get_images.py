@@ -81,12 +81,13 @@ def save_images(license_plate, inspections):
     print("Saving images...")
 
     if not os.path.exists('downloaded_images'):
-        print("downloaded_images folder does not exist, creating one...")
-        try:
-            os.mkdir('downloaded_images')
-        except Exception as exc:
-            print(f"Folder creation for downloaded_images failed, error: {exc}")
-            return
+        print("downloaded_images folder does not exist, not saving images...")
+        # try:
+        #     os.mkdir('downloaded_images')
+        # except Exception as exc:
+        #     print(f"Folder creation for downloaded_images failed, error: {exc}")
+        #     return
+        return
 
     license_plate_path = os.path.join('downloaded_images', license_plate)
     try:
