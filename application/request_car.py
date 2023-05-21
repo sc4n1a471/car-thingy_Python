@@ -1,6 +1,7 @@
+import os
 import traceback
 
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
 from .models.GetDataException import GetDataException
 from .models.LoginException import LoginException
@@ -25,7 +26,22 @@ def request_car(license_plates):
 
     cars: [Car] = []
 
-    settings.init()
+    settings.GRID_IP = os.environ["APP_GRID_IP"]
+
+    if settings.GRID_IP == 'default':
+        return {
+            "message": 'Selenium Grid IP address has the default value',
+            "status": 'fail'
+        }
+
+    try:
+        settings.init()
+    except WebDriverException as wde:
+        return {
+            "message": f'Settings init failed with the following error: {wde.msg}',
+            "status": 'fail'
+        }
+
     settings.driver.get(settings.URL)
 
     try:
@@ -35,13 +51,13 @@ def request_car(license_plates):
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc
+            "message": exc.message
         }
     except TimeoutException as toexc:
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": toexc
+            "message": toexc.msg
         }
 
     try:
@@ -58,14 +74,14 @@ def request_car(license_plates):
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc
+            "message": exc.message
         }
     except Exception as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
         return {
             "status": 'fail',
-            "message": exc
+            "message": exc.args[0]
         }
 
     settings.driver.quit()

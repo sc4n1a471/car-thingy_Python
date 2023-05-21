@@ -26,24 +26,23 @@ Az alkalmazás csak személyes használatra szánt projekt, egyetemi projektmunk
 - If you don't want to, don't create the folder
 ### Docker ###
 - Deploy [Selenium image](https://hub.docker.com/r/selenium/standalone-chrome)
-- Create credentials.env file in root directory
-- Fill it with USERNAME & PASSWORD, like this:
+- Modify the docker-compose.yml file to your needs:
 ```
-GRID=http://<selenium_docker_ip>:<port>/wd/hub
-USERNAME=<username>
-PASSWORD=<password>
+    environment:
+      APP_USERNAME: default
+      APP_PASSWORD: default
+      APP_GRID_IP: 'http://<selenium_docker_ip>:<port>/wd/hub'
 ```
-- Clone the project and build Docker image by running `docker build -t piton .` where `piton` will be the name of the container
-- Run the image with this command: `docker run --name piton -d --restart unless-stopped -p 3001:5000 piton`
+- Run the image with this command: `docker compose up -d --name=NodeJS-Thingy_Python`
 ### Local without Docker ###
 - Install python dependencies with `pip install -r requirements.txt`
-- Create credentials.env file in root directory
-- Fill it with USERNAME & PASSWORD, like this:
+- Add these variables as environment variables:
 ```
-USERNAME=<username>
-PASSWORD=<password>
+APP_GRID_IP=http://<selenium_docker_ip>:<port>/wd/hub
+APP_USERNAME=<username>
+APP_PASSWORD=<password>
 ```
-- Setup your own browser driver in settings.py
+- Set up your own browser driver in settings.py
 - Run API server by running server.py or with the following command: `flask --app server run --host=0.0.0.0 -p 3001`
 
 ---
