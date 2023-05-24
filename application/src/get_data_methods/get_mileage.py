@@ -4,6 +4,9 @@ from selenium.webdriver.common.by import By
 
 from application.data import settings
 from application.data.xpaths import XPATHS
+from application.models.Mileage import Mileage
+
+
 def get_mileage(car):
     """Gets mileage information for the requested car
 
@@ -16,11 +19,8 @@ def get_mileage(car):
     mileage_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("mileage"))
     mileage_rows = mileage_tbody.find_elements(By.TAG_NAME, "tr")
     print("FOUND: Mileage data")
-    car.mileage = []
+
     for row in mileage_rows:
         tmp = row.text.split(" ")
         mileage_num = ''.join(tmp[1:])
-        car.mileage.append({
-            "mileageDate": tmp[0],
-            "mileage": int(mileage_num)
-        })
+        car.mileage.append(Mileage(tmp[0], int(mileage_num)))

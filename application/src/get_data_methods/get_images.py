@@ -8,6 +8,8 @@ from selenium.webdriver.common.by import By
 
 from application.data import settings
 from application.data.xpaths import XPATHS
+from application.models.Inspection import Inspection
+
 
 def get_images(car):
     """Downloads images associated to the inspections
@@ -19,19 +21,16 @@ def get_images(car):
     print("CLICKED: Condition Inspections")
     time.sleep(settings.WAIT_TIME_TAB_CHANGE)
 
-    car_inspections = []
-
     if len(settings.driver.find_elements(By.XPATH, XPATHS.get('no_inspection_data'))) != 0:
         print("NOT FOUND: Inspection data")
     else:
+        car_inspections: [Inspection] = []
+
         inspections = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections'))
         for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
             if i != 0:  # the first inspection is open on tab change
                 inspection_data.click()
-            print(inspection_data.text)
-            car_inspections.append({
-                'inspection': inspection_data.text
-            })
+            car_inspections.append(Inspection(inspection_data.text))
             time.sleep(0.4)
 
         show_pictures_buttons = settings.driver \
@@ -40,7 +39,6 @@ def get_images(car):
 
         for (button, i) in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
             images = []
-            print(button.text)
 
             button.click()
 
@@ -60,7 +58,7 @@ def get_images(car):
                 if not src in images:
                     images.append(src)
 
-            car_inspections[i]['images'] = images
+            car_inspections[i].images = images
 
             close_dialog_button = settings.driver \
                 .find_element(By.XPATH, XPATHS.get('inspections_close_button'))
@@ -97,7 +95,7 @@ def save_images(license_plate, inspections):
         return
 
     for inspection in inspections:
-        inspection_path = os.path.join(license_plate_path, inspection.get('inspection'))
+        inspection_path = os.path.join(license_plate_path, inspection.name)
 
         try:
             os.mkdir(inspection_path)
@@ -106,7 +104,7 @@ def save_images(license_plate, inspections):
             continue
 
         counter = 0
-        for image_src in inspection.get('images'):
+        for image_src in inspection.images:
             image_path = os.path.join(inspection_path, f'{counter}.jpg')
             urllib.request.urlretrieve(image_src, image_path)
             counter += 1
