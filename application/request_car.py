@@ -26,14 +26,6 @@ def request_car(license_plates):
 
     cars: [Car] = []
 
-    settings.GRID_IP = os.environ["APP_GRID_IP"]
-
-    if settings.GRID_IP == 'default':
-        return {
-            "error": 'Selenium Grid IP address has the default value',
-            "status": 'fail'
-        }
-
     try:
         settings.init()
     except WebDriverException as wde:

@@ -18,9 +18,12 @@ def get_mileage(car):
     time.sleep(settings.WAIT_TIME_TAB_CHANGE)
     mileage_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("mileage"))
     mileage_rows = mileage_tbody.find_elements(By.TAG_NAME, "tr")
-    print("FOUND: Mileage data")
 
     for row in mileage_rows:
         tmp = row.text.split(" ")
-        mileage_num = ''.join(tmp[1:])
-        car.mileage.append(Mileage(tmp[0], int(mileage_num)))
+        if tmp != ['']:
+            print("FOUND: Mileage data")
+            mileage_num = ''.join(tmp[1:])
+            car.mileage.append(Mileage(tmp[0], int(mileage_num)))
+        else:
+            print("NOT FOUND: Mileage data")
