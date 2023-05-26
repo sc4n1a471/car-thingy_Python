@@ -18,9 +18,12 @@ def get_accidents(car):
     time.sleep(settings.WAIT_TIME_TAB_CHANGE)
     accidents_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("accidents"))
     accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
-    print("FOUND: Accidents")
 
     for row in accidents_rows:
         tmp = row.text.split(" ")
-        accident_text = ''.join(tmp[1:])
-        car.accidents.append(Accident(tmp[0], accident_text))
+        role = ''.join(tmp[1:])
+        if role != '':
+            print("FOUND: Accidents")
+            car.accidents.append(Accident(tmp[0], role))
+        else:
+            print("NOT FOUND: Accidents")

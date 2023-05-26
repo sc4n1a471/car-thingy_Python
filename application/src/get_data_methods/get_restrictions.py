@@ -14,7 +14,9 @@ def get_restrictions(car):
     time.sleep(settings.WAIT_TIME_TAB_CHANGE)
     restrictions = settings.driver.find_element(By.XPATH, XPATHS.get("restrictions"))
     restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
-    print("FOUND: Restrictions")
-    car.restrictions = []
     for row in restrictions_rows:
-        car.restrictions.append(row.text)
+        if row.text != "":
+            print("FOUND: Restrictions")
+            car.restrictions.append(row.text)
+        else:
+            print("NOT FOUND: Restrictions")

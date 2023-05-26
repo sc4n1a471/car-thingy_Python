@@ -7,7 +7,6 @@ WAIT_TIME = 13
 WAIT_TIME_TAB_CHANGE = 0.5
 TESTING = False
 URL = "https://magyarorszag.hu/jszp_szuf"
-GRID_IP = 'default'
 
 
 # TODO: don't use init(), use global variables, so don't init the driver every time
@@ -19,7 +18,15 @@ def init():
         from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-        driver = webdriver.Remote(GRID_IP, DesiredCapabilities.CHROME)
+        grid_ip = os.environ["APP_GRID_IP"]
+
+        if grid_ip == 'default':
+            return {
+                "error": 'Selenium Grid IP address has the default value',
+                "status": 'fail'
+            }
+
+        driver = webdriver.Remote(grid_ip, DesiredCapabilities.CHROME)
     else:
         from selenium.webdriver.chrome.service import Service
         chromedriver = "/chromedriver"
