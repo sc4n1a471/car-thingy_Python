@@ -8,6 +8,7 @@ XPATHS = {
     'login_button': '//button[@name="submit"]',
 
     'accident_record_ckeckbox': '//input[@id="checkbox-BiztositasKartortenet"]',
+    'inspection_record_ckeckbox': '//input[@id="checkbox-MuszakiAllapot"]',
 
     'search_input': '//input[@id="input-rendszam"]',
 
@@ -47,6 +48,7 @@ XPATHS = {
     'error_modal': '//h4[contains(text(), "Hiba")]',
     'unreleased_license_plate': '//p[contains(text(), "A rendszám nem került kiadásra Magyarországon.")]',
     'no_accident_record': '//p[contains(text(), "A jármű kártörténetéről nem szolgáltatható adat.")]',
+    'no_inspection_record': '//p[contains(text(), "A műszaki állapotra vonatkozó adatok jelenleg nem elérhetők.")]',
     'try_again_later': '//p[contains(text(), "Kérjük, adatigénylését ismételje meg később.")]',
     'error_modal_button': '//*[@id="snap-dialog-ok-button"]',
 

@@ -112,6 +112,21 @@ def check_error_modal(car, requested_car):
 
             fill_search(requested_car, 30)
 
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_record"))) != 0:
+            print("No inspection record was found for this license plate, trying without that")
+            car.has_inspection_record = False
+            car.has_mileage_record = False
+
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
+
+            settings.driver.switch_to.default_content()
+            settings.driver.switch_to.frame(1)
+
+            settings.driver.find_element(By.XPATH, XPATHS.get("inspection_record_ckeckbox")).click()
+            print("CLICKED: Disabled Műszaki állapotra vonatkozó adatok")
+
+            fill_search(requested_car, 30)
+
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
             print("This license plate was not released, no car was found")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()

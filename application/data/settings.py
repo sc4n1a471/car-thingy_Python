@@ -14,7 +14,7 @@ URL = "https://magyarorszag.hu/jszp_szuf"
 def init():
     global driver
 
-    if os.getenv("RUN_ON_SERVER"):
+    if os.getenv("RUN_ON_SERVER") == 'True':
         from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
