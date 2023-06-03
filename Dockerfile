@@ -1,5 +1,4 @@
 FROM --platform=linux/amd64 python:3.11.3-slim-buster
-ENV RUN_ON_SERVER=true
 
 WORKDIR /app
 
