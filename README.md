@@ -36,7 +36,7 @@ Az alkalmazás csak személyes használatra szánt projekt, egyetemi projektmunk
       APP_GRID_IP: 'http://<selenium_docker_ip>:<port>/wd/hub'
       RUN_ON_SERVER: True
 ```
-- Run the image with this command: `docker compose up -d --name=NodeJS-Thingy_Python`
+- Run the image with this command: `docker compose up -d`
 ### Local without Docker ###
 - Install python dependencies with `pip install -r requirements.txt`
 - Add these variables as environment variables:

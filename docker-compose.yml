@@ -3,6 +3,7 @@ services:
   nodejs-thingy_python:
     image: sc4n1a471/nodejs-thingy_python
     environment:
+      RUN_ON_SERVER: True
       APP_USERNAME: default
       APP_PASSWORD: default
       APP_GRID_IP: 'http://<selenium_docker_ip>:<port>/wd/hub'
