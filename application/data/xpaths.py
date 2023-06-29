@@ -44,6 +44,7 @@ XPATHS = {
     'inspections_pictures_dialog_frame': '//*[@id="dialog_frame"]',
     'inspections_pictures': '//img[contains(@title, " kép")]',
     'inspections_close_button': '//button[@id="button-bezaras"]',
+    'inspections_no_pictures': '//p[contains(text(), "A járműről nem szolgáltathatók műszaki vizsgálati képek.")]',
 
     'error_modal': '//h4[contains(text(), "Hiba")]',
     'unreleased_license_plate': '//p[contains(text(), "A rendszám nem került kiadásra Magyarországon.")]',
