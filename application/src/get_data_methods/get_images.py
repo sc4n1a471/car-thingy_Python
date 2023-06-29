@@ -48,18 +48,28 @@ def get_images(car):
             settings.driver.switch_to.frame(dialog_frame)
             print('Switched iframe to dialog_frame')
 
+            try:
+                WebDriverWait(settings.driver, 2).until(
+                    ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_no_pictures')))
+                )
+                time.sleep(1)
+            except:
+                WebDriverWait(settings.driver, 10).until(
+                    ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_pictures')))
+                )
+
+                imgs = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections_pictures'))
+
+                for img in imgs:
+                    src = img.get_attribute('src')
+                    if not src in images:
+                        images.append(src)
+
+                car_inspections[i].images = images
+
             WebDriverWait(settings.driver, 10).until(
-                ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_pictures')))
+                ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_close_button')))
             )
-            imgs = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections_pictures'))
-
-            for img in imgs:
-                src = img.get_attribute('src')
-                if not src in images:
-                    images.append(src)
-
-            car_inspections[i].images = images
-
             close_dialog_button = settings.driver \
                 .find_element(By.XPATH, XPATHS.get('inspections_close_button'))
             close_dialog_button.click()
@@ -105,6 +115,8 @@ def save_images(license_plate, inspections):
 
         counter = 0
         for image_src in inspection.images:
+            if image_src is None:
+                continue
             image_path = os.path.join(inspection_path, f'{counter}.jpg')
             urllib.request.urlretrieve(image_src, image_path)
             counter += 1
