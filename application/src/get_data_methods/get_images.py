@@ -62,6 +62,7 @@ def get_images(car):
 
                 for img in imgs:
                     src = img.get_attribute('src')
+                    src.replace("data:image/jpeg;base64,", "")
                     if not src in images:
                         images.append(src)
 
