@@ -14,8 +14,8 @@ def get_license_plate(license_plate):
         license_plates -- Requested license plate
     """
     with app.app_context():
-        if license_plate == "TEST111":
-            time.sleep(3)
+        if license_plate.lower() == "test111":
+            # time.sleep(1)
             return jsonify(RES)
         return_data = request_car([license_plate])
         return jsonify(return_data)
