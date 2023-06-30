@@ -62,9 +62,9 @@ def get_images(car):
 
                 for img in imgs:
                     src = img.get_attribute('src')
-                    src.replace("data:image/jpeg;base64,", "")
-                    if not src in images:
-                        images.append(src)
+                    replaced_src = src.replace("data:image/jpeg;base64,", "")
+                    if not replaced_src in images:
+                        images.append(replaced_src)
 
                 car_inspections[i].images = images
 
@@ -119,5 +119,5 @@ def save_images(license_plate, inspections):
             if image_src is None:
                 continue
             image_path = os.path.join(inspection_path, f'{counter}.jpg')
-            urllib.request.urlretrieve(image_src, image_path)
+            urllib.request.urlretrieve("data:image/jpeg;base64," + image_src, image_path)
             counter += 1
