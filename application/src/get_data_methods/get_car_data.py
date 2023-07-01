@@ -69,7 +69,7 @@ def get_car_data(car):
         car.fuel_type = settings.driver.find_elements(By.XPATH, XPATHS.get("fuel_type"))[0].text
         print(f"FOUND: Fuel_type {car.fuel_type}")
 
-        if not car.fuel_type == "ELEKTROMOS":
+        if not car.fuel_type.lower() == "elektromos":
             car.engine_size = settings.driver.find_elements(By.XPATH, XPATHS.get("engine_size"))[0].text
             print(f"FOUND: Engine_size {car.engine_size}")
             car.engine_size = int(car.engine_size.replace(" ", "").replace("cm³", ""))
