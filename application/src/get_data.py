@@ -94,8 +94,9 @@ def check_error_modal(car, requested_car):
         requested_car -- Requested license plate
     """
     retries = 0
+    counter = 0
 
-    while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0:
+    while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0 and counter != 10:
         print("FOUND: ERROR DIALOG")
 
         if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_accident_record"))) != 0:
@@ -162,3 +163,8 @@ def check_error_modal(car, requested_car):
 
             fill_search(requested_car, 30)
             retries += 1
+
+        counter += 1
+
+    if counter == 10:
+        raise Exception("Some kind of data was not found before searching for license plate")

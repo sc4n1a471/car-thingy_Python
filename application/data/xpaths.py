@@ -13,7 +13,12 @@ XPATHS = {
     'search_input': '//input[@id="input-rendszam"]',
 
     'no_official_data': '//p[contains(text(), "A járműhöz nem tartoznak okmányadatok.")]',
-    'no_inspection_data': '//p[contains(text(), "A járműhöz nem tartoznak a műszaki állapotára vonatkozó adatok.")]',
+    'error_modal': '//h4[contains(text(), "Hiba")]',
+    'unreleased_license_plate': '//p[contains(text(), "A rendszám nem került kiadásra Magyarországon.")]',
+    'no_accident_record': '//p[contains(text(), "A jármű kártörténetéről nem szolgáltatható adat.")]',
+    'no_inspection_record': '//p[contains(text(), "műszaki állapot")]',
+    'try_again_later': '//p[contains(text(), "Kérjük, adatigénylését ismételje meg később.")]',
+    'error_modal_button': '//*[@id="snap-dialog-ok-button"]',
 
     'brand': '//*[contains(@id, "Gyartmany") and string-length(text())]',
     'model': '//*[contains(@id, "Kerleiras") and string-length(text())]',
@@ -45,13 +50,6 @@ XPATHS = {
     'inspections_pictures': '//img[contains(@title, " kép")]',
     'inspections_close_button': '//button[@id="button-bezaras"]',
     'inspections_no_pictures': '//p[contains(text(), "A járműről nem szolgáltathatók műszaki vizsgálati képek.")]',
-
-    'error_modal': '//h4[contains(text(), "Hiba")]',
-    'unreleased_license_plate': '//p[contains(text(), "A rendszám nem került kiadásra Magyarországon.")]',
-    'no_accident_record': '//p[contains(text(), "A jármű kártörténetéről nem szolgáltatható adat.")]',
-    'no_inspection_record': '//p[contains(text(), "A műszaki állapotra vonatkozó adatok jelenleg nem elérhetők.")]',
-    'try_again_later': '//p[contains(text(), "Kérjük, adatigénylését ismételje meg később.")]',
-    'error_modal_button': '//*[@id="snap-dialog-ok-button"]',
 
     'logout_button': '//*[@id="kijelentkezes"]'
 }
