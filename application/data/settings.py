@@ -5,7 +5,7 @@ import json
 from selenium import webdriver
 
 COUNTER = 0
-WAIT_TIME = 26
+WAIT_TIME = 30
 WAIT_TIME_TAB_CHANGE = 0.5
 TESTING = False
 URL = "https://magyarorszag.hu/jszp_szuf"
