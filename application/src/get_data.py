@@ -26,21 +26,21 @@ def get_data(requested_cars: [Car]):
         print(f"{requested_car} is on the way...")
 
         if not cold_start:
-            print(f"Already logged in, waiting {settings.WAIT_TIME}+{settings.WAIT_TIME} sec...")
+            print(f"Already logged in, waiting {settings.WAIT_TIME} sec...")
             time.sleep(settings.WAIT_TIME)
             settings.driver.get("https://magyarorszag.hu/jszp_szuf")
-            time.sleep(settings.WAIT_TIME)
 
         try:
             WebDriverWait(settings.driver, 30).until(
-                ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
+                ec.presence_of_element_located((By.XPATH, XPATHS.get("request_page"))))
             print("FOUND: Jármű Szolgáltatási Platform")
+            settings.save_cookie()
         except Exception as e:
             raise GetDataException from e
 
         fill_search(requested_car)
 
-        time.sleep(3)
+        time.sleep(1)
 
         try:
             check_error_modal(car, requested_car)
@@ -50,7 +50,7 @@ def get_data(requested_cars: [Car]):
         settings.driver.switch_to.frame(1)
 
         WebDriverWait(settings.driver, 180)\
-            .until(ec.presence_of_element_located((By.XPATH, '//h1[@id="header-jarmu_adatai"]')))
+            .until(ec.presence_of_element_located((By.XPATH, XPATHS.get("car_page"))))
         print("Car loaded")
 
         WebDriverWait(settings.driver, 10)\
@@ -75,6 +75,8 @@ def fill_search(requested_car, wait = 0):
     settings.driver.switch_to.default_content()
     settings.driver.switch_to.frame(1)
 
+    WebDriverWait(settings.driver, 10) \
+        .until(ec.presence_of_element_located((By.XPATH, XPATHS.get("search_input"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).clear()
     settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(requested_car)
     print("FILLED: license plate")
@@ -134,7 +136,7 @@ def check_error_modal(car, requested_car):
             raise UnreleasedLPException()
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later"))) != 0:
-            print("Getting throttled...")
+            print(f"Getting throttled, waiting {settings.WAIT_TIME} seconds...")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
             time.sleep(1)
 
@@ -161,7 +163,7 @@ def check_error_modal(car, requested_car):
                 settings.driver.switch_to.default_content()
                 continue
 
-            fill_search(requested_car, 30)
+            fill_search(requested_car, settings.WAIT_TIME)
             retries += 1
 
         counter += 1

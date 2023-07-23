@@ -2,6 +2,8 @@ import os
 import traceback
 
 from selenium.common import TimeoutException, WebDriverException
+from selenium.webdriver.support.wait import WebDriverWait
+
 
 from .models.GetDataException import GetDataException
 from .models.LoginException import LoginException
@@ -73,7 +75,7 @@ def request_car(license_plates):
         settings.driver.quit()
         return {
             "status": 'fail',
-            "error": exc.args[0]
+            "error": exc.args
         }
 
     settings.driver.quit()
