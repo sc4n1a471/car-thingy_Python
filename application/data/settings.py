@@ -1,10 +1,11 @@
 import os
 import pickle
+import json
 
 from selenium import webdriver
 
 COUNTER = 0
-WAIT_TIME = 25
+WAIT_TIME = 26
 WAIT_TIME_TAB_CHANGE = 0.5
 TESTING = False
 URL = "https://magyarorszag.hu/jszp_szuf"
@@ -66,7 +67,10 @@ def load_cookies():
         cookies = pickle.load(open(COOKIES, "rb"))
 
         # Enables network tracking so we may use Network.setCookie method
-        driver.execute_cdp_cmd('Network.enable', {})
+        if os.getenv("RUN_ON_SERVER") == 'True':
+            send(driver, 'Network.enable', {})
+        else:
+            driver.execute_cdp_cmd('Network.enable', {})
 
         # Iterate through pickle dict and add all the cookies
         for cookie in cookies:
@@ -76,10 +80,31 @@ def load_cookies():
                 del cookie['expiry']
 
             # Set the actual cookie
-            driver.execute_cdp_cmd('Network.setCookie', cookie)
+            if os.getenv("RUN_ON_SERVER") == 'True':
+                send(driver, 'Network.setCookie', cookie)
+            else:
+                driver.execute_cdp_cmd('Network.setCookie', cookie)
 
         # Disable network tracking
-        driver.execute_cdp_cmd('Network.disable', {})
+        if os.getenv("RUN_ON_SERVER") == 'True':
+            send(driver, 'Network.disable', {})
+        else:
+            driver.execute_cdp_cmd('Network.disable', {})
         print("Cookies loaded successfully")
         return 1
     print("Cookies were not found")
+
+def send(driver, cmd, params={}):
+    """
+    This is required to send CDP command to remote driver
+    https://stackoverflow.com/questions/72121479/cdp-with-remote-webdriver-webdriver-object-has-no-attribute-execute-cdp-cmd
+    :param driver:
+    :param cmd: Mostly 'Network.<enable/setCookie/disable>'
+    :param params: Mostly '{}/cookie/{}'
+    :return:
+    """
+    resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
+    url = driver.command_executor._url + resource
+    body = json.dumps({'cmd': cmd, 'params': params})
+    response = driver.command_executor._request('POST', url, body)
+    return response.get('value')
