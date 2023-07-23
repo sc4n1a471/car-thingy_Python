@@ -10,7 +10,9 @@ XPATHS = {
     'accident_record_ckeckbox': '//input[@id="checkbox-BiztositasKartortenet"]',
     'inspection_record_ckeckbox': '//input[@id="checkbox-MuszakiAllapot"]',
 
+    'request_page': '//title[text() = "Jármű Szolgáltatási Platform"]',
     'search_input': '//input[@id="input-rendszam"]',
+    'car_page': '//h1[@id="header-jarmu_adatai"]',
 
     'no_official_data': '//p[contains(text(), "A járműhöz nem tartoznak okmányadatok.")]',
     'no_inspection_data': '//p[contains(text(), "A járműhöz nem tartoznak a műszaki állapotára vonatkozó adatok.")]',
