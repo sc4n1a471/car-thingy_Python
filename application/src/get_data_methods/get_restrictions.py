@@ -19,8 +19,11 @@ def get_restrictions(car):
     restrictions = settings.driver.find_element(By.XPATH, XPATHS.get("restrictions"))
     restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
     for row in restrictions_rows:
-        if row.text != "":
-            print("FOUND: Restrictions")
-            car.restrictions.append(row.text)
+        if row != "":
+            if row.text != "":
+                print("FOUND: Restrictions")
+                car.restrictions.append(row.text)
+            else:
+                print("NOT FOUND: Restrictions")
         else:
             print("NOT FOUND: Restrictions")
