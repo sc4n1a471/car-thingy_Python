@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 from application.data import settings
 from application.data.xpaths import XPATHS
@@ -39,8 +40,6 @@ def get_data(requested_cars: [Car]):
             raise GetDataException from e
 
         fill_search(requested_car)
-
-        time.sleep(1)
 
         try:
             check_error_modal(car, requested_car)
@@ -97,6 +96,11 @@ def check_error_modal(car, requested_car):
     """
     retries = 0
     counter = 0
+
+    try:
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("error_modal"))))
+    except TimeoutException:
+        return
 
     while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0 and counter != 10:
         print("FOUND: ERROR DIALOG")

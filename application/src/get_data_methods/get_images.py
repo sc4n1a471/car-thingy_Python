@@ -17,14 +17,16 @@ def get_images(car):
     Attributes:
         car -- car object
     """
+    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
     print("CLICKED: Condition Inspections")
-    time.sleep(settings.WAIT_TIME_TAB_CHANGE)
 
     if len(settings.driver.find_elements(By.XPATH, XPATHS.get('no_inspection_data'))) != 0:
         print("NOT FOUND: Inspection data")
     else:
         car_inspections: [Inspection] = []
+
+        WebDriverWait(settings.driver, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections"))))
 
         inspections = settings.driver.find_elements(By.XPATH, XPATHS.get('inspections'))
         for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
@@ -49,12 +51,12 @@ def get_images(car):
             print('Switched iframe to dialog_frame')
 
             try:
-                WebDriverWait(settings.driver, 2).until(
+                WebDriverWait(settings.driver, 3).until(
                     ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_no_pictures')))
                 )
-                time.sleep(1)
+                # time.sleep(1)
             except:
-                WebDriverWait(settings.driver, 10).until(
+                WebDriverWait(settings.driver, 7).until(
                     ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_pictures')))
                 )
 
@@ -65,10 +67,11 @@ def get_images(car):
                     replaced_src = src.replace("data:image/jpeg;base64,", "")
                     if not replaced_src in images:
                         images.append(replaced_src)
+                        print("Added image to array...")
 
                 car_inspections[i].images = images
 
-            WebDriverWait(settings.driver, 10).until(
+            WebDriverWait(settings.driver, 2).until(
                 ec.presence_of_element_located((By.XPATH, XPATHS.get('inspections_close_button')))
             )
             close_dialog_button = settings.driver \
