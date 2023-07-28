@@ -5,9 +5,9 @@ from selenium.webdriver.common.by import By
 from application.data import settings
 from application.data.xpaths import XPATHS
 
-def logout():
+async def logout():
     """Logs the user out by clicking logout"""
-    print("Logging out...")
+    await settings.send_message("Logging out...")
     time.sleep(1)
     settings.driver.switch_to.default_content()
     settings.driver.switch_to.frame(2)

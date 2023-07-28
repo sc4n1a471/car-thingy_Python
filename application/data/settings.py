@@ -14,8 +14,10 @@ COOKIES = "cookies.pkl"
 
 # TODO: don't use init(), use global variables, so don't init the driver every time
 #       this way if multiple license plates are requested individually in a row, it would not login every time
-def init():
+async def init(websocket_param):
     global driver
+    global websocket
+    websocket = websocket_param
 
     if os.getenv("RUN_ON_SERVER") == 'True':
         from selenium.webdriver.chrome.service import Service
@@ -41,20 +43,19 @@ def init():
         try:
             option.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
         except:
-            print('Brave browser was not found on Mac, set your own browser up in settings.py')
+            await send_message('Brave browser was not found on Mac, set your own browser up in settings.py')
 
         s = Service(chromedriver)
 
         driver = webdriver.Chrome(service=s, options=option)
         # driver = webdriver.Safari()
-    load_cookies()
+    await load_cookies()
 
 def save_cookie():
     with open(COOKIES, 'wb') as filehandler:
         pickle.dump(driver.get_cookies(), filehandler)
 
-
-def load_cookies():
+async def load_cookies():
     """
     Loads cookies before the first GET to magyarorszag.hu as it redirects to .gov.hu
         if no cookies were found for magyarorszag.hu domain and then these domains can't be
@@ -63,7 +64,7 @@ def load_cookies():
     :return:
     """
     if os.path.exists(COOKIES) and os.path.isfile(COOKIES):
-        print("Loading cookies from " + COOKIES)
+        await send_message(f"Loading cookies from {COOKIES}")
         cookies = pickle.load(open(COOKIES, "rb"))
 
         # Enables network tracking so we may use Network.setCookie method
@@ -90,9 +91,9 @@ def load_cookies():
             send(driver, 'Network.disable', {})
         else:
             driver.execute_cdp_cmd('Network.disable', {})
-        print("Cookies loaded successfully")
+        await send_message("Cookies loaded successfully")
         return 1
-    print("Cookies were not found")
+    await send_message("Cookies were not found")
 
 def send(driver, cmd, params={}):
     """
@@ -108,3 +109,8 @@ def send(driver, cmd, params={}):
     body = json.dumps({'cmd': cmd, 'params': params})
     response = driver.command_executor._request('POST', url, body)
     return response.get('value')
+
+async def send_message(message):
+    global websocket
+    print(message)
+    await websocket.send(message)

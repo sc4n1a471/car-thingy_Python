@@ -13,7 +13,7 @@ from .models.Car import Car
 from .src.get_data import get_data
 from .data import settings
 
-def request_car(license_plates):
+async def request_car(license_plates, websocket_param):
     """Opens page and does the rest of the query
 
     Attributes:
@@ -29,7 +29,7 @@ def request_car(license_plates):
     cars: [Car] = []
 
     try:
-        settings.init()
+        await settings.init(websocket_param)
     except WebDriverException as wde:
         return {
             "error": f'Settings init failed with the following error: {wde.msg}',
@@ -39,7 +39,7 @@ def request_car(license_plates):
     settings.driver.get(settings.URL)
 
     try:
-        login()
+        await login()
     except LoginException as exc:
         print(f"LOGIN ERROR: {traceback.format_exc()}")
         settings.driver.quit()
@@ -55,7 +55,7 @@ def request_car(license_plates):
         }
 
     try:
-        cars = get_data(license_plates)
+        cars = await get_data(license_plates)
     except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
         settings.driver.quit()

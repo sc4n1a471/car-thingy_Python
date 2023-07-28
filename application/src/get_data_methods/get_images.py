@@ -11,7 +11,7 @@ from application.data.xpaths import XPATHS
 from application.models.Inspection import Inspection
 
 
-def get_images(car):
+async def get_images(car):
     """Downloads images associated to the inspections
 
     Attributes:
@@ -19,10 +19,10 @@ def get_images(car):
     """
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
-    print("CLICKED: Condition Inspections")
+    await settings.send_message("CLICKED: Condition Inspections")
 
     if len(settings.driver.find_elements(By.XPATH, XPATHS.get('no_inspection_data'))) != 0:
-        print("NOT FOUND: Inspection data")
+        await settings.send_message("NOT FOUND: Inspection data")
     else:
         car_inspections: [Inspection] = []
 
@@ -48,7 +48,7 @@ def get_images(car):
             dialog_frame = settings.driver \
                 .find_element(By.XPATH, XPATHS.get('inspections_pictures_dialog_frame'))
             settings.driver.switch_to.frame(dialog_frame)
-            print('Switched iframe to dialog_frame')
+            await settings.send_message('Switched iframe to dialog_frame')
 
             try:
                 WebDriverWait(settings.driver, 3).until(
@@ -67,7 +67,7 @@ def get_images(car):
                     replaced_src = src.replace("data:image/jpeg;base64,", "")
                     if not replaced_src in images:
                         images.append(replaced_src)
-                        print("Added image to array...")
+                        await settings.send_message("Added image to array...")
 
                 car_inspections[i].images = images
 
@@ -82,18 +82,18 @@ def get_images(car):
             iframe = settings.driver \
                 .find_element(By.XPATH, XPATHS.get('main_frame'))
             settings.driver.switch_to.frame(iframe)
-            print("Switched to main iframe")
+            await settings.send_message("Switched to main iframe")
 
         car.inspections = car_inspections
-        save_images(car.license_plate, car.inspections)
+        await save_images(car.license_plate, car.inspections)
 
 
-def save_images(license_plate, inspections):
+async def save_images(license_plate, inspections):
     """Saves the image files into folders"""
-    print("Saving images...")
+    await settings.send_message("Saving images...")
 
     if not os.path.exists('downloaded_images'):
-        print("downloaded_images folder does not exist, not saving images...")
+        await settings.send_message("downloaded_images folder does not exist, not saving images...")
         # try:
         #     os.mkdir('downloaded_images')
         # except Exception as exc:
@@ -105,7 +105,7 @@ def save_images(license_plate, inspections):
     try:
         os.mkdir(license_plate_path)
     except Exception as exc:
-        print(f"Folder creation for license plate ({license_plate_path}) failed, error: {exc}")
+        await settings.send_message(f"Folder creation for license plate ({license_plate_path}) failed, error: {exc}")
         return
 
     for inspection in inspections:
@@ -114,7 +114,7 @@ def save_images(license_plate, inspections):
         try:
             os.mkdir(inspection_path)
         except Exception as exc:
-            print(f"Folder creation for inspection ({inspection_path}) failed, error: {exc}")
+            await settings.send_message(f"Folder creation for inspection ({inspection_path}) failed, error: {exc}")
             continue
 
         counter = 0

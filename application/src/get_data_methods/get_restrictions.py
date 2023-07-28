@@ -5,7 +5,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
-def get_restrictions(car):
+async def get_restrictions(car):
     """Gets all information on the requested car
 
     Attributes:
@@ -13,7 +13,7 @@ def get_restrictions(car):
     """
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("restrictions_tab")).click()
-    print("CLICKED: Restrictions")
+    await settings.send_message("CLICKED: Restrictions")
 
     WebDriverWait(settings.driver, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions"))))
     restrictions = settings.driver.find_element(By.XPATH, XPATHS.get("restrictions"))
@@ -21,9 +21,9 @@ def get_restrictions(car):
     for row in restrictions_rows:
         if row != "":
             if row.text != "":
-                print("FOUND: Restrictions")
+                await settings.send_message("FOUND: Restrictions")
                 car.restrictions.append(row.text)
             else:
-                print("NOT FOUND: Restrictions")
+                await settings.send_message("NOT FOUND: Restrictions")
         else:
-            print("NOT FOUND: Restrictions")
+            await settings.send_message("NOT FOUND: Restrictions")
