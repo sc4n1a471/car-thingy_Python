@@ -1,10 +1,7 @@
-import os
+import time
 import traceback
 
 from selenium.common import TimeoutException, WebDriverException
-from selenium.webdriver.support.wait import WebDriverWait
-
-
 from .models.GetDataException import GetDataException
 from .models.LoginException import LoginException
 from .models.UnreleasedLPException import UnreleasedLPException
@@ -12,6 +9,8 @@ from .src.login import login
 from .models.Car import Car
 from .src.get_data import get_data
 from .data import settings
+from tests.test_response import RES
+
 
 async def request_car(license_plates, websocket_param):
     """Opens page and does the rest of the query
@@ -35,6 +34,13 @@ async def request_car(license_plates, websocket_param):
             "error": f'Settings init failed with the following error: {wde.msg}',
             "status": 'fail'
         }
+
+    if license_plates[0].lower() == "test111":
+        settings.driver.quit()
+        time.sleep(1)
+        await settings.send_message("Test car is on the way...")
+        time.sleep(1)
+        return RES
 
     settings.driver.get(settings.URL)
 
@@ -81,6 +87,6 @@ async def request_car(license_plates, websocket_param):
     settings.driver.quit()
 
     return {
-        "message": cars,
+        "data": cars,
         "status": 'success'
     }

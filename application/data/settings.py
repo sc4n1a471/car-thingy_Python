@@ -112,5 +112,9 @@ def send(driver, cmd, params={}):
 
 async def send_message(message):
     global websocket
-    print(message)
-    await websocket.send(message)
+    message_object = {
+        "status": "pending",
+        "message": message
+    }
+    print(message_object)
+    await websocket.send(json.dumps(message_object))

@@ -1,9 +1,9 @@
 import json
 import asyncio
 import websockets
+import time
 
 from application.request_car import request_car
-from tests.test_response import RES
 
 class WebSocketServer:
 
@@ -19,11 +19,7 @@ class WebSocketServer:
         print(f"Connected from path ={path}")
         while True:
             secret = await websocket.recv()
-            if secret.lower() == "test111":
-                await websocket.send(json.dumps(RES))
-
             return_data = await request_car([secret.lower()], websocket)
-
             await websocket.send(json.dumps(return_data, default=vars))
 
 if __name__ == "__main__":
