@@ -14,6 +14,7 @@ from .login import login
 from .logout import logout
 from ..models import GetDataException
 from ..models.LoginException import LoginException
+from ..models.NoVehicleManagementException import NoVehicleManagementException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
 
@@ -133,6 +134,11 @@ def check_error_modal(car, requested_car):
             print("CLICKED: Disabled Műszaki állapotra vonatkozó adatok")
 
             fill_search(requested_car, 30)
+
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_vehicle_management_record"))) != 0:
+            print("No vehicle management record was found for this license plate, "
+                  "probably none of the license plates are queryable now...")
+            raise NoVehicleManagementException()
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
             print("This license plate was not released, no car was found")
