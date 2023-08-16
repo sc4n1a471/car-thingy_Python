@@ -68,9 +68,8 @@ def get_data(requested_cars: [Car]):
 def fill_search(requested_car, wait = 0):
     """Fills the search input and clicks search
 
-    Attributes:
-        requested_car -- license plate
-        wait -- seconds to wait before clicking search
+    :param requested_car: license plate
+    :param wait: seconds to wait before clicking search
     """
     settings.driver.switch_to.default_content()
     settings.driver.switch_to.frame(1)
@@ -91,9 +90,8 @@ def fill_search(requested_car, wait = 0):
 def check_error_modal(car, requested_car):
     """Checks for error dialog after submitting license plate
 
-    Attributes:
-        car -- Car object that will be returned
-        requested_car -- Requested license plate
+    :param car: Car object that will be returned
+    :param requested_car: Requested license plate
     """
     retries = 0
     counter = 0
