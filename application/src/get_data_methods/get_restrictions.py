@@ -28,6 +28,7 @@ def get_restrictions(car):
                     counter = 5
                 else:
                     print("NOT FOUND: Restrictions")
+                    counter = 5
             else:
                 print("NOT FOUND: Restrictions, searching again...")
                 counter += 1
