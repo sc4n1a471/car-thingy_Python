@@ -2,6 +2,7 @@ import urllib.request
 import time
 import os
 
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
@@ -12,10 +13,9 @@ from application.models.Inspection import Inspection
 
 
 def get_images(car):
-    """Downloads images associated to the inspections
-
-    Attributes:
-        car -- car object
+    """
+    Downloads images associated to the inspections
+    :param car: car object
     """
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
@@ -35,9 +35,19 @@ def get_images(car):
             car_inspections.append(Inspection(inspection_data.text))
             time.sleep(0.4)
 
-        show_pictures_buttons = settings.driver \
-            .find_elements(By.XPATH, XPATHS.get('inspections_show_pictures'))
-        show_pictures_buttons.pop(0)
+        counter = 0
+        while counter < 5:
+            try:
+                show_pictures_buttons = settings.driver \
+                    .find_elements(By.XPATH, XPATHS.get('inspections_show_pictures'))
+                show_pictures_buttons.pop(0)
+                counter = 6
+            except:
+                counter += 1
+                time.sleep(0.25)
+
+        if counter == 5:
+            return
 
         for (button, i) in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
             images = []

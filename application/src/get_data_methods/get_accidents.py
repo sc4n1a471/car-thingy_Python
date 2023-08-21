@@ -1,5 +1,4 @@
-import time
-
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
@@ -10,10 +9,9 @@ from application.models.Accident import Accident
 
 
 def get_accidents(car):
-    """Gets the accidents found on accidents_tab
-
-    Attributes:
-        car -- car object
+    """
+    Gets the accidents found on accidents_tab
+    :param car: car object
     """
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("accidents_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("accidents_tab")).click()
@@ -24,10 +22,13 @@ def get_accidents(car):
     accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
 
     for row in accidents_rows:
-        tmp = row.text.split(" ")
-        role = ''.join(tmp[1:])
-        if role != '':
-            print("FOUND: Accidents")
-            car.accidents.append(Accident(tmp[0], role))
-        else:
-            print("NOT FOUND: Accidents")
+        try:
+            tmp = row.text.split(" ")
+            role = ''.join(tmp[1:])
+            if role != '':
+                print("FOUND: Accidents")
+                car.accidents.append(Accident(tmp[0], role))
+            else:
+                print("NOT FOUND: Accidents")
+        except StaleElementReferenceException:
+            continue
