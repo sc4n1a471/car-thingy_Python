@@ -1,4 +1,6 @@
 import time
+
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
@@ -6,8 +8,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from application.data import settings
 from application.data.xpaths import XPATHS
 def get_restrictions(car):
-    """Gets all information on the requested car
-
+    """
+    Gets all information on the requested car
     :param car: car object
     """
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions_tab"))))
@@ -21,16 +23,19 @@ def get_restrictions(car):
         restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
 
         for row in restrictions_rows:
-            if row != "":
-                if row.text != "":
-                    print("FOUND: Restrictions")
-                    car.restrictions.append(row.text)
-                    counter = 5
+            try:
+                if row != "":
+                    if row.text != "":
+                        print("FOUND: Restrictions")
+                        car.restrictions.append(row.text)
+                        counter = 5
+                    else:
+                        print("NOT FOUND: Restrictions")
+                        counter = 5
                 else:
-                    print("NOT FOUND: Restrictions")
-                    counter = 5
-            else:
-                print("NOT FOUND: Restrictions, searching again...")
-                counter += 1
-                time.sleep(0.25)
-                break
+                    print("NOT FOUND: Restrictions, searching again...")
+                    counter += 1
+                    time.sleep(0.25)
+                    break
+            except StaleElementReferenceException:
+                continue
