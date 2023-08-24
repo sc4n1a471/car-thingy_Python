@@ -18,24 +18,21 @@ def get_restrictions(car):
 
     counter = 0
     while counter < 5:
-        WebDriverWait(settings.driver, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions"))))
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions"))))
         restrictions = settings.driver.find_element(By.XPATH, XPATHS.get("restrictions"))
         restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
 
         for row in restrictions_rows:
             try:
-                if row != "":
-                    if row.text != "":
-                        print("FOUND: Restrictions")
-                        car.restrictions.append(row.text)
-                        counter = 5
-                    else:
-                        print("NOT FOUND: Restrictions")
-                        counter = 5
+                tmp = row.text
+                if tmp != '':
+                    print("FOUND: Restrictions")
+                    car.restrictions.append(tmp)
+                    counter = 5
                 else:
                     print("NOT FOUND: Restrictions, searching again...")
                     counter += 1
                     time.sleep(0.25)
                     break
-            except StaleElementReferenceException:
+            except:
                 continue
