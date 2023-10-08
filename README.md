@@ -1,5 +1,6 @@
 # NodeJS-Thingy_Python
 [![Build, Publish, Redeploy](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml/badge.svg)](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml)
+![Alt](https://repobeats.axiom.co/api/embed/fb6459316bd61876f71e174bfcbed2c37ac152c2.svg "Repobeats analytics image")
 
 Ez lenni repository for NodeJS_Thingy_Python
 

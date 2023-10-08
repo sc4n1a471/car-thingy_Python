@@ -14,6 +14,7 @@ from .login import login
 from .logout import logout
 from ..models import GetDataException
 from ..models.LoginException import LoginException
+from ..models.NoVehicleManagementException import NoVehicleManagementException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
 
@@ -67,9 +68,8 @@ async def get_data(requested_cars: [Car]):
 async def fill_search(requested_car, wait = 0):
     """Fills the search input and clicks search
 
-    Attributes:
-        requested_car -- license plate
-        wait -- seconds to wait before clicking search
+    :param requested_car: license plate
+    :param wait: seconds to wait before clicking search
     """
     settings.driver.switch_to.default_content()
     settings.driver.switch_to.frame(1)
@@ -90,9 +90,8 @@ async def fill_search(requested_car, wait = 0):
 async def check_error_modal(car, requested_car):
     """Checks for error dialog after submitting license plate
 
-    Attributes:
-        car -- Car object that will be returned
-        requested_car -- Requested license plate
+    :param car: Car object that will be returned
+    :param requested_car: Requested license plate
     """
     retries = 0
     counter = 0
@@ -133,6 +132,11 @@ async def check_error_modal(car, requested_car):
             await settings.send_message("CLICKED: Disabled Műszaki állapotra vonatkozó adatok")
 
             fill_search(requested_car, 30)
+
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_vehicle_management_record"))) != 0:
+            print("No vehicle management record was found for this license plate, "
+                  "probably none of the license plates are queryable now...")
+            raise NoVehicleManagementException()
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
             await settings.send_message("This license plate was not released, no car was found")
