@@ -10,7 +10,7 @@ from application.data.xpaths import XPATHS
 from application.models.Mileage import Mileage
 
 
-def get_mileage(car):
+async def get_mileage(car):
     """
     Gets mileage information for the requested car
     :param car: car object
@@ -18,7 +18,7 @@ def get_mileage(car):
 
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("mileage_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("mileage_tab")).click()
-    print("CLICKED: Mileage")
+    await settings.send_message("CLICKED: Mileage")
 
     counter = 0
     while counter < 5:
@@ -30,12 +30,12 @@ def get_mileage(car):
             try:
                 tmp = row.text.split(" ")
                 if tmp != ['']:
-                    print("FOUND: Mileage data")
+                    await settings.send_message("FOUND: Mileage data")
                     mileage_num = ''.join(tmp[1:])
                     car.mileage.append(Mileage(tmp[0], int(mileage_num)))
                     counter = 5
                 else:
-                    print("NOT FOUND: Mileage data, searching again...")
+                    await settings.send_message("NOT FOUND: Mileage data, searching again...")
                     counter += 1
                     time.sleep(0.25)
                     break

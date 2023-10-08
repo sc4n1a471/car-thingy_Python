@@ -18,32 +18,32 @@ from ..models.NoVehicleManagementException import NoVehicleManagementException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
 
-def get_data(requested_cars: [Car]):
+async def get_data(requested_cars: [Car]):
     cold_start = True
     car_data: [Car] = []
     for requested_car in requested_cars:
         car = Car()
         car.license_plate = requested_car.upper()
 
-        print(f"{requested_car} is on the way...")
+        await settings.send_message(f"{car.license_plate} is on the way...")
 
         if not cold_start:
-            print(f"Already logged in, waiting {settings.WAIT_TIME} sec...")
+            await settings.send_message(f"Already logged in, waiting {settings.WAIT_TIME} sec...")
             time.sleep(settings.WAIT_TIME)
             settings.driver.get("https://magyarorszag.hu/jszp_szuf")
 
         try:
             WebDriverWait(settings.driver, 30).until(
                 ec.presence_of_element_located((By.XPATH, XPATHS.get("request_page"))))
-            print("FOUND: Jármű Szolgáltatási Platform")
+            await settings.send_message("FOUND: Jármű Szolgáltatási Platform")
             settings.save_cookie()
         except Exception as e:
             raise GetDataException from e
 
-        fill_search(requested_car)
+        await fill_search(requested_car)
 
         try:
-            check_error_modal(car, requested_car)
+            await check_error_modal(car, requested_car)
         except UnreleasedLPException as ulp:
             raise UnreleasedLPException from ulp
 
@@ -51,22 +51,24 @@ def get_data(requested_cars: [Car]):
 
         WebDriverWait(settings.driver, 180)\
             .until(ec.presence_of_element_located((By.XPATH, XPATHS.get("car_page"))))
-        print("Car loaded")
+        await settings.send_message("Car loaded")
 
         WebDriverWait(settings.driver, 10)\
             .until(ec.presence_of_element_located((By.XPATH, XPATHS.get("brand"))))
 
-        get_car_data(car)
+        await get_car_data(car)
 
         car_data.append(car)
         cold_start = False
-        print(f"Changed cold_start to {cold_start}")
+        await settings.send_message(f"Changed cold_start to {cold_start}")
         print("=================")
 
     return car_data
 
-def fill_search(requested_car, wait = 0):
-    """Fills the search input and clicks search
+
+async def fill_search(requested_car, wait = 0):
+    """
+    Fills the search input and clicks search
 
     :param requested_car: license plate
     :param wait: seconds to wait before clicking search
@@ -78,17 +80,19 @@ def fill_search(requested_car, wait = 0):
         .until(ec.presence_of_element_located((By.XPATH, XPATHS.get("search_input"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).clear()
     settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(requested_car)
-    print("FILLED: license plate")
+    await settings.send_message("FILLED: license plate")
 
     time.sleep(wait)
 
     settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(Keys.ENTER)
-    print("Searching for license plate...")
+    await settings.send_message("Searching for license plate...")
 
     settings.driver.switch_to.default_content()
 
-def check_error_modal(car, requested_car):
-    """Checks for error dialog after submitting license plate
+
+async def check_error_modal(car, requested_car):
+    """
+    Checks for error dialog after submitting license plate
 
     :param car: Car object that will be returned
     :param requested_car: Requested license plate
@@ -102,10 +106,10 @@ def check_error_modal(car, requested_car):
         return
 
     while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0 and counter != 10:
-        print("FOUND: ERROR DIALOG")
+        await settings.send_message("FOUND: ERROR DIALOG")
 
         if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_accident_record"))) != 0:
-            print("No accident record was found for this license plate, trying without that")
+            await settings.send_message("No accident record was found for this license plate, trying without that")
             car.has_accident_record = False
 
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
@@ -114,12 +118,12 @@ def check_error_modal(car, requested_car):
             settings.driver.switch_to.frame(1)
 
             settings.driver.find_element(By.XPATH, XPATHS.get("accident_record_ckeckbox")).click()
-            print("CLICKED: Disabled Biztosítás és Kártörténet")
+            await settings.send_message("CLICKED: Disabled Biztosítás és Kártörténet")
 
-            fill_search(requested_car, 30)
+            await fill_search(requested_car, 30)
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_record"))) != 0:
-            print("No inspection record was found for this license plate, trying without that")
+            await settings.send_message("No inspection record was found for this license plate, trying without that")
             car.has_inspection_record = False
             car.has_mileage_record = False
 
@@ -129,9 +133,9 @@ def check_error_modal(car, requested_car):
             settings.driver.switch_to.frame(1)
 
             settings.driver.find_element(By.XPATH, XPATHS.get("inspection_record_ckeckbox")).click()
-            print("CLICKED: Disabled Műszaki állapotra vonatkozó adatok")
+            await settings.send_message("CLICKED: Disabled Műszaki állapotra vonatkozó adatok")
 
-            fill_search(requested_car, 30)
+            await fill_search(requested_car, 30)
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_vehicle_management_record"))) != 0:
             print("No vehicle management record was found for this license plate, "
@@ -139,39 +143,39 @@ def check_error_modal(car, requested_car):
             raise NoVehicleManagementException()
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
-            print("This license plate was not released, no car was found")
+            await settings.send_message("This license plate was not released, no car was found")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
             raise UnreleasedLPException()
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later"))) != 0:
-            print(f"Getting throttled, waiting {settings.WAIT_TIME} seconds...")
+            await settings.send_message(f"Getting throttled, waiting {settings.WAIT_TIME} seconds...")
             settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
             time.sleep(1)
 
             if retries > 1:
-                print("Tried too many times, logging out and back in...")
+                await settings.send_message("Tried too many times, logging out and back in...")
                 retries = 0
 
                 try:
-                    logout()
+                    await logout()
                 except Exception as e:
                     raise LoginException(f"LOGOUT ERROR: {e}") from e
 
                 try:
-                    login(True)
+                    await login(True)
                 except Exception as e:
                     raise LoginException(f"LOGIN ERROR: {e}") from e
 
                 WebDriverWait(settings.driver, 30).until(
                     ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')))
-                print("FOUND: Jármű Szolgáltatási Platform")
+                await settings.send_message("FOUND: Jármű Szolgáltatási Platform")
                 settings.driver.switch_to.frame(1)
                 settings.driver.find_element(By.XPATH, '//input[@id="input-rendszam"]').send_keys(Keys.ENTER)
-                print("Searching for license plate again...")
+                await settings.send_message("Searching for license plate again...")
                 settings.driver.switch_to.default_content()
                 continue
 
-            fill_search(requested_car, settings.WAIT_TIME)
+            await fill_search(requested_car, settings.WAIT_TIME)
             retries += 1
 
         counter += 1

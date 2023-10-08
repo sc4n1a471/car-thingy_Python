@@ -12,7 +12,7 @@ from application.data.xpaths import XPATHS as XPATHS
 from application.models.LoginException import LoginException
 
 
-def login(retry = False):
+async def login(retry = False):
     """
     Logs in with the credentials found as environment variables
     Also checks if user is already logged in
@@ -20,7 +20,7 @@ def login(retry = False):
 
     time.sleep(2)
     if len(settings.driver.find_elements(By.XPATH, XPATHS.get('request_page'))) != 0:
-        print("FOUND: Jármű Szolgáltatási Platform -> Already logged in")
+        await settings.send_message("FOUND: Jármű Szolgáltatási Platform -> Already logged in")
         return
 
     username = os.environ["APP_USERNAME"]
@@ -29,7 +29,7 @@ def login(retry = False):
     if username == 'default' or password == 'default':
         raise LoginException("Credential env variables have default values")
 
-    print("Logging in...")
+    await settings.send_message("Logging in...")
 
     if retry:
         if settings.COUNTER > 2:
@@ -42,24 +42,24 @@ def login(retry = False):
     try:
         WebDriverWait(settings.driver, 10).until(
             ec.presence_of_element_located((By.XPATH, XPATHS.get("login_methods"))))
-        print("FOUND: Login methods")
+        await settings.send_message("FOUND: Login methods")
     except TimeoutException as toexc:
         raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
 
     time.sleep(0.5)
     settings.driver.find_element(By.XPATH, XPATHS.get('login_method')).click()
-    print("CLICKED: Ugyfelkapus azonositas")
+    await settings.send_message("CLICKED: Ugyfelkapus azonositas")
 
     WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get('username_field'))))
-    print("FOUND: username input field")
+    await settings.send_message("FOUND: username input field")
 
     settings.driver.find_element(By.XPATH, XPATHS.get('username_field')).send_keys(username)
-    print("FILLED: username")
+    await settings.send_message("FILLED: username")
 
     settings.driver.find_element(By.XPATH, XPATHS.get('password_field')).send_keys(password)
-    print("FILLED: password filled")
+    await settings.send_message("FILLED: password filled")
 
     time.sleep(0.5)
 
     settings.driver.find_element(By.XPATH, XPATHS.get('login_button')).send_keys(Keys.ENTER)
-    print("CLICKED: login")
+    await settings.send_message("CLICKED: login")
