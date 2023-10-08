@@ -65,8 +65,10 @@ async def get_data(requested_cars: [Car]):
 
     return car_data
 
+
 async def fill_search(requested_car, wait = 0):
-    """Fills the search input and clicks search
+    """
+    Fills the search input and clicks search
 
     :param requested_car: license plate
     :param wait: seconds to wait before clicking search
@@ -87,8 +89,10 @@ async def fill_search(requested_car, wait = 0):
 
     settings.driver.switch_to.default_content()
 
+
 async def check_error_modal(car, requested_car):
-    """Checks for error dialog after submitting license plate
+    """
+    Checks for error dialog after submitting license plate
 
     :param car: Car object that will be returned
     :param requested_car: Requested license plate
@@ -116,7 +120,7 @@ async def check_error_modal(car, requested_car):
             settings.driver.find_element(By.XPATH, XPATHS.get("accident_record_ckeckbox")).click()
             await settings.send_message("CLICKED: Disabled Biztosítás és Kártörténet")
 
-            fill_search(requested_car, 30)
+            await fill_search(requested_car, 30)
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_record"))) != 0:
             await settings.send_message("No inspection record was found for this license plate, trying without that")
@@ -131,7 +135,7 @@ async def check_error_modal(car, requested_car):
             settings.driver.find_element(By.XPATH, XPATHS.get("inspection_record_ckeckbox")).click()
             await settings.send_message("CLICKED: Disabled Műszaki állapotra vonatkozó adatok")
 
-            fill_search(requested_car, 30)
+            await fill_search(requested_car, 30)
 
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_vehicle_management_record"))) != 0:
             print("No vehicle management record was found for this license plate, "
@@ -153,12 +157,12 @@ async def check_error_modal(car, requested_car):
                 retries = 0
 
                 try:
-                    logout()
+                    await logout()
                 except Exception as e:
                     raise LoginException(f"LOGOUT ERROR: {e}") from e
 
                 try:
-                    login(True)
+                    await login(True)
                 except Exception as e:
                     raise LoginException(f"LOGIN ERROR: {e}") from e
 
@@ -171,7 +175,7 @@ async def check_error_modal(car, requested_car):
                 settings.driver.switch_to.default_content()
                 continue
 
-            fill_search(requested_car, settings.WAIT_TIME)
+            await fill_search(requested_car, settings.WAIT_TIME)
             retries += 1
 
         counter += 1

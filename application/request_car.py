@@ -13,10 +13,10 @@ from tests.test_response import RES
 
 
 async def request_car(license_plates, websocket_param):
-    """Opens page and does the rest of the query
+    """
+    Opens page and does the rest of the query
 
-    Attributes:
-        license_plates -- Requested license plate
+    :param license_plates: Requested license plate
     """
 
     if len(license_plates[0]) < 6 or len(license_plates[0]) > 7:

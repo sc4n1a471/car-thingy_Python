@@ -2,7 +2,7 @@ import urllib.request
 import time
 import os
 
-from selenium.common.exceptions import StaleElementReferenceException
+import requests
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
@@ -17,6 +17,7 @@ async def get_images(car):
     Downloads images associated to the inspections
     :param car: car object
     """
+
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
     await settings.send_message("CLICKED: Condition Inspections")
@@ -32,7 +33,17 @@ async def get_images(car):
         for (inspection_data, i) in zip(inspections, range(0, len(inspections))):
             if i != 0:  # the first inspection is open on tab change
                 inspection_data.click()
-            car_inspections.append(Inspection(inspection_data.text))
+
+            counter = 0
+            retry = True
+            while retry:
+                if inspection_data.text != '' or counter == 30:
+                    await settings.send_message(f"FOUND: Inspection name: {inspection_data.text}")
+                    car_inspections.append(Inspection(inspection_data.text))
+                    break
+                await settings.send_message("NOT FOUND: Inspection name, searching again...")
+                counter += 1
+                time.sleep(0.1)
             time.sleep(0.4)
 
         counter = 0
@@ -115,22 +126,71 @@ async def save_images(license_plate, inspections):
     try:
         os.mkdir(license_plate_path)
     except Exception as exc:
-        await settings.send_message(f"Folder creation for license plate ({license_plate_path}) failed, error: {exc}")
-        return
+        await settings.send_message(f"Folder for license plate ({license_plate_path}) already exists")
+
+    image_paths = []
 
     for inspection in inspections:
-        inspection_path = os.path.join(license_plate_path, inspection.name)
+        unix_path = (os.path.join(license_plate_path, inspection.name)
+                     .replace(" ", "_")
+                     .replace(".", "-")
+                     .replace(",", "")
+                     )[:-1]
+
+        docker_path = "/" + (os.path.join(license_plate_path, inspection.name)
+                             .replace(" ", "_")
+                             .replace(".", "-")
+                             .replace(",", "")
+                             )[:-1] + "/"
+        # og path:          downloaded_images/RRZ538/MŰSZAKI VIZSGÁLAT, 2019.08.23.
+        # unix path:        downloaded_images/RRZ538/MŰSZAKI_VIZSGÁLAT_2019-08-23
+        # docker path:      /downloaded_images/RRZ538/MŰSZAKI_VIZSGÁLAT_2019-08-23/
+
+        image_paths.append(docker_path)
 
         try:
-            os.mkdir(inspection_path)
+            os.mkdir(unix_path)
         except Exception as exc:
-            await settings.send_message(f"Folder creation for inspection ({inspection_path}) failed, error: {exc}")
-            continue
+            await settings.send_message(f"Folder for inspection ({unix_path}) already exists")
 
         counter = 0
         for image_src in inspection.images:
             if image_src is None:
                 continue
-            image_path = os.path.join(inspection_path, f'{counter}.jpg')
+
+            image_path = os.path.join(unix_path, f'{counter}.jpeg')
             urllib.request.urlretrieve("data:image/jpeg;base64," + image_src, image_path)
+
             counter += 1
+
+    try:
+        await upload_inspections(license_plate, inspections, image_paths)
+    except Exception as exc:
+        await settings.send_message(exc)
+
+
+async def upload_inspections(license_plate, inspections, image_paths):
+    """
+    Uploads the inspection images to the GO server
+
+    :param license_plate: License plate of the inspections
+    :param inspections: Inspection objects
+    :param image_paths: Full paths of the inspection images
+    """
+
+    url = os.getenv("GO_IP")
+    payload = []
+    for inspection, image_path in zip(inspections, image_paths):
+        individual_payload = {
+            "license_plate": license_plate,
+            "name": inspection.name,
+            "image_location": image_path
+        }
+        payload.append(individual_payload)
+
+    req = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
+
+    if req.status_code != 200:
+        raise Exception(f"Upload failed with status code: {req.status_code} and error: {req.text}")
+    else:
+        await settings.send_message(f"Upload successful")
