@@ -1,5 +1,5 @@
 RES = {
-    "message": [
+    "data": [
         {
             "accidents": [
                 {

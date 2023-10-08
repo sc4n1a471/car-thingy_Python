@@ -1,10 +1,7 @@
-import os
+import time
 import traceback
 
 from selenium.common import TimeoutException, WebDriverException
-from selenium.webdriver.support.wait import WebDriverWait
-
-
 from .models.GetDataException import GetDataException
 from .models.LoginException import LoginException
 from .models.UnreleasedLPException import UnreleasedLPException
@@ -12,8 +9,10 @@ from .src.login import login
 from .models.Car import Car
 from .src.get_data import get_data
 from .data import settings
+from tests.test_response import RES
 
-def request_car(license_plates):
+
+async def request_car(license_plates, websocket_param):
     """Opens page and does the rest of the query
 
     Attributes:
@@ -29,17 +28,24 @@ def request_car(license_plates):
     cars: [Car] = []
 
     try:
-        settings.init()
+        await settings.init(websocket_param)
     except WebDriverException as wde:
         return {
             "error": f'Settings init failed with the following error: {wde.msg}',
             "status": 'fail'
         }
 
+    if license_plates[0].lower() == "test111":
+        settings.driver.quit()
+        time.sleep(1)
+        await settings.send_message("Test car is on the way...")
+        time.sleep(1)
+        return RES
+
     settings.driver.get(settings.URL)
 
     try:
-        login()
+        await login()
     except LoginException as exc:
         print(f"LOGIN ERROR: {traceback.format_exc()}")
         settings.driver.quit()
@@ -55,7 +61,7 @@ def request_car(license_plates):
         }
 
     try:
-        cars = get_data(license_plates)
+        cars = await get_data(license_plates)
     except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
         settings.driver.quit()
@@ -81,6 +87,6 @@ def request_car(license_plates):
     settings.driver.quit()
 
     return {
-        "message": cars,
+        "data": cars,
         "status": 'success'
     }
