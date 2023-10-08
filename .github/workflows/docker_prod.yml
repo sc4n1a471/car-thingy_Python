@@ -1,4 +1,4 @@
-name: Build, Publish, Redeploy
+name: Build, Publish, Redeploy Production
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: sc4n1a471/nodejs-thingy_python:latest
+          tags: sc4n1a471/car-thingy_python:prod
 
   redeploy:
     name: Redeploying on server
@@ -41,5 +41,5 @@ jobs:
       - name: Deploy docker container webhook
         uses: joelwmale/webhook-action@master
         env:
-          WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL  }}
+          WEBHOOK_URL: ${{ secrets.DEPLOY_PROD_WEBHOOK_URL  }}
           data: "{ 'myField': 'myFieldValue'}"
