@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 
 from application.models.Accident import Accident
-from application.models.Inspection import Inspection
 from application.models.Mileage import Mileage
 
 
@@ -24,7 +23,6 @@ class Car:
     restrictions: [str] = field(default_factory=list)
     mileage: [Mileage] = field(default_factory=list)
     accidents: [Accident] = field(default_factory=list)
-    inspections: [Inspection] = field(default_factory=list)
     has_origin_record = True
     has_restriction_record = True
     has_inspection_record = True

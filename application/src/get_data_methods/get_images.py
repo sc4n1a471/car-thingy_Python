@@ -105,8 +105,7 @@ async def get_images(car):
             settings.driver.switch_to.frame(iframe)
             await settings.send_message("Switched to main iframe")
 
-        car.inspections = car_inspections
-        await save_images(car.license_plate, car.inspections)
+        await save_images(car.license_plate, car_inspections)
 
 
 async def save_images(license_plate, inspections):
@@ -166,7 +165,7 @@ async def save_images(license_plate, inspections):
     try:
         await upload_inspections(license_plate, inspections, image_paths)
     except Exception as exc:
-        await settings.send_message(exc)
+        await settings.send_message(f"Upload failed")
 
 
 async def upload_inspections(license_plate, inspections, image_paths):
