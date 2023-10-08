@@ -1,4 +1,4 @@
-name: Build, Publish, Redeploy
+name: Build, Publish, Redeploy 
 
 on:
   push:
