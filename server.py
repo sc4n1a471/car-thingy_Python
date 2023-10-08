@@ -26,5 +26,5 @@ class WebSocketServer:
 
 if __name__ == "__main__":
     print("Starting server...")
-    server = WebSocketServer("127.0.0.1", 3001, "")
+    server = WebSocketServer("", 3001, "")
     server.start()
