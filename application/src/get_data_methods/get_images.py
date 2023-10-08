@@ -137,14 +137,14 @@ async def save_images(license_plate, inspections):
                      .replace(",", "")
                      )[:-1]
 
-        docker_path = "/" + (os.path.join(license_plate_path, inspection.name)
-                             .replace(" ", "_")
-                             .replace(".", "-")
-                             .replace(",", "")
-                             )[:-1] + "/"
+        docker_path = (os.path.join(license_plate_path, inspection.name)
+                       .replace(" ", "_")
+                       .replace(".", "-")
+                       .replace(",", "")
+                       )[:-1] + "/"
         # og path:          downloaded_images/RRZ538/MŰSZAKI VIZSGÁLAT, 2019.08.23.
         # unix path:        downloaded_images/RRZ538/MŰSZAKI_VIZSGÁLAT_2019-08-23
-        # docker path:      /downloaded_images/RRZ538/MŰSZAKI_VIZSGÁLAT_2019-08-23/
+        # docker path:      downloaded_images/RRZ538/MŰSZAKI_VIZSGÁLAT_2019-08-23/
 
         image_paths.append(docker_path)
 

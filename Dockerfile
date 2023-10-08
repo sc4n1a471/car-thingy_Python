@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 3001
 
-CMD ["python", "server.py"]
+ENTRYPOINT ["python3", "./server.py"]
