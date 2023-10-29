@@ -110,11 +110,35 @@ def send(driver, cmd, params={}):
     response = driver.command_executor._request('POST', url, body)
     return response.get('value')
 
+
 async def send_message(message):
     global websocket
     message_object = {
         "status": "pending",
+        "percentage": 0.0,
+        "key": "message",
         "message": message
     }
+    print(message_object)
+    await websocket.send(json.dumps(message_object))
+
+
+async def send_data(key, value, percentage, status="pending"):
+    global websocket
+
+    if status == "success":
+        message_object = {
+            "status": status,
+            "percentage": percentage,
+            "key": "message"
+        }
+    else:
+        message_object = {
+            "status": status,
+            "percentage": percentage,
+            "key": key,
+            "value": value
+        }
+
     print(message_object)
     await websocket.send(json.dumps(message_object))
