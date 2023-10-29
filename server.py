@@ -6,7 +6,6 @@ from application.request_car import request_car
 
 
 class WebSocketServer:
-
     def __init__(self, host, port, secret):
         self._secret = secret
         self._server = websockets.serve(self._start, host, port)
@@ -20,8 +19,10 @@ class WebSocketServer:
         print(f"Connected from path ={path}")
         while True:
             secret = await websocket.recv()
-            return_data = await request_car([secret.lower()], websocket)
-            await websocket.send(json.dumps(return_data, default=vars))
+            await request_car([secret.lower()], websocket)
+            # return_data = await request_car([secret.lower()], websocket)
+            # await websocket.send(json.dumps(return_data, default=vars))
+            websocket.close()
 
 
 if __name__ == "__main__":

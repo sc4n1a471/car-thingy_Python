@@ -20,20 +20,26 @@ async def request_car(license_plates, websocket_param):
     """
 
     if len(license_plates[0]) < 6 or len(license_plates[0]) > 7:
-        return {
-            "error": 'License plate is not valid, should be 6 or 7 characters',
-            "status": 'fail'
-        }
+        await settings.send_data(
+            "message",
+            "License plate is not valid, should be 6 or 7 characters",
+            100,
+            "fail",
+        )
+        return
 
     cars: [Car] = []
 
     try:
         await settings.init(websocket_param)
     except WebDriverException as wde:
-        return {
-            "error": f'Settings init failed with the following error: {wde.msg}',
-            "status": 'fail'
-        }
+        await settings.send_data(
+            "message",
+            f"Settings init failed with the following error: {wde.msg}",
+            100,
+            "fail",
+        )
+        return
 
     if license_plates[0].lower() == "test111":
         settings.driver.quit()
@@ -52,48 +58,42 @@ async def request_car(license_plates, websocket_param):
     settings.driver.get(settings.URL)
 
     try:
-        await login()
+        await login()  # 13 %
     except LoginException as exc:
         print(f"LOGIN ERROR: {traceback.format_exc()}")
         settings.driver.quit()
-        return {
-            "status": 'fail',
-            "error": exc.message
-        }
+        await settings.send_data("message", f"Login failed: {exc.message}", 100, "fail")
+        return
     except TimeoutException as toexc:
         settings.driver.quit()
-        return {
-            "status": 'fail',
-            "error": toexc.msg
-        }
+        await settings.send_data("message", f"Login failed: {toexc.msg}", 100, "fail")
+        return
 
     try:
         cars = await get_data(license_plates)
     except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
         settings.driver.quit()
-        return {
-            "status": 'fail',
-            "error": ulp.args[0]
-        }
+        await settings.send_data(
+            "message", f"GET_DATA ERROR: {ulp.args[0]}", 100, "fail"
+        )
+        return
     except GetDataException as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
-        return {
-            "status": 'fail',
-            "error": exc.message
-        }
+        await settings.send_data(
+            "message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail"
+        )
+        return
     except Exception as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
-        return {
-            "status": 'fail',
-            "error": exc.args
-        }
+        await settings.send_data(
+            "message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail"
+        )
+        return
 
     settings.driver.quit()
 
-    return {
-        "data": cars,
-        "status": 'success'
-    }
+    await settings.send_data("message", None, 100, "success")
+    return
