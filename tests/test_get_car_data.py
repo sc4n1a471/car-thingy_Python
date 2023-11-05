@@ -18,9 +18,9 @@ class MyTestCase(unittest.TestCase):
         settings.TESTING = True
 
         self.car = Car()
-    def test_get_car_data(self):
+    async def test_get_car_data(self):
 
-        get_car_data(self.car)
+        await get_car_data(self.car)
         expected = Car(
             license_plate='',
             brand='BMW',

@@ -1,5 +1,6 @@
 # NodeJS-Thingy_Python
-[![Build, Publish, Redeploy](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml/badge.svg)](https://github.com/sc4n1a471/NodeJS-Thingy_Python/actions/workflows/docker.yml)
+[![Build, Publish, Redeploy Development](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_dev.yml/badge.svg?branch=dev)](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_dev.yml)
+[![Build, Publish, Redeploy Production](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_prod.yml/badge.svg?branch=main)](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_prod.yml)
 ![Alt](https://repobeats.axiom.co/api/embed/fb6459316bd61876f71e174bfcbed2c37ac152c2.svg "Repobeats analytics image")
 
 Ez lenni repository for NodeJS_Thingy_Python

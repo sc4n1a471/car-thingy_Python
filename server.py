@@ -1,25 +1,31 @@
-from flask import Flask, jsonify
+import json
+import asyncio
+import websockets
+
 from application.request_car import request_car
-from tests.test_response import RES
 
-app = Flask(__name__)
 
-@app.route("/<license_plate>")
-def get_license_plate(license_plate):
-    """Returns the requested car details
+class WebSocketServer:
+    def __init__(self, host, port, secret):
+        self._secret = secret
+        self._server = websockets.serve(self._start, host, port)
 
-    :param license_plates: Requested license plate
-    """
-    with app.app_context():
-        if license_plate.lower() == "test111":
-            # time.sleep(1)
-            return jsonify(RES)
-        return_data = request_car([license_plate])
-        return jsonify(return_data)
+    def start(self):
+        print("Server started")
+        asyncio.get_event_loop().run_until_complete(self._server)
+        asyncio.get_event_loop().run_forever()
 
-if __name__ == '__main__':
-    app.run(debug=False, host="127.0.0.1", port=3001)
-#     get_license_plate("aAKb294")
-#     get_license_plate("gsm140")
-#     get_license_plate("HKL138")
-# To run it not as an API server, uncomment one of these lines and run it from the IDE
+    async def _start(self, websocket, path):
+        print(f"Connected from path ={path}")
+        while True:
+            secret = await websocket.recv()
+            await request_car([secret.lower()], websocket)
+            # return_data = await request_car([secret.lower()], websocket)
+            # await websocket.send(json.dumps(return_data, default=vars))
+            websocket.close()
+
+
+if __name__ == "__main__":
+    print("Starting server...")
+    server = WebSocketServer("", 3001, "")
+    server.start()

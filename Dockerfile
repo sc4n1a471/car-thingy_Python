@@ -10,6 +10,6 @@ RUN apt update
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 3001
 
-CMD ["flask", "--app", "server.py", "run", "--host=0.0.0.0"]
+ENTRYPOINT ["python3", "./server.py"]
