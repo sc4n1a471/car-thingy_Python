@@ -1,3 +1,4 @@
+import shutil
 import urllib.request
 import time
 import os
@@ -215,7 +216,10 @@ async def save_images(license_plate, inspections):
     try:
         await upload_inspections(license_plate, inspections, image_paths)
     except Exception as exc:
-        await settings.send_data("message", f"Upload failed", 98, "fail")
+        await settings.send_data(
+            "message", f"Upload failed with error {exc}", 98, "fail"
+        )
+        shutil.rmtree(unix_path)
 
 
 async def upload_inspections(license_plate, inspections, image_paths):
