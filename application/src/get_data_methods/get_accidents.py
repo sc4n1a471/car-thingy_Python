@@ -37,7 +37,13 @@ async def get_accidents(car):
                     await settings.send_data(
                         "message", "FOUND: Accidents", 80, "pending"
                     )
-                    car.accidents.append({"accident_date": tmp[0], "role": role})
+                    car.accidents.append(
+                        {
+                            "license_plate": car.license_plate,
+                            "accident_date": tmp[0],
+                            "role": role,
+                        }
+                    )
                     counter = 5
                 else:
                     await settings.send_data(
