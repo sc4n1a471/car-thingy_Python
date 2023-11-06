@@ -1,9 +1,9 @@
-# NodeJS-Thingy_Python
+# car-thingy_Python
 [![Build, Publish, Redeploy Development](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_dev.yml/badge.svg?branch=dev)](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_dev.yml)
 [![Build, Publish, Redeploy Production](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_prod.yml/badge.svg?branch=main)](https://github.com/sc4n1a471/car-thingy_Python/actions/workflows/docker_prod.yml)
-![Alt](https://repobeats.axiom.co/api/embed/fb6459316bd61876f71e174bfcbed2c37ac152c2.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/d7c3548129c77ccafe012e59e383f9902d39d85c.svg "Repobeats analytics image")
 
-Ez lenni repository for NodeJS_Thingy_Python
+Ez lenni repository for car-thingy_Python
 
 ---
 
