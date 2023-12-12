@@ -59,7 +59,7 @@ async def init(websocket_param):
 
         driver = webdriver.Chrome(service=s, options=option)
         # driver = webdriver.Safari()
-    await load_cookies()
+    # await load_cookies()
 
 
 def save_cookie():
