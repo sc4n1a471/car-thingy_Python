@@ -41,31 +41,22 @@ async def request_car(license_plates, websocket_param):
         )
         return
 
-    if license_plates[0].lower() == "test111":
-        settings.driver.quit()
-
-        num_of_keys = 17
-        counter = 0
-
-        # iterate through RES.get("data")[0] and its keys, values and send them one by one
-        for key, value in RES.get("data")[0].items():
-            time.sleep(0.25)
-            await settings.send_data(key, value, counter)
-            counter += 1
-        await settings.send_data("message", None, 17, "success")
-        return
-
-    if license_plates[0].lower() == "test112":
+    if license_plates[0].lower() == "test111" or license_plates[0].lower() == "test112":
         settings.driver.quit()
 
         counter = 0
 
-        # iterate through RES.get("data")[0] and its keys, values and send them one by one
-        for key, value in RES.get("data")[0].items():
-            time.sleep(0.25)
+        for key, value in RES.items():
+            time.sleep(0.05)
             await settings.send_data(key, value, counter)
-            counter += 5
-        await settings.send_data("message", "This is a test error message", 17, "fail")
+            counter += 100 / 17
+
+        if license_plates[0].lower() == "test112":
+            await settings.send_data(
+                "message", "This is a test error message", 100, "fail"
+            )
+        else:
+            await settings.send_data("message", None, 100, "success")
         return
 
     settings.driver.get(settings.URL)
