@@ -39,9 +39,7 @@ async def get_data(requested_cars: [Car]):
             WebDriverWait(settings.driver, 30).until(
                 ec.presence_of_element_located((By.XPATH, XPATHS.get("request_page")))
             )
-            await settings.send_data(
-                "message", "FOUND: Jármű Szolgáltatási Platform", 14, "pending"
-            )
+            await settings.send_data("message", "FOUND: Jármű Szolgáltatási Platform", 14, "pending")
             settings.save_cookie()
         except Exception as e:
             raise GetDataException from e
@@ -55,14 +53,10 @@ async def get_data(requested_cars: [Car]):
 
         settings.driver.switch_to.frame(1)
 
-        WebDriverWait(settings.driver, 180).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("car_page")))
-        )
+        WebDriverWait(settings.driver, 180).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("car_page"))))
         await settings.send_data("message", "FOUND: Car loaded", 20, "pending")
 
-        WebDriverWait(settings.driver, 10).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("brand")))
-        )
+        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("brand"))))
 
         await get_car_data(car)
 
@@ -84,20 +78,14 @@ async def fill_search(requested_car, wait=0):
     settings.driver.switch_to.default_content()
     settings.driver.switch_to.frame(1)
 
-    WebDriverWait(settings.driver, 10).until(
-        ec.presence_of_element_located((By.XPATH, XPATHS.get("search_input")))
-    )
+    WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("search_input"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).clear()
-    settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(
-        requested_car
-    )
+    settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(requested_car)
     await settings.send_data("message", "FILLED: license plate", 15, "pending")
 
     time.sleep(wait)
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(
-        Keys.ENTER
-    )
+    settings.driver.find_element(By.XPATH, XPATHS.get("search_input")).send_keys(Keys.ENTER)
     await settings.send_data("message", "Searching for license plate...", 16, "pending")
 
     settings.driver.switch_to.default_content()
@@ -114,26 +102,14 @@ async def check_error_modal(car, requested_car):
     counter = 0
 
     try:
-        WebDriverWait(settings.driver, 5).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("error_modal")))
-        )
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("error_modal"))))
     except TimeoutException:
         return
 
-    while (
-        len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0
-        and counter != 10
-    ):
+    while len(settings.driver.find_elements(By.XPATH, XPATHS.get("error_modal"))) != 0 and counter != 10:
         await settings.send_data("message", "FOUND: ERROR DIALOG", -1, "pending")
 
-        if (
-            len(
-                settings.driver.find_elements(
-                    By.XPATH, XPATHS.get("no_accident_record")
-                )
-            )
-            != 0
-        ):
+        if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_accident_record"))) != 0:
             await settings.send_data(
                 "message",
                 "No accident record was found for this license plate, trying without that",
@@ -143,16 +119,12 @@ async def check_error_modal(car, requested_car):
 
             car.has_accident_record = False
 
-            settings.driver.find_element(
-                By.XPATH, XPATHS.get("error_modal_button")
-            ).click()
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
 
             settings.driver.switch_to.default_content()
             settings.driver.switch_to.frame(1)
 
-            settings.driver.find_element(
-                By.XPATH, XPATHS.get("accident_record_ckeckbox")
-            ).click()
+            settings.driver.find_element(By.XPATH, XPATHS.get("accident_record_ckeckbox")).click()
             await settings.send_data(
                 "message",
                 "DISABLED: Biztosítás és Kártörténet",
@@ -162,14 +134,7 @@ async def check_error_modal(car, requested_car):
 
             await fill_search(requested_car, 30)
 
-        elif (
-            len(
-                settings.driver.find_elements(
-                    By.XPATH, XPATHS.get("no_inspection_record")
-                )
-            )
-            != 0
-        ):
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_record"))) != 0:
             await settings.send_data(
                 "message",
                 "No inspection record was found for this license plate, trying without that",
@@ -179,16 +144,12 @@ async def check_error_modal(car, requested_car):
             car.has_inspection_record = False
             car.has_mileage_record = False
 
-            settings.driver.find_element(
-                By.XPATH, XPATHS.get("error_modal_button")
-            ).click()
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
 
             settings.driver.switch_to.default_content()
             settings.driver.switch_to.frame(1)
 
-            settings.driver.find_element(
-                By.XPATH, XPATHS.get("inspection_record_ckeckbox")
-            ).click()
+            settings.driver.find_element(By.XPATH, XPATHS.get("inspection_record_ckeckbox")).click()
             await settings.send_data(
                 "message",
                 "DISABLED: Műszaki állapotra vonatkozó adatok",
@@ -198,37 +159,18 @@ async def check_error_modal(car, requested_car):
 
             await fill_search(requested_car, 30)
 
-        elif (
-            len(
-                settings.driver.find_elements(
-                    By.XPATH, XPATHS.get("no_vehicle_management_record")
-                )
-            )
-            != 0
-        ):
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_vehicle_management_record"))) != 0:
             print(
                 "No vehicle management record was found for this license plate, "
                 "probably none of the license plates are queryable now..."
             )
             raise NoVehicleManagementException()
 
-        elif (
-            len(
-                settings.driver.find_elements(
-                    By.XPATH, XPATHS.get("unreleased_license_plate")
-                )
-            )
-            != 0
-        ):
-            settings.driver.find_element(
-                By.XPATH, XPATHS.get("error_modal_button")
-            ).click()
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("unreleased_license_plate"))) != 0:
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
             raise UnreleasedLPException()
 
-        elif (
-            len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later")))
-            != 0
-        ):
+        elif len(settings.driver.find_elements(By.XPATH, XPATHS.get("try_again_later"))) != 0:
             await settings.send_data(
                 "message",
                 f"Getting throttled, waiting {settings.WAIT_TIME} seconds...",
@@ -236,9 +178,7 @@ async def check_error_modal(car, requested_car):
                 "pending",
             )
 
-            settings.driver.find_element(
-                By.XPATH, XPATHS.get("error_modal_button")
-            ).click()
+            settings.driver.find_element(By.XPATH, XPATHS.get("error_modal_button")).click()
             time.sleep(1)
 
             if retries > 1:
@@ -261,9 +201,7 @@ async def check_error_modal(car, requested_car):
                     raise LoginException(f"LOGIN ERROR: {e}") from e
 
                 WebDriverWait(settings.driver, 30).until(
-                    ec.presence_of_element_located(
-                        (By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]')
-                    )
+                    ec.presence_of_element_located((By.XPATH, '//title[text() = "Jármű Szolgáltatási Platform"]'))
                 )
                 await settings.send_data(
                     "message",
@@ -272,9 +210,7 @@ async def check_error_modal(car, requested_car):
                     "pending",
                 )
                 settings.driver.switch_to.frame(1)
-                settings.driver.find_element(
-                    By.XPATH, '//input[@id="input-rendszam"]'
-                ).send_keys(Keys.ENTER)
+                settings.driver.find_element(By.XPATH, '//input[@id="input-rendszam"]').send_keys(Keys.ENTER)
                 await settings.send_data(
                     "message",
                     "Searching for license plate again...",
@@ -290,6 +226,4 @@ async def check_error_modal(car, requested_car):
         counter += 1
 
     if counter == 10:
-        raise Exception(
-            "Some kind of data was not found before searching for license plate"
-        )
+        raise Exception("Some kind of data was not found before searching for license plate")

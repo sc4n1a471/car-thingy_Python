@@ -22,9 +22,7 @@ async def get_mileage(car):
 
     counter = 0
     while counter < 5:
-        WebDriverWait(settings.driver, 5).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("mileage")))
-        )
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("mileage"))))
         mileage_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("mileage"))
         mileage_rows = mileage_tbody.find_elements(By.TAG_NAME, "tr")
 
@@ -32,9 +30,7 @@ async def get_mileage(car):
             try:
                 tmp = row.text.split(" ")
                 if tmp != [""]:
-                    await settings.send_data(
-                        "message", "FOUND: Mileage data", 70, "pending"
-                    )
+                    await settings.send_data("message", "FOUND: Mileage data", 70, "pending")
                     mileage_num = "".join(tmp[1:])
                     # car.mileage.append(Mileage(tmp[0], int(mileage_num)))
                     car.mileage.append(

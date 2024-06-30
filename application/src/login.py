@@ -45,32 +45,22 @@ async def login(retry=False):
         )
         await settings.send_data("message", "FOUND: Login methods", 7, "pending")
     except TimeoutException as toexc:
-        raise TimeoutException(
-            "Could not find login page, maybe the page does not load?"
-        ) from toexc
+        raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
 
     time.sleep(0.5)
     settings.driver.find_element(By.XPATH, XPATHS.get("login_method")).click()
     await settings.send_data("message", "CLICKED: Ugyfelkapus azonositas", 8, "pending")
 
-    WebDriverWait(settings.driver, 10).until(
-        ec.presence_of_element_located((By.XPATH, XPATHS.get("username_field")))
-    )
+    WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("username_field"))))
     await settings.send_data("message", "FOUND: username input field", 9, "pending")
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("username_field")).send_keys(
-        username
-    )
+    settings.driver.find_element(By.XPATH, XPATHS.get("username_field")).send_keys(username)
     await settings.send_data("message", "FILLED: username", 10, "pending")
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("password_field")).send_keys(
-        password
-    )
+    settings.driver.find_element(By.XPATH, XPATHS.get("password_field")).send_keys(password)
     await settings.send_data("message", "FILLED: password", 11, "pending")
 
     time.sleep(0.5)
 
-    settings.driver.find_element(By.XPATH, XPATHS.get("login_button")).send_keys(
-        Keys.ENTER
-    )
+    settings.driver.find_element(By.XPATH, XPATHS.get("login_button")).send_keys(Keys.ENTER)
     await settings.send_data("message", "CLICKED: login", 12, "pending")

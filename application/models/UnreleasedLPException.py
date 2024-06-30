@@ -1,8 +1,8 @@
 class UnreleasedLPException(Exception):
     """Exception raised for license plate that was not released
 
-        Attributes:
-            message -- Message thrown with the exception
+    Attributes:
+        message -- Message thrown with the exception
     """
 
     def __init__(self):
