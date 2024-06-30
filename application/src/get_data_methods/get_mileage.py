@@ -35,8 +35,8 @@ async def get_mileage(car):
                     # car.mileage.append(Mileage(tmp[0], int(mileage_num)))
                     car.mileage.append(
                         {
-                            "license_plate": car.license_plate,
-                            "mileage_date": tmp[0],
+                            "licensePlate": car.license_plate,
+                            "date": tmp[0],
                             "mileage": int(mileage_num),
                         }
                     )
