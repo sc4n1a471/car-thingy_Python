@@ -21,9 +21,7 @@ async def get_car_data(car):
     :param car: car object
     """
 
-    WebDriverWait(settings.driver, 5).until(
-        ec.presence_of_element_located((By.XPATH, XPATHS.get("brand")))
-    )
+    WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("brand"))))
     car.brand = settings.driver.find_element(By.XPATH, XPATHS.get("brand")).text
     await settings.send_data("brand", car.brand, 25, "pending")
 
@@ -34,9 +32,7 @@ async def get_car_data(car):
         await settings.send_data("message", "NOT FOUND: Model", 27, "pending")
 
     try:
-        car.type_code = settings.driver.find_element(
-            By.XPATH, XPATHS.get("type_code")
-        ).text
+        car.type_code = settings.driver.find_element(By.XPATH, XPATHS.get("type_code")).text
         await settings.send_data("type_code", car.type_code, 29, "pending")
     except NoSuchElementException:
         await settings.send_data("message", "NOT FOUND: Type_code", 29, "pending")
@@ -52,46 +48,27 @@ async def get_car_data(car):
         iframe = settings.driver.find_element(By.XPATH, XPATHS.get("main_frame"))
         settings.driver.switch_to.frame(iframe)
 
-    if (
-        len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_official_data")))
-        != 0
-    ):
-        await settings.send_data(
-            "message", "NOT FOUND: Official records", 47, "pending"
-        )
+    if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_official_data"))) != 0:
+        await settings.send_data("message", "NOT FOUND: Official records", 47, "pending")
     else:
-        WebDriverWait(settings.driver, 10).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("first_reg")))
-        )
-        car.first_reg = settings.driver.find_elements(
-            By.XPATH, XPATHS.get("first_reg")
-        )[0].text
+        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("first_reg"))))
+        car.first_reg = settings.driver.find_elements(By.XPATH, XPATHS.get("first_reg"))[0].text
         await settings.send_data("first_reg", car.first_reg, 31, "pending")
 
-        car.first_reg_hun = settings.driver.find_elements(
-            By.XPATH, XPATHS.get("first_reg_hun")
-        )[0].text
+        car.first_reg_hun = settings.driver.find_elements(By.XPATH, XPATHS.get("first_reg_hun"))[0].text
         await settings.send_data("first_reg_hun", car.first_reg_hun, 33, "pending")
 
-        car.num_of_owners = int(
-            settings.driver.find_elements(By.XPATH, XPATHS.get("num_of_owners"))[0].text
-        )
+        car.num_of_owners = int(settings.driver.find_elements(By.XPATH, XPATHS.get("num_of_owners"))[0].text)
         await settings.send_data("num_of_owners", car.num_of_owners, 35, "pending")
 
-        car.year = int(
-            settings.driver.find_elements(By.XPATH, XPATHS.get("year"))[0].text
-        )
+        car.year = int(settings.driver.find_elements(By.XPATH, XPATHS.get("year"))[0].text)
         await settings.send_data("year", car.year, 37, "pending")
 
-        car.fuel_type = settings.driver.find_elements(
-            By.XPATH, XPATHS.get("fuel_type")
-        )[0].text
+        car.fuel_type = settings.driver.find_elements(By.XPATH, XPATHS.get("fuel_type"))[0].text
         await settings.send_data("fuel_type", car.fuel_type, 39, "pending")
 
         if not car.fuel_type.lower() == "elektromos":
-            car.engine_size = settings.driver.find_elements(
-                By.XPATH, XPATHS.get("engine_size")
-            )[0].text
+            car.engine_size = settings.driver.find_elements(By.XPATH, XPATHS.get("engine_size"))[0].text
             car.engine_size = int(car.engine_size.replace(" ", "").replace("cm³", ""))
             await settings.send_data("engine_size", car.engine_size, 41, "pending")
 
@@ -106,16 +83,12 @@ async def get_car_data(car):
         ):
             raise GetDataException("All found data is empty")
 
-        car.performance = settings.driver.find_elements(
-            By.XPATH, XPATHS.get("performance")
-        )[0].text
+        car.performance = settings.driver.find_elements(By.XPATH, XPATHS.get("performance"))[0].text
         car.performance = car.performance.replace(" kW", "")
         car.performance = int(int(car.performance) * 1.34)  # convert kW to HP
         await settings.send_data("performance", car.performance, 43, "pending")
 
-        car.gearbox = settings.driver.find_elements(By.XPATH, XPATHS.get("gearbox"))[
-            0
-        ].text
+        car.gearbox = settings.driver.find_elements(By.XPATH, XPATHS.get("gearbox"))[0].text
         tmp = car.gearbox.split(" ")
         car.gearbox = tmp[2]
         await settings.send_data("gearbox", car.gearbox, 45, "pending")
@@ -131,30 +104,22 @@ async def get_car_data(car):
         try:
             await get_restrictions(car)  # 60%
         except Exception as exc:
-            raise GetDataException(
-                f"GET_RESTRICTIONS_ERROR: {traceback.format_exc()}"
-            ) from exc
+            raise GetDataException(f"GET_RESTRICTIONS_ERROR: {traceback.format_exc()}") from exc
 
     if car.has_mileage_record:
         try:
             await get_mileage(car)  # 70%
         except Exception as exc:
-            raise GetDataException(
-                f"GET_MILEAGE_ERROR: {traceback.format_exc()}"
-            ) from exc
+            raise GetDataException(f"GET_MILEAGE_ERROR: {traceback.format_exc()}") from exc
 
     if car.has_accident_record:
         try:
             await get_accidents(car)  # 80%
         except Exception as exc:
-            raise GetDataException(
-                f"GET_ACCIDENTS_ERROR: {traceback.format_exc()}"
-            ) from exc
+            raise GetDataException(f"GET_ACCIDENTS_ERROR: {traceback.format_exc()}") from exc
 
     if car.has_inspection_record and not settings.TESTING:
         try:
             await get_images(car)  # 98%
         except Exception as exc:
-            raise GetDataException(
-                f"GET_IMAGES_ERROR: {traceback.format_exc()}"
-            ) from exc
+            raise GetDataException(f"GET_IMAGES_ERROR: {traceback.format_exc()}") from exc

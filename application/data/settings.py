@@ -27,9 +27,7 @@ async def init(websocket_param):
         grid_ip = os.environ["APP_GRID_IP"]
 
         if grid_ip == "default":
-            await send_data(
-                "message", "Selenium Grid IP address has the default value", 100, "fail"
-            )
+            await send_data("message", "Selenium Grid IP address has the default value", 100, "fail")
             return
 
         driver = webdriver.Remote(grid_ip, DesiredCapabilities.CHROME)
@@ -43,9 +41,7 @@ async def init(websocket_param):
         option = webdriver.ChromeOptions()
 
         try:
-            option.binary_location = (
-                "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
-            )
+            option.binary_location = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
         except:
             await send_data(
                 "message",

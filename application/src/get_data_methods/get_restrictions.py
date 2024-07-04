@@ -20,21 +20,15 @@ async def get_restrictions(car):
 
     counter = 0
     while counter < 5:
-        WebDriverWait(settings.driver, 5).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions")))
-        )
-        restrictions = settings.driver.find_element(
-            By.XPATH, XPATHS.get("restrictions")
-        )
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions"))))
+        restrictions = settings.driver.find_element(By.XPATH, XPATHS.get("restrictions"))
         restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
 
         for row in restrictions_rows:
             try:
                 tmp = row.text
                 if tmp != "":
-                    await settings.send_data(
-                        "message", "FOUND: Restrictions", 60, "pending"
-                    )
+                    await settings.send_data("message", "FOUND: Restrictions", 60, "pending")
                     car.restrictions.append(tmp)
                     counter = 5
                 else:

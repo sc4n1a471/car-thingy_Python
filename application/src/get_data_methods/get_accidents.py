@@ -21,12 +21,8 @@ async def get_accidents(car):
 
     counter = 0
     while counter < 5:
-        WebDriverWait(settings.driver, 5).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("accidents")))
-        )
-        accidents_tbody = settings.driver.find_element(
-            By.XPATH, XPATHS.get("accidents")
-        )
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("accidents"))))
+        accidents_tbody = settings.driver.find_element(By.XPATH, XPATHS.get("accidents"))
         accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
 
         for row in accidents_rows:
@@ -34,9 +30,7 @@ async def get_accidents(car):
                 tmp = row.text.split(" ")
                 if tmp != [""]:
                     role = "".join(tmp[1:])
-                    await settings.send_data(
-                        "message", "FOUND: Accidents", 80, "pending"
-                    )
+                    await settings.send_data("message", "FOUND: Accidents", 80, "pending")
                     car.accidents.append(
                         {
                             "license_plate": car.license_plate,

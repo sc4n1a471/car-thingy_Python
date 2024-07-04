@@ -24,23 +24,14 @@ async def get_images(car):
 
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_tab"))))
     settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
-    await settings.send_data(
-        "message", "Searching for inspection data...", percentage, "pending"
-    )
+    await settings.send_data("message", "Searching for inspection data...", percentage, "pending")
 
-    if (
-        len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_data")))
-        != 0
-    ):
-        await settings.send_data(
-            "message", "NOT FOUND: Inspection data", max_percentage, "pending"
-        )
+    if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_data"))) != 0:
+        await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
     else:
         car_inspections: [Inspection] = []
 
-        WebDriverWait(settings.driver, 3).until(
-            ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections")))
-        )
+        WebDriverWait(settings.driver, 3).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections"))))
 
         inspections = settings.driver.find_elements(By.XPATH, XPATHS.get("inspections"))
         for inspection_data, i in zip(inspections, range(0, len(inspections))):
@@ -52,9 +43,7 @@ async def get_images(car):
             while retry:
                 if inspection_data.text != "" or counter == 30:
                     percentage += 1
-                    await settings.send_data(
-                        "message", f"FOUND: Inspection", percentage, "pending"
-                    )
+                    await settings.send_data("message", f"FOUND: Inspection", percentage, "pending")
                     car_inspections.append(Inspection(inspection_data.text))
                     break
                 await settings.send_data(
@@ -70,9 +59,7 @@ async def get_images(car):
         counter = 0
         while counter < 5:
             try:
-                show_pictures_buttons = settings.driver.find_elements(
-                    By.XPATH, XPATHS.get("inspections_show_pictures")
-                )
+                show_pictures_buttons = settings.driver.find_elements(By.XPATH, XPATHS.get("inspections_show_pictures"))
                 show_pictures_buttons.pop(0)
                 counter = 6
             except:
@@ -88,28 +75,20 @@ async def get_images(car):
             button.click()
 
             settings.driver.switch_to.default_content()
-            dialog_frame = settings.driver.find_element(
-                By.XPATH, XPATHS.get("inspections_pictures_dialog_frame")
-            )
+            dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.get("inspections_pictures_dialog_frame"))
             settings.driver.switch_to.frame(dialog_frame)
 
             try:
                 WebDriverWait(settings.driver, 2).until(
-                    ec.presence_of_element_located(
-                        (By.XPATH, XPATHS.get("inspections_no_pictures"))
-                    )
+                    ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_no_pictures")))
                 )
                 # time.sleep(1)
             except:
                 WebDriverWait(settings.driver, 7).until(
-                    ec.presence_of_element_located(
-                        (By.XPATH, XPATHS.get("inspections_pictures"))
-                    )
+                    ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_pictures")))
                 )
 
-                imgs = settings.driver.find_elements(
-                    By.XPATH, XPATHS.get("inspections_pictures")
-                )
+                imgs = settings.driver.find_elements(By.XPATH, XPATHS.get("inspections_pictures"))
 
                 for img in imgs:
                     src = img.get_attribute("src")
@@ -117,20 +96,14 @@ async def get_images(car):
                     if not replaced_src in images:
                         images.append(replaced_src)
                         percentage += 0.25
-                        await settings.send_data(
-                            "message", f"FOUND: Image", percentage, "pending"
-                        )
+                        await settings.send_data("message", f"FOUND: Image", percentage, "pending")
 
                 car_inspections[i].images = images
 
             WebDriverWait(settings.driver, 4).until(
-                ec.presence_of_element_located(
-                    (By.XPATH, XPATHS.get("inspections_close_button"))
-                )
+                ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_close_button")))
             )
-            close_dialog_button = settings.driver.find_element(
-                By.XPATH, XPATHS.get("inspections_close_button")
-            )
+            close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.get("inspections_close_button"))
             close_dialog_button.click()
 
             settings.driver.switch_to.default_content()
@@ -173,17 +146,11 @@ async def save_images(license_plate, inspections):
 
     for inspection in inspections:
         unix_path = (
-            os.path.join(license_plate_path, inspection.name)
-            .replace(" ", "_")
-            .replace(".", "-")
-            .replace(",", "")
+            os.path.join(license_plate_path, inspection.name).replace(" ", "_").replace(".", "-").replace(",", "")
         )[:-1]
 
         docker_path = (
-            os.path.join(license_plate_path, inspection.name)
-            .replace(" ", "_")
-            .replace(".", "-")
-            .replace(",", "")
+            os.path.join(license_plate_path, inspection.name).replace(" ", "_").replace(".", "-").replace(",", "")
         )[:-1] + "/"
         # og path:          downloaded_images/RRZ538/MŰSZAKI VIZSGÁLAT, 2019.08.23.
         # unix path:        downloaded_images/RRZ538/MŰSZAKI_VIZSGÁLAT_2019-08-23
@@ -207,18 +174,14 @@ async def save_images(license_plate, inspections):
                 continue
 
             image_path = os.path.join(unix_path, f"{counter}.jpeg")
-            urllib.request.urlretrieve(
-                "data:image/jpeg;base64," + image_src, image_path
-            )
+            urllib.request.urlretrieve("data:image/jpeg;base64," + image_src, image_path)
 
             counter += 1
 
     try:
         await upload_inspections(license_plate, inspections, image_paths)
     except Exception as exc:
-        await settings.send_data(
-            "message", f"Upload failed with error {exc}", 98, "fail"
-        )
+        await settings.send_data("message", f"Upload failed with error {exc}", 98, "fail")
         shutil.rmtree(unix_path)
 
 
@@ -235,17 +198,16 @@ async def upload_inspections(license_plate, inspections, image_paths):
     payload = []
     for inspection, image_path in zip(inspections, image_paths):
         individual_payload = {
-            "license_plate": license_plate,
+            "licensePlate": license_plate,
             "name": inspection.name,
-            "image_location": image_path,
+            "imageLocation": image_path,
         }
         payload.append(individual_payload)
 
+    print(f"Payload: {payload}")
     req = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
 
     if req.status_code != 200:
-        raise Exception(
-            f"Upload failed with status code: {req.status_code} and error: {req.text}"
-        )
+        raise Exception(f"Upload failed with status code: {req.status_code} and error: {req.text}")
     else:
         await settings.send_data("message", f"Upload successful", 98, "pending")

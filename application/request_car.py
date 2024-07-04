@@ -52,9 +52,7 @@ async def request_car(license_plates, websocket_param):
             counter += 100 / 17
 
         if license_plates[0].lower() == "test112":
-            await settings.send_data(
-                "message", "This is a test error message", 100, "fail"
-            )
+            await settings.send_data("message", "This is a test error message", 100, "fail")
         else:
             await settings.send_data("message", None, 100, "success")
         return
@@ -78,23 +76,17 @@ async def request_car(license_plates, websocket_param):
     except UnreleasedLPException as ulp:
         print(f"GET_DATA ERROR: {ulp}")
         settings.driver.quit()
-        await settings.send_data(
-            "message", f"GET_DATA ERROR: {ulp.args[0]}", 100, "fail"
-        )
+        await settings.send_data("message", f"GET_DATA ERROR: {ulp.args[0]}", 100, "fail")
         return
     except GetDataException as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
-        await settings.send_data(
-            "message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail"
-        )
+        await settings.send_data("message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail")
         return
     except Exception as exc:
         print(f"GET_DATA ERROR: {traceback.format_exc()}")
         settings.driver.quit()
-        await settings.send_data(
-            "message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail"
-        )
+        await settings.send_data("message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail")
         return
 
     settings.driver.quit()
