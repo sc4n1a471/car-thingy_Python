@@ -22,7 +22,9 @@ async def init(websocket_param):
 
     if os.getenv("RUN_ON_SERVER") == "True":
         from selenium.webdriver.chrome.service import Service
-        from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+        from selenium.webdriver import ChromeOptions
+
+        chrome_options = ChromeOptions()
 
         grid_ip = os.environ["APP_GRID_IP"]
 
@@ -30,7 +32,7 @@ async def init(websocket_param):
             await send_data("message", "Selenium Grid IP address has the default value", 100, "fail")
             return
 
-        driver = webdriver.Remote(grid_ip, DesiredCapabilities.CHROME)
+        driver = webdriver.Remote(grid_ip, options=chrome_options)
     else:
         from selenium.webdriver.chrome.service import Service
 
@@ -79,7 +81,7 @@ async def load_cookies():
         if os.getenv("RUN_ON_SERVER") == "True":
             send(driver, "Network.enable", {})
         else:
-            driver.execute_cdp_cmd("Network.enable", {})
+            driver.execute_cdp_cmd("Network.enable", {})  # type: ignore
 
         # Iterate through pickle dict and add all the cookies
         for cookie in cookies:
@@ -92,13 +94,13 @@ async def load_cookies():
             if os.getenv("RUN_ON_SERVER") == "True":
                 send(driver, "Network.setCookie", cookie)
             else:
-                driver.execute_cdp_cmd("Network.setCookie", cookie)
+                driver.execute_cdp_cmd("Network.setCookie", cookie)  # type: ignore
 
         # Disable network tracking
         if os.getenv("RUN_ON_SERVER") == "True":
             send(driver, "Network.disable", {})
         else:
-            driver.execute_cdp_cmd("Network.disable", {})
+            driver.execute_cdp_cmd("Network.disable", {})  # type: ignore
         await send_data("message", "Cookies loaded successfully", 5, "pending")
         return 1
     await send_data("message", "Cookies could not be loaded", 5, "pending")
