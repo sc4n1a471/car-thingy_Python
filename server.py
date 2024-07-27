@@ -18,13 +18,21 @@ class WebSocketServer:
         print(f"Connected from path ={path}")
         while True:
             secret = await websocket.recv()
-            await request_car([secret.lower()], websocket)
+            # await request_car([secret.lower()], websocket)
             # return_data = await request_car([secret.lower()], websocket)
             # await websocket.send(json.dumps(return_data, default=vars))
             websocket.close()
 
 
+async def main():
+    async with websockets.serve(request_car, "localhost", 3001):
+        await asyncio.Future()
+
+
+# if __name__ == "__main__":
+#     print("Starting server...")
+#     server = WebSocketServer("", 3001, "")
+#     server.start()
+
 if __name__ == "__main__":
-    print("Starting server...")
-    server = WebSocketServer("", 3001, "")
-    server.start()
+    asyncio.run(main())
