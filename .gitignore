@@ -129,3 +129,10 @@ dmypy.json
 .pyre/
 
 .idea
+
+redeploy.py
+downloaded_images
+tests
+cookies.pkl
+test_deploy.sh
+launch.json
