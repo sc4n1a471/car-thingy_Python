@@ -7,7 +7,7 @@ from logging import info
 
 
 async def main():
-    async with websockets.serve(request_car, "localhost", 3001):
+    async with websockets.serve(request_car, host="", port=3001):
         info("Server started")
         await asyncio.Future()
 
