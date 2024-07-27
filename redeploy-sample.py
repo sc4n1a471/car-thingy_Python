@@ -24,7 +24,10 @@ def main():
     if env == "prod":
         print("Redeploying production container...")
         name = "car-thingy_python_prod"
-        volumes = {"downloaded_images_prod": {"bind": "/app/downloaded_images", "mode": "rw"}}
+        volumes = {
+            "downloaded_images_prod": {"bind": "/app/downloaded_images", "mode": "rw"},
+            "logs": {"bind": "/app/logs", "mode": "rw"},
+        }
         environment = [
             "RUN_ON_SERVER=True/False",
             "APP_USERNAME=<APP_USERNAME>",
@@ -36,7 +39,10 @@ def main():
     else:
         print("Redeploying development container...")
         name = "car-thingy_python_dev"
-        volumes = {"downloaded_images_dev": {"bind": "/app/downloaded_images", "mode": "rw"}}
+        volumes = {
+            "downloaded_images_dev": {"bind": "/app/downloaded_images", "mode": "rw"},
+            "logs": {"bind": "/app/logs", "mode": "rw"},
+        }
         environment = [
             "RUN_ON_SERVER=True/False",
             "APP_USERNAME=<APP_USERNAME>",
