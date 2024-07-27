@@ -168,7 +168,7 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
 
 # MARK: Logging
 def setup_logging():
-    log_file = f"logs\\python-dev.log"
+    log_file = os.path.join("logs", "python-dev.log")
 
     logging.basicConfig(
         level=logging.INFO,
