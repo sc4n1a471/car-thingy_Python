@@ -1,3 +1,4 @@
+import asyncio
 import os
 import pickle
 import json
@@ -13,12 +14,12 @@ COOKIES = "cookies.pkl"
 STATUS_COUNTER = 0
 
 
-# TODO: don't use init(), use global variables, so don't init the driver every time
-#       this way if multiple license plates are requested individually in a row, it would not login every time
 async def init(websocket_param):
     global driver
     global websocket
     websocket = websocket_param
+
+    await send_data("message", "Request received", 2, "pending")
 
     if os.getenv("RUN_ON_SERVER") == "True":
         from selenium.webdriver.chrome.service import Service
@@ -57,9 +58,13 @@ async def init(websocket_param):
 
         driver = webdriver.Chrome(service=s, options=option)
         # driver = webdriver.Safari()
+
+    await send_data("message", "Driver initialized", 3, "success")
+
     await load_cookies()
 
 
+# region: Cookie handling
 def save_cookie():
     with open(COOKIES, "wb") as filehandler:
         pickle.dump(driver.get_cookies(), filehandler)
@@ -106,6 +111,10 @@ async def load_cookies():
     await send_data("message", "Cookies could not be loaded", 5, "pending")
 
 
+# endregion
+
+
+# region: Send data
 def send(driver, cmd, params={}):
     """
     This is required to send CDP command to remote driver
@@ -120,18 +129,6 @@ def send(driver, cmd, params={}):
     body = json.dumps({"cmd": cmd, "params": params})
     response = driver.command_executor._request("POST", url, body)
     return response.get("value")
-
-
-async def send_message(message):
-    global websocket
-    message_object = {
-        "status": "pending",
-        "percentage": 0.0,
-        "key": "message",
-        "message": message,
-    }
-    print(message_object)
-    await websocket.send(json.dumps(message_object))
 
 
 async def send_data(key, value, percentage, status="pending", is_json=False):
@@ -161,3 +158,7 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
 
     print(message_object)
     await websocket.send(json.dumps(message_object))
+    await asyncio.sleep(0)
+
+
+# endregion

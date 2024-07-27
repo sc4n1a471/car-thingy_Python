@@ -14,14 +14,14 @@ async def get_restrictions(car):
     Gets all information on the requested car
     :param car: car object
     """
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions_tab"))))
-    settings.driver.find_element(By.XPATH, XPATHS.get("restrictions_tab")).click()
+    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.restrictions_tab)))
+    settings.driver.find_element(By.XPATH, XPATHS.restrictions_tab).click()
     await settings.send_data("message", "Searching for restrictions...", 49, "pending")
 
     counter = 0
     while counter < 5:
-        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("restrictions"))))
-        restrictions = settings.driver.find_element(By.XPATH, XPATHS.get("restrictions"))
+        WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.restrictions)))
+        restrictions = settings.driver.find_element(By.XPATH, XPATHS.restrictions)
         restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
 
         for row in restrictions_rows:
