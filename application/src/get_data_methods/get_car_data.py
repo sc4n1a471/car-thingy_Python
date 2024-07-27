@@ -21,6 +21,7 @@ async def get_car_data(car):
     :param car: car object
     """
 
+    # MARK: Get specs
     WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.brand)))
     car.brand = settings.driver.find_element(By.XPATH, XPATHS.brand).text
     await settings.send_data("brand", car.brand, 25, "pending")
@@ -100,24 +101,28 @@ async def get_car_data(car):
 
     # 47%
 
+    # MARK: Get restrictions
     if car.has_restriction_record:
         try:
             await get_restrictions(car)  # 60%
         except Exception as exc:
             raise GetDataException(f"GET_RESTRICTIONS_ERROR: {traceback.format_exc()}") from exc
 
+    # MARK: Get mileage
     if car.has_mileage_record:
         try:
             await get_mileage(car)  # 70%
         except Exception as exc:
             raise GetDataException(f"GET_MILEAGE_ERROR: {traceback.format_exc()}") from exc
 
+    # MARK: Get accidents
     if car.has_accident_record:
         try:
             await get_accidents(car)  # 80%
         except Exception as exc:
             raise GetDataException(f"GET_ACCIDENTS_ERROR: {traceback.format_exc()}") from exc
 
+    # MARK: Get images
     if car.has_inspection_record and not settings.TESTING:
         try:
             await get_images(car)  # 98%
