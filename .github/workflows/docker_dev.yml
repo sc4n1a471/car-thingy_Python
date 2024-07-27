@@ -3,7 +3,7 @@ name: Build, Publish, Redeploy Development
 on:
   push:
     branches:
-    - main
+    - dev
 
 jobs:
   docker:
