@@ -2,8 +2,8 @@ import shutil
 import urllib.request
 import time
 import os
-
 import requests
+
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
@@ -11,6 +11,8 @@ from selenium.webdriver.common.by import By
 from application.data import settings
 from application.data.xpaths import XPATHS
 from application.models.Inspection import Inspection
+
+from logging import info
 
 
 async def get_images(car):
@@ -204,7 +206,7 @@ async def upload_inspections(license_plate, inspections, image_paths):
         }
         payload.append(individual_payload)
 
-    print(f"Payload: {payload}")
+    info(f"Payload: {payload}")
     req = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
 
     if req.status_code != 200:

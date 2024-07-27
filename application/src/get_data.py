@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 
+from logging import info
+
 from application.data import settings
 from application.data.xpaths import XPATHS
 from application.models.Car import Car
@@ -37,9 +39,7 @@ async def get_data(requested_cars: [Car]):  # type: ignore
             settings.driver.get("https://magyarorszag.hu/jszp_szuf")
 
         try:
-            WebDriverWait(settings.driver, 30).until(
-                ec.presence_of_element_located((By.XPATH, XPATHS.request_page))
-            )
+            WebDriverWait(settings.driver, 30).until(ec.presence_of_element_located((By.XPATH, XPATHS.request_page)))
             await settings.send_data("message", "FOUND: Jármű Szolgáltatási Platform", 14, "pending")
             settings.save_cookie()
         except Exception as e:
@@ -64,7 +64,7 @@ async def get_data(requested_cars: [Car]):  # type: ignore
         car_data.append(car)
         cold_start = False
         # await settings.send_message(f"Changed cold_start to {cold_start}")
-        print("=================")
+        info("=================")
 
     return car_data
 
@@ -166,7 +166,7 @@ async def check_error_modal(car, requested_car):
 
         # MARK: No vehicle management record
         elif len(settings.driver.find_elements(By.XPATH, XPATHS.no_vehicle_management_record)) != 0:
-            print(
+            info(
                 "No vehicle management record was found for this license plate, "
                 "probably none of the license plates are queryable now..."
             )

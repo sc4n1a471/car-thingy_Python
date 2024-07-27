@@ -2,8 +2,10 @@ import asyncio
 import os
 import pickle
 import json
+import logging
 
 from selenium import webdriver
+from logging import info
 
 COUNTER = 0
 WAIT_TIME = 30
@@ -59,7 +61,7 @@ async def init(websocket_param):
         driver = webdriver.Chrome(service=s, options=option)
         # driver = webdriver.Safari()
 
-    await send_data("message", "Driver initialized", 3, "success")
+    await send_data("message", "Driver initialized", 3, "pending")
 
     await load_cookies()
 
@@ -156,9 +158,27 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
                 "value": value,
             }
 
-    print(message_object)
+    info(message_object)
     await websocket.send(json.dumps(message_object))
     await asyncio.sleep(0)
 
 
 # endregion
+
+
+# MARK: Logging
+def setup_logging():
+    log_file = f"logs\\python-dev.log"
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+        datefmt="%Y.%m.%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(log_file, "a", "utf-8"),
+            logging.StreamHandler(),
+        ],
+    )
+    # https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
+    # Log to file and console
+    info("Logging initialized")

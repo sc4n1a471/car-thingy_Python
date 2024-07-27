@@ -11,6 +11,7 @@ from .models.Car import Car
 from .src.get_data import get_data
 from .data import settings
 from tests.test_response import RES
+from logging import exception
 
 
 async def request_car(websocket_param):
@@ -69,7 +70,7 @@ async def request_car(websocket_param):
             try:
                 await login()  # MARK: Login - 13 %
             except LoginException as exc:
-                print(f"LOGIN ERROR: {traceback.format_exc()}")
+                exception(exc)
                 settings.driver.quit()
                 await settings.send_data("message", f"Login failed: {exc.message}", 100, "fail")
                 return
@@ -81,17 +82,17 @@ async def request_car(websocket_param):
             try:
                 await get_data(license_plates)  # MARK: Get data
             except UnreleasedLPException as ulp:
-                print(f"GET_DATA ERROR: {ulp}")
+                exception(ulp)
                 settings.driver.quit()
                 await settings.send_data("message", f"GET_DATA ERROR: {ulp.args[0]}", 100, "fail")
                 return
             except GetDataException as exc:
-                print(f"GET_DATA ERROR: {traceback.format_exc()}")
+                exception(exc)
                 settings.driver.quit()
                 await settings.send_data("message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail")
                 return
             except Exception as exc:
-                print(f"GET_DATA ERROR: {traceback.format_exc()}")
+                exception(exc)
                 settings.driver.quit()
                 await settings.send_data("message", f"GET_DATA ERROR: {traceback.format_exc()}", 100, "fail")
                 return
@@ -101,5 +102,6 @@ async def request_car(websocket_param):
             await settings.send_data("message", None, 100, "success")
             return
     except Exception as exc:
+        exception(exc)
         await settings.send_data("message", f"Could not read input: {exc.args[0]}", 100, "fail")
         return
