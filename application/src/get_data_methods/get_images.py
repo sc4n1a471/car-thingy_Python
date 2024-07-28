@@ -2,8 +2,8 @@ import shutil
 import urllib.request
 import time
 import os
-
 import requests
+
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
@@ -11,6 +11,8 @@ from selenium.webdriver.common.by import By
 from application.data import settings
 from application.data.xpaths import XPATHS
 from application.models.Inspection import Inspection
+
+from logging import info
 
 
 async def get_images(car):
@@ -22,18 +24,18 @@ async def get_images(car):
     percentage = 82
     max_percentage = 98
 
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_tab"))))
-    settings.driver.find_element(By.XPATH, XPATHS.get("inspections_tab")).click()
+    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.inspections_tab)))
+    settings.driver.find_element(By.XPATH, XPATHS.inspections_tab).click()
     await settings.send_data("message", "Searching for inspection data...", percentage, "pending")
 
-    if len(settings.driver.find_elements(By.XPATH, XPATHS.get("no_inspection_data"))) != 0:
+    if len(settings.driver.find_elements(By.XPATH, XPATHS.no_inspection_data)) != 0:
         await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
     else:
         car_inspections: [Inspection] = []
 
-        WebDriverWait(settings.driver, 3).until(ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections"))))
+        WebDriverWait(settings.driver, 3).until(ec.presence_of_element_located((By.XPATH, XPATHS.inspections)))
 
-        inspections = settings.driver.find_elements(By.XPATH, XPATHS.get("inspections"))
+        inspections = settings.driver.find_elements(By.XPATH, XPATHS.inspections)
         for inspection_data, i in zip(inspections, range(0, len(inspections))):
             if i != 0:  # the first inspection is open on tab change
                 inspection_data.click()
@@ -59,7 +61,7 @@ async def get_images(car):
         counter = 0
         while counter < 5:
             try:
-                show_pictures_buttons = settings.driver.find_elements(By.XPATH, XPATHS.get("inspections_show_pictures"))
+                show_pictures_buttons = settings.driver.find_elements(By.XPATH, XPATHS.inspections_show_pictures)
                 show_pictures_buttons.pop(0)
                 counter = 6
             except:
@@ -75,20 +77,20 @@ async def get_images(car):
             button.click()
 
             settings.driver.switch_to.default_content()
-            dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.get("inspections_pictures_dialog_frame"))
+            dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
             settings.driver.switch_to.frame(dialog_frame)
 
             try:
                 WebDriverWait(settings.driver, 2).until(
-                    ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_no_pictures")))
+                    ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures))
                 )
                 # time.sleep(1)
             except:
                 WebDriverWait(settings.driver, 7).until(
-                    ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_pictures")))
+                    ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures))
                 )
 
-                imgs = settings.driver.find_elements(By.XPATH, XPATHS.get("inspections_pictures"))
+                imgs = settings.driver.find_elements(By.XPATH, XPATHS.inspections_pictures)
 
                 for img in imgs:
                     src = img.get_attribute("src")
@@ -101,13 +103,13 @@ async def get_images(car):
                 car_inspections[i].images = images
 
             WebDriverWait(settings.driver, 4).until(
-                ec.presence_of_element_located((By.XPATH, XPATHS.get("inspections_close_button")))
+                ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button))
             )
-            close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.get("inspections_close_button"))
+            close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.inspections_close_button)
             close_dialog_button.click()
 
             settings.driver.switch_to.default_content()
-            iframe = settings.driver.find_element(By.XPATH, XPATHS.get("main_frame"))
+            iframe = settings.driver.find_element(By.XPATH, XPATHS.main_frame)
             settings.driver.switch_to.frame(iframe)
 
         await save_images(car.license_plate, car_inspections)
@@ -204,7 +206,7 @@ async def upload_inspections(license_plate, inspections, image_paths):
         }
         payload.append(individual_payload)
 
-    print(f"Payload: {payload}")
+    info(f"Payload: {payload}")
     req = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
 
     if req.status_code != 200:

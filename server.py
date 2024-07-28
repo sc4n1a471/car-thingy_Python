@@ -1,30 +1,17 @@
 import asyncio
 import websockets
 
+from application.data import settings
 from application.request_car import request_car
+from logging import info
 
 
-class WebSocketServer:
-    def __init__(self, host, port, secret):
-        self._secret = secret
-        self._server = websockets.serve(self._start, host, port)
-
-    def start(self):
-        print("Server started")
-        asyncio.get_event_loop().run_until_complete(self._server)
-        asyncio.get_event_loop().run_forever()
-
-    async def _start(self, websocket, path):
-        print(f"Connected from path ={path}")
-        while True:
-            secret = await websocket.recv()
-            await request_car([secret.lower()], websocket)
-            # return_data = await request_car([secret.lower()], websocket)
-            # await websocket.send(json.dumps(return_data, default=vars))
-            websocket.close()
+async def main():
+    async with websockets.serve(request_car, host="", port=3001):
+        info("Server started")
+        await asyncio.Future()
 
 
 if __name__ == "__main__":
-    print("Starting server...")
-    server = WebSocketServer("", 3001, "")
-    server.start()
+    settings.setup_logging()
+    asyncio.run(main())
