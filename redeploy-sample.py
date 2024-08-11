@@ -69,7 +69,8 @@ def main():
         environment=environment,
         ports=ports,
         name=name,
-        restart_policy={"Name": "on-failure", "MaximumRetryCount": 5},
+        network='car-thingy',
+        restart_policy={"Name": "on-failure", "MaximumRetryCount": 5}
     )
     print(f"Version {version} was deployed successfully")
 
