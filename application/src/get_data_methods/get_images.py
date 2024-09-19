@@ -14,8 +14,6 @@ from application.models.Inspection import Inspection
 
 from logging import info
 
-from ...data.settings import AUTHKEY
-
 
 async def get_images(car):
     """
@@ -214,7 +212,7 @@ async def upload_inspections(license_plate, inspections, image_paths):
     req = requests.post(
         url + "/inspections",
         json=payload,
-        headers={"Content-Type": "application/json", "x-api-key": AUTHKEY},
+        headers={"Content-Type": "application/json", "x-api-key": settings.AUTHKEY},
     )
 
     if req.status_code != 200:
