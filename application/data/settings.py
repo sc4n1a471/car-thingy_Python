@@ -14,14 +14,18 @@ TESTING = False
 URL = "https://magyarorszag.hu/jszp_szuf"
 COOKIES = "cookies.pkl"
 STATUS_COUNTER = 0
+AUTHKEY = None
 
 
 async def init(websocket_param):
     global driver
     global websocket
+    global AUTHKEY
     websocket = websocket_param
 
     await send_data("message", "Request received", 2, "pending")
+
+    AUTHKEY = websocket_param.request_headers.get("x-api-key")
 
     if os.getenv("RUN_ON_SERVER") == "True":
         from selenium.webdriver.chrome.service import Service

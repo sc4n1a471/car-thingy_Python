@@ -14,6 +14,8 @@ from application.models.Inspection import Inspection
 
 from logging import info
 
+from ...data.settings import AUTHKEY
+
 
 async def get_images(car):
     """
@@ -197,6 +199,8 @@ async def upload_inspections(license_plate, inspections, image_paths):
     """
 
     url = os.getenv("GO_IP")
+    if url is None:
+        raise Exception("Environment variable GO_IP is not set")
     payload = []
     for inspection, image_path in zip(inspections, image_paths):
         individual_payload = {
@@ -207,7 +211,11 @@ async def upload_inspections(license_plate, inspections, image_paths):
         payload.append(individual_payload)
 
     info(f"Payload: {payload}")
-    req = requests.post(url, json=payload, headers={"Content-Type": "application/json"})
+    req = requests.post(
+        url + "/inspections",
+        json=payload,
+        headers={"Content-Type": "application/json", "x-api-key": AUTHKEY},
+    )
 
     if req.status_code != 200:
         raise Exception(f"Upload failed with status code: {req.status_code} and error: {req.text}")

@@ -1,6 +1,8 @@
 import asyncio
 import time
 import traceback
+import os
+import requests
 
 from selenium.common import TimeoutException, WebDriverException
 from .models.GetDataException import GetDataException
@@ -14,6 +16,15 @@ from tests.test_response import RES
 from logging import exception
 
 
+def check_auth(auth_key):
+    go_ip = os.getenv("GO_IP")
+    if go_ip is None:
+        raise ValueError("Environment variable GO_IP is not set")
+    req = requests.get(go_ip + "/auth", headers={"x-api-key": auth_key})
+    if req.status_code != 200:
+        raise ValueError("Invalid API key")
+
+
 async def request_car(websocket_param):
     """
     Opens page and does the rest of the query
@@ -23,6 +34,9 @@ async def request_car(websocket_param):
 
     try:
         async for license_plate in websocket_param:
+            authKey = websocket_param.request_headers.get("x-api-key")
+            check_auth(authKey)
+
             license_plate = license_plate.lower().strip().replace(" ", "")
             license_plates = [license_plate]
             await asyncio.sleep(0)
@@ -52,7 +66,7 @@ async def request_car(websocket_param):
             if license_plates[0].lower() == "test111" or license_plates[0].lower() == "test112":
                 settings.driver.quit()
 
-                counter = 0
+                counter = 5.5
 
                 for key, value in RES.items():
                     time.sleep(0.05)
@@ -103,5 +117,4 @@ async def request_car(websocket_param):
             return
     except Exception as exc:
         exception(exc)
-        await settings.send_data("message", f"Could not read input: {exc.args[0]}", 100, "fail")
         return
