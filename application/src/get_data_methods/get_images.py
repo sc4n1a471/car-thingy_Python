@@ -209,6 +209,7 @@ async def upload_inspections(license_plate, inspections, image_paths):
         payload.append(individual_payload)
 
     info(f"Payload: {payload}")
+    info(f"AUTHKEY in get_images: {settings.AUTHKEY}")
     req = requests.post(
         url + "/inspections",
         json=payload,
