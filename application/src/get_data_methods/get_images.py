@@ -4,6 +4,8 @@ import time
 import os
 import requests
 
+from typing import List
+
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
@@ -24,95 +26,118 @@ async def get_images(car):
     percentage = 82
     max_percentage = 98
 
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.inspections_tab)))
-    settings.driver.find_element(By.XPATH, XPATHS.inspections_tab).click()
-    await settings.send_data("message", "Searching for inspection data...", percentage, "pending")
+    inspection_types = [
+        {
+            "name": "technical Inspections",
+            "tab_path": XPATHS.inspections_tab,
+            "list_path": XPATHS.inspections,
+            "show_pictures_path": XPATHS.inspections_show_pictures,
+            "no_inspection_data": XPATHS.no_inspection_data,
+        },
+        {
+            "name": "originality Inspections",
+            "tab_path": XPATHS.originality_tab,
+            "list_path": XPATHS.originalities,
+            "show_pictures_path": XPATHS.originality_show_pictures,
+            "no_inspection_data": XPATHS.no_originality_data,
+        },
+    ]
 
-    if len(settings.driver.find_elements(By.XPATH, XPATHS.no_inspection_data)) != 0:
-        await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
-    else:
-        car_inspections: [Inspection] = []
+    for inspection_type in inspection_types:
+        # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.inspections_tab)))
+        settings.driver.find_element(By.XPATH, inspection_type["tab_path"]).click()
+        await settings.send_data("message", f"Searching for {inspection_type['name']}...", percentage, "pending")
 
-        WebDriverWait(settings.driver, 3).until(ec.presence_of_element_located((By.XPATH, XPATHS.inspections)))
+        if len(settings.driver.find_elements(By.XPATH, inspection_type["no_inspection_data"])) != 0:
+            await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
+        else:
+            car_inspections: [Inspection] = []
 
-        inspections = settings.driver.find_elements(By.XPATH, XPATHS.inspections)
-        for inspection_data, i in zip(inspections, range(0, len(inspections))):
-            if i != 0:  # the first inspection is open on tab change
-                inspection_data.click()
+            WebDriverWait(settings.driver, 5).until(
+                ec.presence_of_element_located((By.XPATH, inspection_type["list_path"]))
+            )
+
+            inspections = settings.driver.find_elements(By.XPATH, inspection_type["list_path"])
+            for inspection_data, i in zip(inspections, range(0, len(inspections))):
+                if i != 0:  # the first inspection is open on tab change
+                    inspection_data.click()
+
+                counter = 0
+                retry = True
+                while retry:
+                    if inspection_data.text != "" or counter == 30:
+                        percentage += 1
+                        await settings.send_data("message", f"FOUND: Inspection", percentage, "pending")
+                        car_inspections.append(Inspection(inspection_data.text))
+                        break
+                    await settings.send_data(
+                        "message",
+                        "NOT FOUND: Inspection, searching again...",
+                        -1,
+                        "pending",
+                    )
+                    counter += 1
+                    time.sleep(0.1)
+                time.sleep(0.4)
 
             counter = 0
-            retry = True
-            while retry:
-                if inspection_data.text != "" or counter == 30:
-                    percentage += 1
-                    await settings.send_data("message", f"FOUND: Inspection", percentage, "pending")
-                    car_inspections.append(Inspection(inspection_data.text))
-                    break
-                await settings.send_data(
-                    "message",
-                    "NOT FOUND: Inspection, searching again...",
-                    -1,
-                    "pending",
+            while counter < 5:
+                try:
+                    show_pictures_buttons = settings.driver.find_elements(
+                        By.XPATH, inspection_type["show_pictures_path"]
+                    )
+                    show_pictures_buttons.pop(0)
+                    counter = 6
+                except:
+                    counter += 1
+                    time.sleep(0.25)
+
+            if counter == 5:
+                return
+
+            for button, i in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
+                images = []
+
+                button.click()
+
+                settings.driver.switch_to.default_content()
+                dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
+                settings.driver.switch_to.frame(dialog_frame)
+
+                try:
+                    WebDriverWait(settings.driver, 2).until(
+                        ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures))
+                    )
+                    # time.sleep(1)
+                except:
+                    WebDriverWait(settings.driver, 7).until(
+                        ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures))
+                    )
+
+                    imgs = settings.driver.find_elements(By.XPATH, XPATHS.inspections_pictures)
+
+                    for img in imgs:
+                        src = img.get_attribute("src")
+                        if src is not None:
+                            replaced_src = src.replace("data:image/jpeg;base64,", "")
+                            if not replaced_src in images:
+                                images.append(replaced_src)
+                                percentage += 0.25
+                                await settings.send_data("message", f"FOUND: Image", percentage, "pending")
+
+                    car_inspections[i].images = images
+
+                WebDriverWait(settings.driver, 4).until(
+                    ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button))
                 )
-                counter += 1
-                time.sleep(0.1)
-            time.sleep(0.4)
+                close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.inspections_close_button)
+                close_dialog_button.click()
 
-        counter = 0
-        while counter < 5:
-            try:
-                show_pictures_buttons = settings.driver.find_elements(By.XPATH, XPATHS.inspections_show_pictures)
-                show_pictures_buttons.pop(0)
-                counter = 6
-            except:
-                counter += 1
-                time.sleep(0.25)
+                settings.driver.switch_to.default_content()
+                iframe = settings.driver.find_element(By.XPATH, XPATHS.main_frame)
+                settings.driver.switch_to.frame(iframe)
 
-        if counter == 5:
-            return
-
-        for button, i in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
-            images = []
-
-            button.click()
-
-            settings.driver.switch_to.default_content()
-            dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
-            settings.driver.switch_to.frame(dialog_frame)
-
-            try:
-                WebDriverWait(settings.driver, 2).until(
-                    ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures))
-                )
-                # time.sleep(1)
-            except:
-                WebDriverWait(settings.driver, 7).until(
-                    ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures))
-                )
-
-                imgs = settings.driver.find_elements(By.XPATH, XPATHS.inspections_pictures)
-
-                for img in imgs:
-                    src = img.get_attribute("src")
-                    replaced_src = src.replace("data:image/jpeg;base64,", "")
-                    if not replaced_src in images:
-                        images.append(replaced_src)
-                        percentage += 0.25
-                        await settings.send_data("message", f"FOUND: Image", percentage, "pending")
-
-                car_inspections[i].images = images
-
-            WebDriverWait(settings.driver, 4).until(
-                ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button))
-            )
-            close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.inspections_close_button)
-            close_dialog_button.click()
-
-            settings.driver.switch_to.default_content()
-            iframe = settings.driver.find_element(By.XPATH, XPATHS.main_frame)
-            settings.driver.switch_to.frame(iframe)
-
-        await save_images(car.license_plate, car_inspections)
+            await save_images(car.license_plate, car_inspections)
 
 
 async def save_images(license_plate, inspections):

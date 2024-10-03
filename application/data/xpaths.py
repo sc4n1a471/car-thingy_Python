@@ -54,3 +54,9 @@ class XPATHS:
     inspections = '//a[contains(@href, "_collapsible-MuszakiAllapot")]'
     restrictions_tab = '//*[@id="tabitem-ForgtartasForgkorlat"]'
     restrictions = '//*[@id="datatable-Forgkorlat"]/tbody'
+    originality_tab = '//*[@id="tabitem-SzarmazasEredet"]'
+    originalities = '//a[contains(@href, "_collapsible-EredetVizsga")]'
+    originality_show_pictures = '//button[contains(@id, "EredetVizsga_Kepek_megjelenitese")]'
+    no_originality_data = (
+        '//p[contains(text(), "A járműhöz nem tartoznak származásellenőrzési és eredetiségvizsgálati adatok.")]'
+    )
