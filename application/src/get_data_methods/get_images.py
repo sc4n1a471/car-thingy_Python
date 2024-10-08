@@ -53,9 +53,13 @@ async def get_images(car):
         else:
             car_inspections: [Inspection] = []
 
-            WebDriverWait(settings.driver, 5).until(
-                ec.presence_of_element_located((By.XPATH, inspection_type["list_path"]))
-            )
+            try:
+                WebDriverWait(settings.driver, 5).until(
+                    ec.presence_of_element_located((By.XPATH, inspection_type["list_path"]))
+                )
+            except:
+                await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
+                continue
 
             inspections = settings.driver.find_elements(By.XPATH, inspection_type["list_path"])
             for inspection_data, i in zip(inspections, range(0, len(inspections))):
