@@ -89,8 +89,9 @@ async def request_car(websocket_param):
                 await settings.send_data("message", f"Login failed: {exc.message}", 100, "fail")
                 return
             except TimeoutException as toexc:
+                exception(toexc)
                 settings.driver.quit()
-                await settings.send_data("message", f"Login failed: {toexc.msg}", 100, "fail")
+                await settings.send_data("message", f"Login failed: Selenium timeout on login page", 100, "fail")
                 return
 
             try:
