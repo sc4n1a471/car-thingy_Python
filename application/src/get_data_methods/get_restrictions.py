@@ -1,6 +1,5 @@
 import time
 
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
@@ -15,7 +14,19 @@ async def get_restrictions(car):
     :param car: car object
     """
     # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.restrictions_tab)))
-    settings.driver.find_element(By.XPATH, XPATHS.restrictions_tab).click()
+    counter = 0
+    while counter < 5:
+        try:
+            settings.driver.find_element(By.XPATH, XPATHS.restrictions_tab).click()
+            break
+        except:
+            counter += 1
+            time.sleep(0.25)
+            continue
+    if counter == 5:
+        await settings.send_data("message", "Restrictions tab not found", 49, "pending")
+        return
+
     await settings.send_data("message", "Searching for restrictions...", 49, "pending")
 
     counter = 0
