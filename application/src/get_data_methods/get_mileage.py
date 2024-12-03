@@ -7,7 +7,6 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
-from application.models.Mileage import Mileage
 
 
 async def get_mileage(car):

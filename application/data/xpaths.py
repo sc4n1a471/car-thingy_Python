@@ -2,9 +2,9 @@ class XPATHS:
     main_frame = '//*[@id="main"]/iframe'
     login_methods = '//form[@id="urn:eksz.gov.hu:1.0:azonositas:kau:1:uk:uidpwd"]'
     login_method = '//form[@id="urn:eksz.gov.hu:1.0:azonositas:kau:1:uk:uidpwd"]'
-    username_field = '//input[@id="fldUser"]'
-    password_field = '//input[@id="fldPass"]'
-    login_button = '//button[@name="submit"]'
+    username_field = "//dap-ds-input"
+    password_field = "//dap-ds-password-input"
+    login_button = '//input[@value="Bejelentkezés"]'
     accident_record_checkbox = '//input[@id="checkbox-BiztositasKartortenet"]'
     inspection_record_checkbox = '//input[@id="checkbox-MuszakiAllapot"]'
     request_page = '//title[text() = "Jármű Szolgáltatási Platform"]'
