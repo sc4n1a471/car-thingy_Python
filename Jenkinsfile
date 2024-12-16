@@ -40,7 +40,8 @@ pipeline {
         }
 
         stage('Build and Push') {
-            stage('Push production docker image') {
+            parallel {
+                stage('Push production docker image') {
                     when {
                         branch 'main'
                     }
@@ -67,6 +68,7 @@ pipeline {
                         }
                     }
                 }
+            }
         }
 
         stage('Deploy development') {
