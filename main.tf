@@ -13,7 +13,7 @@ locals {
 }
 
 resource "docker_image" "car-thingy_python" {
-  name = "sc4n1a471/thingy_python:${var.container_version}"
+  name = "sc4n1a471/car-thingy_python:${var.container_version}"
 }
 
 resource "docker_container" "car-thingy_python" {

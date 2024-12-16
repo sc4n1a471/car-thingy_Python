@@ -98,13 +98,13 @@ pipeline {
                     terraform init
 
                     terraform apply \
-                        -var="container_version=$version-dev-$buildNumber" \
+                        -var="container_version=\$version-dev-\$buildNumber" \
                         -var="env=dev" \
                         -var="run_on_server=true" \
-                        -var="app_username=$CAR_THINGY_PYTHON_USERNAME" \
-                        -var="app_password=$CAR_THINGY_PYTHON_PASSWORD" \
-                        -var="app_grid_ip=$CAR_THINGY_PYTHON_GRID_IP" \
-                        -var="go_ip=$CAR_THINGY_PYTHON_GO_IP_DEV" \
+                        -var="app_username=\$CAR_THINGY_PYTHON_USERNAME" \
+                        -var="app_password=\$CAR_THINGY_PYTHON_PASSWORD" \
+                        -var="app_grid_ip=\$CAR_THINGY_PYTHON_GRID_IP" \
+                        -var="go_ip=\$CAR_THINGY_PYTHON_GO_IP_DEV" \
                         -auto-approve
                     """
                 }
@@ -135,13 +135,13 @@ pipeline {
                     terraform init
 
                     terraform apply \
-                        -var="container_version=$version-$buildNumber" \
+                        -var="container_version=$version-\$buildNumber" \
                         -var="env=prod" \
                         -var="run_on_server=true" \
-                        -var="app_username=$CAR_THINGY_PYTHON_USERNAME" \
-                        -var="app_password=$CAR_THINGY_PYTHON_PASSWORD" \
-                        -var="app_grid_ip=$CAR_THINGY_PYTHON_GRID_IP" \
-                        -var="go_ip=$CAR_THINGY_PYTHON_GO_IP_PROD" \
+                        -var="app_username=\$CAR_THINGY_PYTHON_USERNAME" \
+                        -var="app_password=\$CAR_THINGY_PYTHON_PASSWORD" \
+                        -var="app_grid_ip=\$CAR_THINGY_PYTHON_GRID_IP" \
+                        -var="go_ip=\$CAR_THINGY_PYTHON_GO_IP_PROD" \
                         -auto-approve
                     """
                 }
