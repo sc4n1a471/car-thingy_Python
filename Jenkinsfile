@@ -40,11 +40,6 @@ pipeline {
         }
 
         stage('Build and Push') {
-            steps {
-                script {
-                    dockerImage = docker.build('sc4n1a471/car-thingy_python')
-                }
-            }
             parallel {
                 stage('Push production docker image') {
                     when {
@@ -52,6 +47,7 @@ pipeline {
                     }
                     steps {
                         script {
+                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-dev-${buildNumber}")
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
                                 dockerImage.push("latest")
                                 dockerImage.push("${version}-${buildNumber}")
@@ -66,6 +62,7 @@ pipeline {
                     // }
                     steps {
                         script {
+                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-dev-${buildNumber}")
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
                                 dockerImage.push("latest-dev")
                                 dockerImage.push("${version}-dev-${buildNumber}")
