@@ -7,11 +7,11 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'sc4n1a471'
 
-        CAR-THINGY_PYTHON_USERNAME = credentials('CAR-THINGY_PYTHON_USERNAME')
-        CAR-THINGY_PYTHON_PASSWORD = credentials('CAR-THINGY_PYTHON_PASSWORD')
-        CAR-THINGY_PYTHON_GRID_IP = credentials('CAR-THINGY_PYTHON_GRID_IP')
-        CAR-THINGY_PYTHON_GO_IP_PROD = credentials('CAR-THINGY_PYTHON_GO_IP_PROD')
-        CAR-THINGY_PYTHON_GO_IP_DEV = credentials('CAR-THINGY_PYTHON_GO_IP_DEV')
+        CAR_THINGY_PYTHON_USERNAME = credentials('CAR-THINGY_PYTHON_USERNAME')
+        CAR_THINGY_PYTHON_PASSWORD = credentials('CAR-THINGY_PYTHON_PASSWORD')
+        CAR_THINGY_PYTHON_GRID_IP = credentials('CAR-THINGY_PYTHON_GRID_IP')
+        CAR_THINGY_PYTHON_GO_IP_PROD = credentials('CAR-THINGY_PYTHON_GO_IP_PROD')
+        CAR_THINGY_PYTHON_GO_IP_DEV = credentials('CAR-THINGY_PYTHON_GO_IP_DEV')
     }
     stages {
         stage('Checkout') {
@@ -97,10 +97,10 @@ pipeline {
                         -var="container_version=$version-dev-$buildNumber" \
                         -var="env=dev" \
                         -var="run_on_server=true" \
-                        -var="app_username=$CAR-THINGY_PYTHON_USERNAME" \
-                        -var="app_password=$CAR-THINGY_PYTHON_PASSWORD" \
-                        -var="app_grid_ip=$CAR-THINGY_PYTHON_GRID_IP" \
-                        -var="go_ip=$CAR-THINGY_PYTHON_GO_IP_DEV" \
+                        -var="app_username=$CAR_THINGY_PYTHON_USERNAME" \
+                        -var="app_password=$CAR_THINGY_PYTHON_PASSWORD" \
+                        -var="app_grid_ip=$CAR_THINGY_PYTHON_GRID_IP" \
+                        -var="go_ip=$CAR_THINGY_PYTHON_GO_IP_DEV" \
                         -auto-approve
                     """
                 }
@@ -134,10 +134,10 @@ pipeline {
                         -var="container_version=$version-$buildNumber" \
                         -var="env=prod" \
                         -var="run_on_server=true" \
-                        -var="app_username=$CAR-THINGY_PYTHON_USERNAME" \
-                        -var="app_password=$CAR-THINGY_PYTHON_PASSWORD" \
-                        -var="app_grid_ip=$CAR-THINGY_PYTHON_GRID_IP" \
-                        -var="go_ip=$CAR-THINGY_PYTHON_GO_IP_PROD" \
+                        -var="app_username=$CAR_THINGY_PYTHON_USERNAME" \
+                        -var="app_password=$CAR_THINGY_PYTHON_PASSWORD" \
+                        -var="app_grid_ip=$CAR_THINGY_PYTHON_GRID_IP" \
+                        -var="go_ip=$CAR_THINGY_PYTHON_GO_IP_PROD" \
                         -auto-approve
                     """
                 }
