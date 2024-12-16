@@ -11,6 +11,7 @@ pipeline {
         CAR-THINGY_PYTHON_PASSWORD = credentials('CAR-THINGY_PYTHON_PASSWORD')
         CAR-THINGY_PYTHON_GRID_IP = credentials('CAR-THINGY_PYTHON_GRID_IP')
         CAR-THINGY_PYTHON_GO_IP_PROD = credentials('CAR-THINGY_PYTHON_GO_IP_PROD')
+        CAR-THINGY_PYTHON_GO_IP_DEV = credentials('CAR-THINGY_PYTHON_GO_IP_DEV')
     }
     stages {
         stage('Checkout') {
@@ -99,7 +100,7 @@ pipeline {
                         -var="app_username=$CAR-THINGY_PYTHON_USERNAME" \
                         -var="app_password=$CAR-THINGY_PYTHON_PASSWORD" \
                         -var="app_grid_ip=$CAR-THINGY_PYTHON_GRID_IP" \
-                        -var="go_ip=$CAR-THINGY_PYTHON_GO_IP" \
+                        -var="go_ip=$CAR-THINGY_PYTHON_GO_IP_DEV" \
                         -auto-approve
                     """
                 }
