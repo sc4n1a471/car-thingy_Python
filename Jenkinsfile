@@ -15,19 +15,35 @@ pipeline {
     }
     stages {
         stage('Checkout') {
-            steps {
-                git branch: '109-v20', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
+            parallel {
+                stage('Checkout main') {
+                    when {
+                        branch 'main'
+                    }
+                    steps {
+                        git branch: 'main', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
+                    }
+                }
+
+                stage('Checkout dev') {
+                    when {
+                        branch 'dev'
+                    }
+                    steps {
+                        git branch: 'dev', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
+                    }
+                }
             }
         }
 
         // MARK: Read Version
         stage('Read Version') {
-            // when {
-            //     anyOf {
-            //         branch 'main'
-            //         branch 'dev'
-            //     }
-            // }
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'dev'
+                }
+            }
             steps {
                 script {
                     version = readFile('version').trim()
@@ -57,9 +73,9 @@ pipeline {
                 }
 
                 stage('Push development docker image') {
-                    // when {
-                    //     branch 'dev'
-                    // }
+                    when {
+                        branch 'dev'
+                    }
                     steps {
                         script {
                             dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-dev-${buildNumber}")
@@ -74,9 +90,9 @@ pipeline {
         }
 
         stage('Deploy development') {
-            // when {
-            //     branch 'dev'
-            // }
+            when {
+                branch 'dev'
+            }
 
             steps {
                 script {
