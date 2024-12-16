@@ -22,12 +22,12 @@ pipeline {
 
         // MARK: Read Version
         stage('Read Version') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'dev'
-                }
-            }
+            // when {
+            //     anyOf {
+            //         branch 'main'
+            //         branch 'dev'
+            //     }
+            // }
             steps {
                 script {
                     version = readFile('version').trim()
@@ -55,9 +55,9 @@ pipeline {
                 }
 
                 stage('Push development docker image') {
-                    when {
-                        branch 'dev'
-                    }
+                    // when {
+                    //     branch 'dev'
+                    // }
                     steps {
                         script {
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
@@ -70,9 +70,9 @@ pipeline {
         }
 
         stage('Deploy development') {
-            when {
-                branch 'dev'
-            }
+            // when {
+            //     branch 'dev'
+            // }
 
             steps {
                 script {
