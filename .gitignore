@@ -136,3 +136,4 @@ tests
 cookies.pkl
 test_deploy.sh
 launch.json
+logs

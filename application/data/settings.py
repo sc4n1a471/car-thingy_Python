@@ -6,6 +6,7 @@ import logging
 
 from selenium import webdriver
 from logging import info
+from logging.handlers import TimedRotatingFileHandler
 
 COUNTER = 0
 WAIT_TIME = 30
@@ -174,14 +175,15 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
 def setup_logging():
     log_file = os.path.join("logs", "python-dev.log")
 
+    time_rotating_handler = TimedRotatingFileHandler(
+        log_file, when="midnight", interval=1, backupCount=30, encoding="utf-8"
+    )
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s | %(message)s",
         datefmt="%Y.%m.%d %H:%M:%S",
-        handlers=[
-            logging.FileHandler(log_file, "a", "utf-8"),
-            logging.StreamHandler(),
-        ],
+        handlers=[logging.StreamHandler(), time_rotating_handler],
     )
     # https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
     # Log to file and console
