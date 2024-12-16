@@ -40,6 +40,11 @@ pipeline {
         }
 
         stage('Build and Push') {
+            steps {
+                script {
+                    dockerImage = docker.build('sc4n1a471/car-thingy_python')
+                }
+            }
             parallel {
                 stage('Push production docker image') {
                     when {
