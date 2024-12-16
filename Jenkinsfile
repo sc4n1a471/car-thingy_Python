@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
+                git branch: '109-v20', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
             }
         }
 
