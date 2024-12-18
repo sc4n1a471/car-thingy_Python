@@ -43,6 +43,10 @@ resource "docker_container" "car-thingy_python" {
     external = var.env == "prod" ? 3005 : (var.env == "dev" ? 3006 : null)
   }
 
+  networks_advanced {
+    name = "car-thingy"
+  }
+
   restart = "on-failure"
   max_retry_count = 5
 }
