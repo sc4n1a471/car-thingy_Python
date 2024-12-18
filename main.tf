@@ -40,7 +40,7 @@ resource "docker_container" "car-thingy_python" {
 
   ports {
     internal = 3001
-    external = var.env == "prod" ? 3005 : 3006
+    external = var.env == "prod" ? 3005 : (var.env == "dev" ? 3006 : null)
   }
 
   restart = "on-failure"
