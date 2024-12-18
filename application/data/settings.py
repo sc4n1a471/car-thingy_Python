@@ -139,6 +139,15 @@ def send(driver, cmd, params={}):
 
 
 async def send_data(key, value, percentage, status="pending", is_json=False):
+    """Sends json to client
+
+    Args:
+        key (string): message/input/restrictions/accidents/mileage
+        value (any): The value of the message
+        percentage (int): Status percentage
+        status (str, optional): pending/waiting/success/fail. Defaults to "pending".
+        is_json (bool, optional): Don't know why it's necessary, will remove it later... Defaults to False.
+    """
     global websocket
     global STATUS_COUNTER
 
@@ -148,6 +157,7 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
     if status == "success":
         message_object = {"status": status, "percentage": 100, "key": "message"}
     else:
+        # What is this is_json boolean doing here? It's literally creating the same message_object...
         if is_json:
             message_object = {
                 "status": status,
@@ -188,3 +198,22 @@ def setup_logging():
     # https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
     # Log to file and console
     info("Logging initialized")
+
+
+# MARK: Wait for verification code
+async def wait_for_input(message: str, percentage: int):
+    """Waits for an input from the client
+
+    Args:
+        message (str): The message that should be sent to the client before waiting for input, a headsup for the client
+        percentage (int): The current percentage
+
+    Returns:
+        str: Message received from the client
+    """
+    global websocket
+
+    await send_data("input", message, percentage, status="waiting")
+
+    received_msg = await websocket.recv()
+    return received_msg
