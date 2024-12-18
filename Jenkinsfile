@@ -106,13 +106,13 @@ pipeline {
                     echo "Deploying version ${version}, build ${buildNumber} to ${branchName} branch"
 
                     sh """
-                    if [ \$(docker ps -a -q -f name=car-thingy_python_\$branchName) ]; then
+                    if [ \$(docker ps -a -q -f name=car-thingy_python_$branchName) ]; then
                         docker rm -f car-thingy_python_\$branchName
                         echo "Container removed"
                     fi
                         
-                    if [ \$(docker images -q sc4n1a471/car-thingy_python:\$version-\$branchName-\$buildNumber) ]; then
-                        docker rmi -f sc4n1a471/car-thingy_python:\$version-\$branchName-\$buildNumber
+                    if [ \$(docker images -q sc4n1a471/car-thingy_python:$version-$branchName-$buildNumber) ]; then
+                        docker rmi -f sc4n1a471/car-thingy_python:$version-$branchName-$buildNumber
                         echo "Image removed"
                     fi
                     """
@@ -149,8 +149,8 @@ pipeline {
                         echo "Container removed"
                     fi
 
-                    if [ \$(docker images -q sc4n1a471/car-thingy_python:\$version-\$buildNumber) ]; then
-                        docker rmi -f sc4n1a471/car-thingy_python:\$version-\$buildNumber
+                    if [ \$(docker images -q sc4n1a471/car-thingy_python:$version-$buildNumber) ]; then
+                        docker rmi -f sc4n1a471/car-thingy_python:$version-$buildNumber
                         echo "Image removed"
                     fi
                     """
