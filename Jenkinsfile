@@ -71,6 +71,8 @@ pipeline {
                     when {
                         not {
                             changeRequest()
+                        }
+                        not {
                             branch 'main'
                         }
                     }
@@ -91,6 +93,8 @@ pipeline {
             when {
                 not {
                     changeRequest()
+                }
+                not {
                     branch 'main'
                 }
             }
