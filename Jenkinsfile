@@ -103,7 +103,7 @@ pipeline {
 
             steps {
                 script {
-                    echo "Deploying version ${version}, build ${buildNumber} to ${brachName} branch"
+                    echo "Deploying version ${version}, build ${buildNumber} to ${branchName} branch"
 
                     sh """
                     if [ \$(docker ps -a -q -f name=car-thingy_python_\$branchName) ]; then
