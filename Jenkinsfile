@@ -121,7 +121,7 @@ pipeline {
                     terraform init
 
                     terraform apply \
-                        -var="container_version=$version-\$branchName-$buildNumber" \
+                        -var="container_version=$version-$branchName-$buildNumber" \
                         -var="env=dev" \
                         -var="run_on_server=true" \
                         -var="app_username=\$CAR_THINGY_PYTHON_USERNAME" \
