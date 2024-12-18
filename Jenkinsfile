@@ -1,6 +1,7 @@
 def dockerImage
 def version
 def buildNumber
+def branchName
 
 pipeline {
     agent any
@@ -16,21 +17,16 @@ pipeline {
     stages {
         stage('Checkout') {
             parallel {
-                stage('Checkout main') {
+                stage('Checkout the branch') {
                     when {
-                        branch 'main'
+                        not {
+                            changeRequest()
+                        }
                     }
                     steps {
-                        git branch: 'main', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
-                    }
-                }
-
-                stage('Checkout dev') {
-                    when {
-                        branch 'dev'
-                    }
-                    steps {
-                        git branch: 'dev', credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
+                        echo "Checking out ${env.BRANCH_NAME} branch..."
+                        branchName = env.BRANCH_NAME
+                        git branch: env.BRANCH_NAME, credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
                     }
                 }
             }
@@ -39,9 +35,8 @@ pipeline {
         // MARK: Read Version
         stage('Read Version') {
             when {
-                anyOf {
-                    branch 'main'
-                    branch 'dev'
+                not {
+                    changeRequest()
                 }
             }
             steps {
@@ -63,7 +58,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-dev-${buildNumber}")
+                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-${buildNumber}")
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
                                 dockerImage.push("latest")
                                 dockerImage.push("${version}-${buildNumber}")
@@ -72,16 +67,19 @@ pipeline {
                     }
                 }
 
-                stage('Push development docker image') {
+                stage('Push not production docker image') {
                     when {
-                        branch 'dev'
+                        not {
+                            changeRequest()
+                            branch 'main'
+                        }
                     }
                     steps {
                         script {
-                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-dev-${buildNumber}")
+                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-${branchName}-${buildNumber}")
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
-                                dockerImage.push("latest-dev")
-                                dockerImage.push("${version}-dev-${buildNumber}")
+                                dockerImage.push("latest-${branchName}")
+                                dockerImage.push("${version}-${branchName}-${buildNumber}")
                             }
                         }
                     }
@@ -91,21 +89,24 @@ pipeline {
 
         stage('Deploy development') {
             when {
-                branch 'dev'
+                not {
+                    changeRequest()
+                    branch 'main'
+                }
             }
 
             steps {
                 script {
-                    echo "Deploying version ${version}, build ${buildNumber} to DEV"
+                    echo "Deploying version ${version}, build ${buildNumber} to ${brachName} branch"
 
                     sh """
-                    if [ \$(docker ps -a -q -f name=car-thingy_python_dev) ]; then
-                        docker rm -f car-thingy_python_dev
+                    if [ \$(docker ps -a -q -f name=car-thingy_python_\$branchName) ]; then
+                        docker rm -f car-thingy_python_\$branchName
                         echo "Container removed"
                     fi
                         
-                    if [ \$(docker images -q sc4n1a471/car-thingy_python:\$version-dev-\$buildNumber) ]; then
-                        docker rmi -f sc4n1a471/car-thingy_python:\$version-dev-\$buildNumber
+                    if [ \$(docker images -q sc4n1a471/car-thingy_python:\$version-\$branchName-\$buildNumber) ]; then
+                        docker rmi -f sc4n1a471/car-thingy_python:\$version-\$branchName-\$buildNumber
                         echo "Image removed"
                     fi
                     """
@@ -114,7 +115,7 @@ pipeline {
                     terraform init
 
                     terraform apply \
-                        -var="container_version=$version-dev-$buildNumber" \
+                        -var="container_version=$version-\$branchName-$buildNumber" \
                         -var="env=dev" \
                         -var="run_on_server=true" \
                         -var="app_username=\$CAR_THINGY_PYTHON_USERNAME" \
