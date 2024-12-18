@@ -25,7 +25,6 @@ pipeline {
                     }
                     steps {
                         echo "Checking out ${env.BRANCH_NAME} branch..."
-                        branchName = env.BRANCH_NAME
                         git branch: env.BRANCH_NAME, credentialsId: 'Home-VM_jenkins', url: 'git@github.com:sc4n1a471/car-thingy_Python.git'
                     }
                 }
@@ -46,6 +45,9 @@ pipeline {
 
                     buildNumber = env.BUILD_NUMBER
                     echo "Build number: ${buildNumber}"
+
+                    branchName = env.BRANCH_NAME
+                    echo "Build branch: ${branchName}"
                 }
             }
         }
