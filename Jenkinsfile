@@ -107,7 +107,7 @@ pipeline {
 
                     sh """
                     if [ \$(docker ps -a -q -f name=car-thingy_python_$branchName) ]; then
-                        docker rm -f car-thingy_python_\$branchName
+                        docker rm -f car-thingy_python_$branchName
                         echo "Container removed"
                     fi
                         
