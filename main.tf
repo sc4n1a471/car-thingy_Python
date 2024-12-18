@@ -8,7 +8,7 @@ terraform {
 }
 
 locals {
-  container_name = var.env == "prod" ? "car-thingy_python_prod" : "car-thingy_python_dev"
+  container_name = var.container_name
   port_mapping   = var.env == "prod" ? "3000:3000" : "3001:3000"
 }
 

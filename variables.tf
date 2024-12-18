@@ -1,3 +1,7 @@
+variable "container_name" {
+  description = "Name of the container"
+  type = string
+}
 variable "container_version" {
   description = "Version of the Docker image"
   type        = string
