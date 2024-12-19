@@ -6,6 +6,7 @@ import logging
 
 from selenium import webdriver
 from logging import info
+from logging.handlers import TimedRotatingFileHandler
 
 COUNTER = 0
 WAIT_TIME = 30
@@ -15,19 +16,23 @@ URL = "https://magyarorszag.hu/jszp_szuf"
 COOKIES = "cookies.pkl"
 STATUS_COUNTER = 0
 AUTHKEY = None
+RUN_ON_SERVER = True
 
 
 async def init(websocket_param):
     global driver
     global websocket
     global AUTHKEY
+    global RUN_ON_SERVER
     websocket = websocket_param
 
     await send_data("message", "Request received", 2, "pending")
 
     AUTHKEY = websocket_param.request_headers.get("x-api-key")
 
-    if os.getenv("RUN_ON_SERVER") == "True":
+    RUN_ON_SERVER = RUN_ON_SERVER or RUN_ON_SERVER
+
+    if RUN_ON_SERVER:
         from selenium.webdriver.chrome.service import Service
         from selenium.webdriver import ChromeOptions
 
@@ -89,7 +94,7 @@ async def load_cookies():
         cookies = pickle.load(open(COOKIES, "rb"))
 
         # Enables network tracking so we may use Network.setCookie method
-        if os.getenv("RUN_ON_SERVER") == "True":
+        if RUN_ON_SERVER:
             send(driver, "Network.enable", {})
         else:
             driver.execute_cdp_cmd("Network.enable", {})  # type: ignore
@@ -102,13 +107,13 @@ async def load_cookies():
                 del cookie["expiry"]
 
             # Set the actual cookie
-            if os.getenv("RUN_ON_SERVER") == "True":
+            if RUN_ON_SERVER:
                 send(driver, "Network.setCookie", cookie)
             else:
                 driver.execute_cdp_cmd("Network.setCookie", cookie)  # type: ignore
 
         # Disable network tracking
-        if os.getenv("RUN_ON_SERVER") == "True":
+        if RUN_ON_SERVER:
             send(driver, "Network.disable", {})
         else:
             driver.execute_cdp_cmd("Network.disable", {})  # type: ignore
@@ -138,6 +143,15 @@ def send(driver, cmd, params={}):
 
 
 async def send_data(key, value, percentage, status="pending", is_json=False):
+    """Sends json to client
+
+    Args:
+        key (string): message/input/restrictions/accidents/mileage
+        value (any): The value of the message
+        percentage (int): Status percentage
+        status (str, optional): pending/waiting/success/fail. Defaults to "pending".
+        is_json (bool, optional): Don't know why it's necessary, will remove it later... Defaults to False.
+    """
     global websocket
     global STATUS_COUNTER
 
@@ -147,6 +161,7 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
     if status == "success":
         message_object = {"status": status, "percentage": 100, "key": "message"}
     else:
+        # What is this is_json boolean doing here? It's literally creating the same message_object...
         if is_json:
             message_object = {
                 "status": status,
@@ -174,15 +189,35 @@ async def send_data(key, value, percentage, status="pending", is_json=False):
 def setup_logging():
     log_file = os.path.join("logs", "python-dev.log")
 
+    time_rotating_handler = TimedRotatingFileHandler(
+        log_file, when="midnight", interval=1, backupCount=30, encoding="utf-8"
+    )
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)s | %(message)s",
         datefmt="%Y.%m.%d %H:%M:%S",
-        handlers=[
-            logging.FileHandler(log_file, "a", "utf-8"),
-            logging.StreamHandler(),
-        ],
+        handlers=[logging.StreamHandler(), time_rotating_handler],
     )
     # https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
     # Log to file and console
     info("Logging initialized")
+
+
+# MARK: Wait for verification code
+async def wait_for_input(message: str, percentage: int):
+    """Waits for an input from the client
+
+    Args:
+        message (str): The message that should be sent to the client before waiting for input, a headsup for the client
+        percentage (int): The current percentage
+
+    Returns:
+        str: Message received from the client
+    """
+    global websocket
+
+    await send_data("input", message, percentage, status="waiting")
+
+    received_msg = await websocket.recv()
+    return received_msg
