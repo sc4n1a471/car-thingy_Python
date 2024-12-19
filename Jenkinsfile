@@ -123,7 +123,7 @@ pipeline {
                     terraform apply \
                         -var="container_name=car-thingy_python_$branchName" \
                         -var="container_version=$version-$branchName-$buildNumber" \
-                        -var="env=dev" \
+                        -var="env=$branchName" \
                         -var="run_on_server=true" \
                         -var="app_username=\$CAR_THINGY_PYTHON_USERNAME" \
                         -var="app_password=\$CAR_THINGY_PYTHON_PASSWORD" \

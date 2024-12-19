@@ -16,19 +16,23 @@ URL = "https://magyarorszag.hu/jszp_szuf"
 COOKIES = "cookies.pkl"
 STATUS_COUNTER = 0
 AUTHKEY = None
+RUN_ON_SERVER = True
 
 
 async def init(websocket_param):
     global driver
     global websocket
     global AUTHKEY
+    global RUN_ON_SERVER
     websocket = websocket_param
 
     await send_data("message", "Request received", 2, "pending")
 
     AUTHKEY = websocket_param.request_headers.get("x-api-key")
 
-    if os.getenv("RUN_ON_SERVER") == "True":
+    RUN_ON_SERVER = RUN_ON_SERVER or RUN_ON_SERVER
+
+    if RUN_ON_SERVER:
         from selenium.webdriver.chrome.service import Service
         from selenium.webdriver import ChromeOptions
 
@@ -90,7 +94,7 @@ async def load_cookies():
         cookies = pickle.load(open(COOKIES, "rb"))
 
         # Enables network tracking so we may use Network.setCookie method
-        if os.getenv("RUN_ON_SERVER") == "True":
+        if RUN_ON_SERVER:
             send(driver, "Network.enable", {})
         else:
             driver.execute_cdp_cmd("Network.enable", {})  # type: ignore
@@ -103,13 +107,13 @@ async def load_cookies():
                 del cookie["expiry"]
 
             # Set the actual cookie
-            if os.getenv("RUN_ON_SERVER") == "True":
+            if RUN_ON_SERVER:
                 send(driver, "Network.setCookie", cookie)
             else:
                 driver.execute_cdp_cmd("Network.setCookie", cookie)  # type: ignore
 
         # Disable network tracking
-        if os.getenv("RUN_ON_SERVER") == "True":
+        if RUN_ON_SERVER:
             send(driver, "Network.disable", {})
         else:
             driver.execute_cdp_cmd("Network.disable", {})  # type: ignore
