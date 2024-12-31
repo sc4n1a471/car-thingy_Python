@@ -2,8 +2,8 @@ class XPATHS:
     main_frame = '//*[@id="main"]/iframe'
     login_methods = '//form[@id="urn:eksz.gov.hu:1.0:azonositas:kau:1:uk:uidpwd"]'
     login_method = '//input[@value="Ügyfélkapu+"]'
-    username_field = "//dap-ds-input"
-    password_field = "//dap-ds-password-input"
+    username_field = '//*[@id="name"]'
+    password_field = '//*[@id="password"]'
     verification_code_field = '//*[@id="identifier"]'
     login_button = '//input[@value="Bejelentkezés"]'
     accident_record_checkbox = '//input[@id="checkbox-BiztositasKartortenet"]'
