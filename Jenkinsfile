@@ -196,7 +196,7 @@ pipeline {
                 }
             }
         }
-        steps {
+        stage('Remove prev docker image') {
             when {
                 not {
                     changeRequest()
