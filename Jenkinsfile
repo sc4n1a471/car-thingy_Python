@@ -196,6 +196,20 @@ pipeline {
                 }
             }
         }
+        steps {
+            when {
+                not {
+                    changeRequest()
+                }
+            }
+            script {
+                def previousBuildNumber = buildNumber.toInteger() - 1
+                if (previousBuildNumber > 0) {
+                    echo "Removing previous build number associated Docker image: ${version}-${branchName}-${previousBuildNumber}"
+                    sh "docker rmi -f sc4n1a471/car-thingy_python:${version}-${branchName}-${previousBuildNumber}"
+                }
+            }
+        }
     }
     post {
         success {
@@ -209,13 +223,6 @@ pipeline {
             echo "Cleaning docker images"
             sh "docker rmi -f sc4n1a471/car-thingy_python"
             sh "docker image prune -f"
-            script {
-                def previousBuildNumber = buildNumber.toInteger() - 1
-                if (previousBuildNumber > 0) {
-                    echo "Removing previous build number associated Docker image: ${version}-${previousBuildNumber}"
-                    sh "docker rmi -f sc4n1a471/car-thingy_python:${version}-${previousBuildNumber}"
-                }
-            }
         }
     }
 }
