@@ -180,5 +180,11 @@ pipeline {
         failure {
             echo 'Build or deployment failed.'
         }
+        always {
+            cleanWs()
+            echo "Cleaning docker images"
+            sh "docker rmi -f sc4n1a471/car-thingy_python"
+            sh "docker image prune -f"
+        }
     }
 }
