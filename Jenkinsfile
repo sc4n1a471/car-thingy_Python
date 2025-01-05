@@ -172,6 +172,46 @@ pipeline {
                 }
             }
         }
+        stage('Cleanup after merge') {
+            when {
+                anyOf {
+                    changeRequest target: 'dev'
+                }
+            }
+            steps {
+                script {
+                    echo "Cleaning up Docker images and containers for to be merged branch ${env.CHANGE_BRANCH}"
+
+                    sh """
+                    if [ \$(docker ps -a -q -f name=car-thingy_python_${env.CHANGE_BRANCH}) ]; then
+                        docker rm -f car-thingy_python_${env.CHANGE_BRANCH}
+                        echo "Container removed"
+                    fi
+
+                    if [ \$(docker images -q sc4n1a471/car-thingy_python:${version}-${env.CHANGE_BRANCH}-${buildNumber}) ]; then
+                        docker rmi -f sc4n1a471/car-thingy_python:${version}-${env.CHANGE_BRANCH}-${buildNumber}
+                        echo "Image removed"
+                    fi
+                    """
+                }
+            }
+        }
+        stage('Remove prev docker image') {
+            when {
+                not {
+                    changeRequest()
+                }
+            }
+            steps {
+                script {
+                    def previousBuildNumber = buildNumber.toInteger() - 1
+                    if (previousBuildNumber > 0) {
+                        echo "Removing previous build number associated Docker image: ${version}-${branchName}-${previousBuildNumber}"
+                        sh "docker rmi -f sc4n1a471/car-thingy_python:${version}-${branchName}-${previousBuildNumber}"
+                    }
+                }
+            }
+        }
     }
     post {
         success {
@@ -179,6 +219,12 @@ pipeline {
         }
         failure {
             echo 'Build or deployment failed.'
+        }
+        always {
+            cleanWs()
+            echo "Cleaning docker images"
+            sh "docker rmi -f sc4n1a471/car-thingy_python"
+            sh "docker image prune -f"
         }
     }
 }
