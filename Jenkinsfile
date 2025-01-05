@@ -202,11 +202,13 @@ pipeline {
                     changeRequest()
                 }
             }
-            script {
-                def previousBuildNumber = buildNumber.toInteger() - 1
-                if (previousBuildNumber > 0) {
-                    echo "Removing previous build number associated Docker image: ${version}-${branchName}-${previousBuildNumber}"
-                    sh "docker rmi -f sc4n1a471/car-thingy_python:${version}-${branchName}-${previousBuildNumber}"
+            steps {
+                script {
+                    def previousBuildNumber = buildNumber.toInteger() - 1
+                    if (previousBuildNumber > 0) {
+                        echo "Removing previous build number associated Docker image: ${version}-${branchName}-${previousBuildNumber}"
+                        sh "docker rmi -f sc4n1a471/car-thingy_python:${version}-${branchName}-${previousBuildNumber}"
+                    }
                 }
             }
         }
