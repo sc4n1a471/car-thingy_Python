@@ -1,6 +1,6 @@
 import time
 
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
@@ -18,7 +18,18 @@ async def get_mileage(car: Car):
     """
 
     WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.mileage_tab)))
-    settings.driver.find_element(By.XPATH, XPATHS.mileage_tab).click()
+
+    counter = 0
+    while counter < 5:
+        try:  # .click() is still intercepted even though the element is clickable...
+            settings.driver.find_element(By.XPATH, XPATHS.mileage_tab).click()
+            await settings.send_data("message", "Clicked on Mileage tab", 62, "pending")
+            break
+        except ElementClickInterceptedException:
+            counter += 1
+            time.sleep(0.25)
+            continue
+
     await settings.send_data("message", "Searching for mileage data...", 62, "pending")
 
     counter = 0
