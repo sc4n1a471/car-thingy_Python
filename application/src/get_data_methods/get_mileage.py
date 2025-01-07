@@ -15,7 +15,7 @@ async def get_mileage(car):
     :param car: car object
     """
 
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.mileage_tab)))
+    WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.mileage_tab)))
     settings.driver.find_element(By.XPATH, XPATHS.mileage_tab).click()
     await settings.send_data("message", "Searching for mileage data...", 62, "pending")
 
@@ -31,7 +31,6 @@ async def get_mileage(car):
                 if tmp != [""]:
                     await settings.send_data("message", "FOUND: Mileage data", 70, "pending")
                     mileage_num = "".join(tmp[1:])
-                    # car.mileage.append(Mileage(tmp[0], int(mileage_num)))
                     car.mileage.append(
                         {
                             "licensePlate": car.license_plate,

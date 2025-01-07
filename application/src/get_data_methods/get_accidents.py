@@ -15,7 +15,7 @@ async def get_accidents(car):
     Gets the accidents found on accidents_tab
     :param car: car object
     """
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.accidents_tab)))
+    WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accidents_tab)))
     settings.driver.find_element(By.XPATH, XPATHS.accidents_tab).click()
     await settings.send_data("message", "Searching for accidents...", 72, "pending")
 

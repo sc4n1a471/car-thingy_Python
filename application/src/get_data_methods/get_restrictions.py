@@ -13,7 +13,7 @@ async def get_restrictions(car):
     Gets all information on the requested car
     :param car: car object
     """
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.restrictions_tab)))
+    WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.restrictions_tab)))
     counter = 0
     while counter < 5:
         try:
