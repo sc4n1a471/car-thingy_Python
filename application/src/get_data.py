@@ -21,7 +21,7 @@ from ..models.NoVehicleManagementException import NoVehicleManagementException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
 
-async def get_data(requested_cars: [Car]):  # type: ignore
+async def get_data(requested_cars: list[str]):
     cold_start = True
     car_data: [Car] = []  # type: ignore
     for requested_car in requested_cars:
@@ -63,7 +63,6 @@ async def get_data(requested_cars: [Car]):  # type: ignore
 
         car_data.append(car)
         cold_start = False
-        # await settings.send_message(f"Changed cold_start to {cold_start}")
         info("=================")
 
     return car_data

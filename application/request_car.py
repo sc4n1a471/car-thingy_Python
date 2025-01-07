@@ -26,10 +26,10 @@ def check_auth(auth_key):
 
 
 async def request_car(websocket_param):
-    """
-    Opens page and does the rest of the query
+    """Opens page and does the rest of the query
 
-    :param license_plates: Requested license plate
+    Args:
+        websocket_param (str): Requested license plate
     """
 
     try:

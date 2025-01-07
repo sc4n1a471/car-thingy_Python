@@ -4,4 +4,4 @@ from dataclasses import dataclass, field
 @dataclass
 class Inspection:
     name: str
-    images: [str] = field(default_factory=list)
+    images: list[str] = field(default_factory=list)

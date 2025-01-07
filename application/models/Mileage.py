@@ -4,7 +4,8 @@ import json
 
 @dataclass
 class Mileage:
-    mileage_date: str
+    licensePlate: str
+    date: str
     mileage: int
 
     def toJSON(self):

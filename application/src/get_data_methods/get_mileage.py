@@ -7,12 +7,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
+from application.models.Car import Car, Mileage
 
 
-async def get_mileage(car):
-    """
-    Gets mileage information for the requested car
-    :param car: car object
+async def get_mileage(car: Car):
+    """Gets mileage information for the requested car
+
+    Args:
+        car (Car): Car object
     """
 
     WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.mileage_tab)))
@@ -32,11 +34,11 @@ async def get_mileage(car):
                     await settings.send_data("message", "FOUND: Mileage data", 70, "pending")
                     mileage_num = "".join(tmp[1:])
                     car.mileage.append(
-                        {
-                            "licensePlate": car.license_plate,
-                            "date": tmp[0],
-                            "mileage": int(mileage_num),
-                        }
+                        Mileage(
+                            licensePlate=car.license_plate,
+                            date=tmp[0],
+                            mileage=int(mileage_num),
+                        )
                     )
                     counter = 5
                 else:

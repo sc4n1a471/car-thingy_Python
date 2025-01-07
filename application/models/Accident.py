@@ -3,5 +3,6 @@ from dataclasses import dataclass
 
 @dataclass
 class Accident:
-    accident_date: str
+    licensePlate: str
+    accidentDate: str
     role: str

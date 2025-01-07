@@ -6,12 +6,14 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
+from application.models.Car import Car
 
 
-async def get_restrictions(car):
-    """
-    Gets all information on the requested car
-    :param car: car object
+async def get_restrictions(car: Car):
+    """Gets all information on the requested car
+
+    Args:
+        car (Car): Car object
     """
     WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.restrictions_tab)))
     counter = 0
