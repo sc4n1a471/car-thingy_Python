@@ -7,7 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
-from application.models.Car import Car, Mileage
+from application.models.Car import Car
 
 
 async def get_mileage(car: Car):
@@ -45,11 +45,11 @@ async def get_mileage(car: Car):
                     await settings.send_data("message", "FOUND: Mileage data", 70, "pending")
                     mileage_num = "".join(tmp[1:])
                     car.mileage.append(
-                        Mileage(
-                            licensePlate=car.license_plate,
-                            date=tmp[0],
-                            mileage=int(mileage_num),
-                        )
+                        {
+                            "licensePlate": car.license_plate,
+                            "date": tmp[0],
+                            "mileage": int(mileage_num),
+                        }
                     )
                     counter = 5
                 else:

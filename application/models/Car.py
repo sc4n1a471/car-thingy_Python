@@ -1,8 +1,5 @@
 from dataclasses import dataclass, field
 
-from application.models.Accident import Accident
-from application.models.Mileage import Mileage
-
 
 @dataclass
 class Car:
@@ -21,8 +18,8 @@ class Car:
     fuel_type: str = ""
     gearbox: str = ""
     restrictions: list[str] = field(default_factory=list)
-    mileage: list[Mileage] = field(default_factory=list)
-    accidents: list[Accident] = field(default_factory=list)
+    mileage = []
+    accidents = []
     has_origin_record = True
     has_restriction_record = True
     has_inspection_record = True

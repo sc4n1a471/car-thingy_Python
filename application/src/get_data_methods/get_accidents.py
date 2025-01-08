@@ -5,7 +5,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
-from application.models.Car import Car, Accident
+from application.models.Car import Car
 
 import time
 
@@ -33,11 +33,11 @@ async def get_accidents(car: Car):
                     role = "".join(tmp[1:])
                     await settings.send_data("message", "FOUND: Accidents", 80, "pending")
                     car.accidents.append(
-                        Accident(
-                            licensePlate=car.license_plate,
-                            accidentDate=tmp[0],
-                            role=role,
-                        )
+                        {
+                            "licensePlate": car.license_plate,
+                            "accidentDate": tmp[0],
+                            "role": role,
+                        }
                     )
                     counter = 5
                 else:
