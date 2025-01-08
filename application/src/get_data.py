@@ -23,7 +23,7 @@ from ..models.UnreleasedLPException import UnreleasedLPException
 
 async def get_data(requested_cars: list[str]):
     cold_start = True
-    car_data: [Car] = []  # type: ignore
+    car_data: list[Car] = []
     for requested_car in requested_cars:
         car = Car()
         car.license_plate = requested_car.upper()

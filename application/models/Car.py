@@ -18,8 +18,8 @@ class Car:
     fuel_type: str = ""
     gearbox: str = ""
     restrictions: list[str] = field(default_factory=list)
-    mileage = []
-    accidents = []
+    mileage: list[dict] = field(default_factory=list)
+    accidents: list[dict] = field(default_factory=list)
     has_origin_record = True
     has_restriction_record = True
     has_inspection_record = True
