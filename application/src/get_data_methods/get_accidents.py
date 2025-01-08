@@ -5,17 +5,18 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
-from application.models.Accident import Accident
+from application.models.Car import Car
 
 import time
 
 
-async def get_accidents(car):
+async def get_accidents(car: Car):
+    """Gets the accidents found on accidents_tab
+
+    Args:
+        car (Car): Car object
     """
-    Gets the accidents found on accidents_tab
-    :param car: car object
-    """
-    # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.accidents_tab)))
+    WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accidents_tab)))
     settings.driver.find_element(By.XPATH, XPATHS.accidents_tab).click()
     await settings.send_data("message", "Searching for accidents...", 72, "pending")
 
