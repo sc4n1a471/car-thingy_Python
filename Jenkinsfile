@@ -144,10 +144,8 @@ pipeline {
                     echo "Deploying version ${version}, build ${buildNumber} to PROD"
 
                     sh """#!/bin/bash
-                    if [ \$(docker ps -a -q -f name=car-thingy_python) ]; then
-                        docker rm -f car-thingy_python
-                        echo "Container removed"
-                    fi
+                    docker rm -f car-thingy_python
+                    echo "Container removed"
 
                     if [ \$(docker images -q sc4n1a471/car-thingy_python:$version-$buildNumber) ]; then
                         docker rmi -f sc4n1a471/car-thingy_python:$version-$buildNumber
