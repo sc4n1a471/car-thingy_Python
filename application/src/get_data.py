@@ -15,13 +15,13 @@ from application.models.Car import Car
 from .get_data_methods.get_car_data import get_car_data
 from .login import login
 from .logout import logout
-from ..models import GetDataException
+from ..models.GetDataException import GetDataException
 from ..models.LoginException import LoginException
 from ..models.NoVehicleManagementException import NoVehicleManagementException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
 
-async def get_data(requested_cars: [Car]):  # type: ignore
+async def get_data(requested_cars: list[str]):
     cold_start = True
     car_data: [Car] = []  # type: ignore
     for requested_car in requested_cars:
@@ -43,7 +43,7 @@ async def get_data(requested_cars: [Car]):  # type: ignore
             await settings.send_data("message", "FOUND: Jármű Szolgáltatási Platform", 14, "pending")
             settings.save_cookie()
         except Exception as e:
-            raise GetDataException from e
+            raise GetDataException(e.args) from e
 
         await fill_search(requested_car)  # 16%
 
@@ -63,7 +63,6 @@ async def get_data(requested_cars: [Car]):  # type: ignore
 
         car_data.append(car)
         cold_start = False
-        # await settings.send_message(f"Changed cold_start to {cold_start}")
         info("=================")
 
     return car_data
@@ -232,6 +231,11 @@ async def check_error_modal(car, requested_car):
             retries += 1
 
         counter += 1
+
+        try:
+            WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.error_modal)))
+        except TimeoutException:
+            return
 
     if counter == 10:
         raise Exception("Some kind of data was not found before searching for license plate")

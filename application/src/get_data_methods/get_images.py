@@ -12,20 +12,23 @@ from selenium.webdriver.common.by import By
 
 from application.data import settings
 from application.data.xpaths import XPATHS
+from application.models.Car import Car
 from application.models.Inspection import Inspection
 
 from logging import info
 
 
-async def get_images(car):
-    """
-    Downloads images associated to the inspections
-    :param car: car object
+async def get_images(car: Car):
+    """Downloads images associated to the inspections
+
+    Args:
+        car (Car): Car object
     """
 
     percentage = 82
     max_percentage = 98
 
+    # MARK: Inspection types
     inspection_types = [
         {
             "name": "technical Inspections",
@@ -44,14 +47,14 @@ async def get_images(car):
     ]
 
     for inspection_type in inspection_types:
-        # WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.inspections_tab)))
+        WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)))
         settings.driver.find_element(By.XPATH, inspection_type["tab_path"]).click()
         await settings.send_data("message", f"Searching for {inspection_type['name']}...", percentage, "pending")
 
         if len(settings.driver.find_elements(By.XPATH, inspection_type["no_inspection_data"])) != 0:
             await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
         else:
-            car_inspections: [Inspection] = []
+            car_inspections: List[Inspection] = []
 
             try:
                 WebDriverWait(settings.driver, 5).until(
@@ -86,6 +89,7 @@ async def get_images(car):
 
             counter = 0
             while counter < 5:
+                # MARK: Opening image panels
                 try:
                     show_pictures_buttons = settings.driver.find_elements(
                         By.XPATH, inspection_type["show_pictures_path"]
@@ -102,6 +106,7 @@ async def get_images(car):
             for button, i in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
                 images = []
 
+                # MARK: Opening image dialogs
                 button.click()
 
                 settings.driver.switch_to.default_content()
@@ -144,8 +149,14 @@ async def get_images(car):
             await save_images(car.license_plate, car_inspections)
 
 
+# MARK: Save images
 async def save_images(license_plate, inspections):
-    """Saves the image files into folders"""
+    """Saves the image files into folders
+
+    Args:
+        license_plate (str): License plate of the inspections
+        inspections (list[Inspection]): Inspection objects
+    """
     await settings.send_data("message", "Saving images...", 94, "pending")
 
     if not os.path.exists("downloaded_images"):
@@ -216,13 +227,17 @@ async def save_images(license_plate, inspections):
         shutil.rmtree(unix_path)
 
 
-async def upload_inspections(license_plate, inspections, image_paths):
-    """
-    Uploads the inspection images to the GO server
+# MARK: Upload images
+async def upload_inspections(license_plate: str, inspections: list[Inspection], image_paths: List[str]):
+    """Uploads the inspection images to the GO server
 
-    :param license_plate: License plate of the inspections
-    :param inspections: Inspection objects
-    :param image_paths: Full paths of the inspection images
+    Args:
+        license_plate (str): License plate of the inspections
+        inspections (list[Inspection]): Inspection objects
+        image_paths (list[str]): Full paths of the inspection images
+
+    Raises:
+        Exception: Raised if the upload fails or the GO_IP environment variable is not set
     """
 
     url = os.getenv("GO_IP")

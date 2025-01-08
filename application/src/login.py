@@ -17,6 +17,7 @@ async def login(retry=False):
     """
     Logs in with the credentials found as environment variables
     Also checks if user is already logged in
+    If the cookies are invalid, it requests the 2FA code from the client
 
     Args:
         retry (bool, optional): Retry login. Defaults to False.
@@ -39,6 +40,7 @@ async def login(retry=False):
 
     await settings.send_data("message", "Logging in...", 6, "pending")
 
+    # MARK: Retry login
     if retry:
         if settings.COUNTER > 2:
             raise LoginException("Tried logging out/in too many times...")
@@ -53,6 +55,7 @@ async def login(retry=False):
     except TimeoutException as toexc:
         raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
 
+    # MARK: Filling inputs
     time.sleep(0.5)
     settings.driver.find_element(By.XPATH, XPATHS.login_method).click()
     await settings.send_data("message", "CLICKED: Ugyfelkapu+ azonositas", 8, "pending")

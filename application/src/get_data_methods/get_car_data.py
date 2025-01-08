@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as ec
 
 from application.data import settings
 from application.data.xpaths import XPATHS
+from application.models.Car import Car
 from ..get_data_methods.get_accidents import get_accidents
 from ..get_data_methods.get_images import get_images
 from ..get_data_methods.get_mileage import get_mileage
@@ -14,14 +15,17 @@ from ..get_data_methods.get_restrictions import get_restrictions
 from ...models.GetDataException import GetDataException
 
 
-async def get_car_data(car):
-    """
-    Gets all information on the requested car
+async def get_car_data(car: Car):
+    """Gets all information on the requested car
 
-    :param car: car object
+    Args:
+        car (Car): Car object
+
+    Raises:
+        GetDataException: Yup, you guessed it, it raises GetDataException
     """
 
-    # MARK: Get specs
+    # region: Specs
     WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.brand)))
     car.brand = settings.driver.find_element(By.XPATH, XPATHS.brand).text
     await settings.send_data("brand", car.brand, 25, "pending")
@@ -69,8 +73,8 @@ async def get_car_data(car):
         await settings.send_data("fuel_type", car.fuel_type, 39, "pending")
 
         if not car.fuel_type.lower() == "elektromos":
-            car.engine_size = settings.driver.find_elements(By.XPATH, XPATHS.engine_size)[0].text
-            car.engine_size = int(car.engine_size.replace(" ", "").replace("cm³", ""))
+            engine_size = settings.driver.find_elements(By.XPATH, XPATHS.engine_size)[0].text
+            car.engine_size = int(engine_size.replace(" ", "").replace("cm³", ""))
             await settings.send_data("engine_size", car.engine_size, 41, "pending")
 
         if (
@@ -84,8 +88,8 @@ async def get_car_data(car):
         ):
             raise GetDataException("All found data is empty")
 
-        car.performance = settings.driver.find_elements(By.XPATH, XPATHS.performance)[0].text
-        car.performance = car.performance.replace(" kW", "")
+        performance = settings.driver.find_elements(By.XPATH, XPATHS.performance)[0].text
+        car.performance = int(performance.replace(" kW", ""))
         car.performance = int(int(car.performance) * 1.34)  # convert kW to HP
         await settings.send_data("performance", car.performance, 43, "pending")
 
@@ -98,6 +102,7 @@ async def get_car_data(car):
         tmp = car.color.split(" ")
         car.color = tmp[1]
         await settings.send_data("color", car.color, 47, "pending")
+    # endregion
 
     # 47%
 
