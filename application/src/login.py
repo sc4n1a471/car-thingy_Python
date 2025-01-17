@@ -38,7 +38,7 @@ async def login(retry=False):
     if username == "default" or password == "default":
         raise LoginException("Credential env variables have default values")
 
-    await settings.send_data("message", "Logging in...", 6, "pending")
+    await settings.send_data("message", "Waiting for login page...", 6, "pending")
 
     # MARK: Retry login
     if retry:
@@ -50,7 +50,7 @@ async def login(retry=False):
         settings.driver.get("https://magyarorszag.hu/jszp_szuf")
 
     try:
-        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.login_methods)))
+        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.login_method)))
         await settings.send_data("message", "FOUND: Login methods", 7, "pending")
     except TimeoutException as toexc:
         raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
