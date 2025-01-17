@@ -60,7 +60,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-${buildNumber}")
+                            dockerImage = docker.build("sc4n1a471/car-thingy_python")
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
                                 dockerImage.push("latest")
                                 dockerImage.push("${version}-${buildNumber}")
@@ -80,7 +80,7 @@ pipeline {
                     }
                     steps {
                         script {
-                            dockerImage = docker.build("sc4n1a471/car-thingy_python:${version}-${branchName}-${buildNumber}")
+                            dockerImage = docker.build("sc4n1a471/car-thingy_python")
                             docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB') {
                                 dockerImage.push("latest-${branchName}")
                                 dockerImage.push("${version}-${branchName}-${buildNumber}")
