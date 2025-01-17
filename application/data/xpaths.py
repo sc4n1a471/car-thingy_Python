@@ -1,5 +1,6 @@
 class XPATHS:
     main_frame = '//*[@id="main"]/iframe'
+    login_methods = '//*[@id="dropdown-control-id"]'
     login_method = '//*[@id="urn:eksz.gov.hu:1.0:azonositas:kau:2:uk:totp"]/button'
     username_field = '//*[@id="name"]'
     password_field = '//*[@id="password"]'

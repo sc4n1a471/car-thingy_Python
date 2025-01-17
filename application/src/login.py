@@ -50,8 +50,9 @@ async def login(retry=False):
         settings.driver.get("https://magyarorszag.hu/jszp_szuf")
 
     try:
-        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.login_method)))
+        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.login_methods)))
         await settings.send_data("message", "FOUND: Login methods", 7, "pending")
+        settings.driver.find_element(By.XPATH, XPATHS.login_methods).click()  # Open dropdown
     except TimeoutException as toexc:
         raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
 
