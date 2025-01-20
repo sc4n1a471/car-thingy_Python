@@ -45,7 +45,7 @@ resource "docker_container" "car-thingy_python" {
 
   networks_advanced {
     name = "car-thingy"
-    ipv4_address = var.env == "prod" ? "172.18.0.4" : (var.env == "dev" ? "172.18.0.2" : null)
+    ipv4_address = var.env == "prod" ? "172.18.0.3" : (var.env == "dev" ? "172.18.0.2" : null)
   }
 
   restart = "on-failure"
