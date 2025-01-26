@@ -132,7 +132,7 @@ pipeline {
                         -var="app_password=\$CAR_THINGY_PYTHON_PASSWORD" \
                         -var="app_grid_ip=\$CAR_THINGY_PYTHON_GRID_IP" \
                         -var="go_ip=\$CAR_THINGY_PYTHON_GO_IP_DEV" \
-                        -var="graylog_host=$CAR_THINGY_PYTHON_GRAYLOG_HOST_DEV" \
+                        -var="graylog_host=\$CAR_THINGY_PYTHON_GRAYLOG_HOST_DEV" \
                         -auto-approve
                     """
                 }
@@ -171,7 +171,7 @@ pipeline {
                         -var="app_password=\$CAR_THINGY_PYTHON_PASSWORD" \
                         -var="app_grid_ip=\$CAR_THINGY_PYTHON_GRID_IP" \
                         -var="go_ip=\$CAR_THINGY_PYTHON_GO_IP_PROD" \
-                        -var="graylog_host=$CAR_THINGY_PYTHON_GRAYLOG_HOST_PROD" \
+                        -var="graylog_host=\$CAR_THINGY_PYTHON_GRAYLOG_HOST_PROD" \
                         -auto-approve
                     """
                 }
