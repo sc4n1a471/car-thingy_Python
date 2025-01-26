@@ -43,3 +43,8 @@ variable "go_ip" {
   type        = string
   sensitive = true
 }
+
+variable "graylog_host" {
+  description = "The Graylog host with ip and port: <ip>:<port>"
+  type        = string
+}
