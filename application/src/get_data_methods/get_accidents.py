@@ -30,6 +30,7 @@ async def get_accidents(car: Car):
 
     if counter == 5:
         await settings.send_data("message", "Could not open accidents tab", 80, "pending")
+        await settings.send_data("accidents", car.accidents, 80, "pending", True)
         return
 
     await settings.send_data("message", "Searching for accidents...", 72, "pending")
