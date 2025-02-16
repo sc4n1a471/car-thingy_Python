@@ -1,4 +1,4 @@
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
@@ -16,8 +16,22 @@ async def get_accidents(car: Car):
     Args:
         car (Car): Car object
     """
-    WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accidents_tab)))
-    settings.driver.find_element(By.XPATH, XPATHS.accidents_tab).click()
+    counter = 0
+    while counter < 5:
+        try:
+            WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accidents_tab)))
+            settings.driver.find_element(By.XPATH, XPATHS.accidents_tab).click()
+            counter = 5
+            break
+        except ElementClickInterceptedException:
+            time.sleep(1)
+            counter += 1
+            continue
+
+    if counter == 5:
+        await settings.send_data("message", "Could not open accidents tab", 80, "pending")
+        return
+
     await settings.send_data("message", "Searching for accidents...", 72, "pending")
 
     counter = 0
