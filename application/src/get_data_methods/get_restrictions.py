@@ -15,6 +15,27 @@ async def get_restrictions(car: Car):
     Args:
         car (Car): Car object
     """
+    # Check for loading spinner before searching for Restrictions tab
+    counter = 0
+    while counter < 10:
+        try:
+            if settings.driver.find_element(By.XPATH, XPATHS.loading_spinner).is_displayed():
+                await settings.send_data("message", "Loading spinner found, waiting...", 48, "pending")
+                time.sleep(0.5)
+                counter += 1
+                continue
+            else:
+                await settings.send_data("message", "Loading spinner not found, proceeding...", 48, "pending")
+                break
+        except:
+            counter += 1
+            time.sleep(0.25)
+            continue
+
+    if counter == 10:
+        await settings.send_data("message", "Loading spinner not found after 10s, aborting...", -1, "pending")
+        return
+
     WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.restrictions_tab)))
     counter = 0
     while counter < 5:

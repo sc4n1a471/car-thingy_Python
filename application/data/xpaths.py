@@ -61,3 +61,5 @@ class XPATHS:
     no_originality_data = (
         '//p[contains(text(), "A járműhöz nem tartoznak származásellenőrzési és eredetiségvizsgálati adatok.")]'
     )
+    # div id="ajax_loader"
+    loading_spinner = '//*[@id="ajax_loader"]'
