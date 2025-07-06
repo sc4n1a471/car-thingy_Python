@@ -20,6 +20,9 @@ async def get_restrictions(car: Car):
     while counter < 20:
         try:
             if counter == 10:
+                await settings.send_data(
+                    "message", "Loading spinner is still present after 10 tries, refreshing...", 48, "pending"
+                )
                 settings.driver.refresh()
 
             if settings.driver.find_element(By.XPATH, XPATHS.loading_spinner).is_displayed():
@@ -39,7 +42,7 @@ async def get_restrictions(car: Car):
         await settings.send_data("message", "Loading spinner not found after 10s, aborting...", -1, "pending")
         return
 
-    WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.restrictions_tab)))
+    WebDriverWait(settings.driver, 10).until(ec.element_to_be_clickable((By.XPATH, XPATHS.restrictions_tab)))
     counter = 0
     while counter < 5:
         try:

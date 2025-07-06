@@ -13,5 +13,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    settings.setup_logging()
+    # settings.setup_logging()
     asyncio.run(main())
