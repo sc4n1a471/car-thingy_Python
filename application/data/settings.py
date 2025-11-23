@@ -1,12 +1,12 @@
-import asyncio
 import os
 import pickle
-import json
 import logging
 
 from selenium import webdriver
 from logging import info
 from logging.handlers import TimedRotatingFileHandler
+from .helpers import send_to_client, send
+from warnings import deprecated
 
 COUNTER = 0
 WAIT_TIME = 30
@@ -19,16 +19,14 @@ AUTHKEY = None
 RUN_ON_SERVER = True
 
 
-async def init(websocket_param):
+async def init(sid: str, x_api_key: str):
     global driver
-    global websocket
     global AUTHKEY
     global RUN_ON_SERVER
-    websocket = websocket_param
 
-    await send_data("message", "Request received", 2, "pending")
+    await send_to_client(sid, "message", "Request received", 2, "pending")
 
-    AUTHKEY = websocket_param.request_headers.get("x-api-key")
+    AUTHKEY = x_api_key
 
     RUN_ON_SERVER = RUN_ON_SERVER or RUN_ON_SERVER
 
@@ -41,7 +39,7 @@ async def init(websocket_param):
         grid_ip = os.environ["APP_GRID_IP"]
 
         if grid_ip == "default":
-            await send_data("message", "Selenium Grid IP address has the default value", 100, "fail")
+            await send_to_client(sid, "message", "Selenium Grid IP address has the default value", 100, "fail")
             return
 
         driver = webdriver.Remote(grid_ip, options=chrome_options)
@@ -57,7 +55,8 @@ async def init(websocket_param):
         try:
             option.binary_location = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
         except:
-            await send_data(
+            await send_to_client(
+                sid,
                 "message",
                 "Brave browser was not found on Mac, set your own browser up in settings.py",
                 100,
@@ -70,9 +69,9 @@ async def init(websocket_param):
         driver = webdriver.Chrome(service=s, options=option)
         # driver = webdriver.Safari()
 
-    await send_data("message", "Driver initialized", 3, "pending")
+    await send_to_client(sid, "message", "Driver initialized", 3, "pending")
 
-    await load_cookies()
+    await load_cookies(sid)
 
 
 # region: Cookie handling
@@ -81,7 +80,7 @@ def save_cookie():
         pickle.dump(driver.get_cookies(), filehandler)
 
 
-async def load_cookies():
+async def load_cookies(sid: str):
     """
     Loads cookies before the first GET to magyarorszag.hu as it redirects to .gov.hu
         if no cookies were found for magyarorszag.hu domain and then these domains can't be
@@ -90,7 +89,7 @@ async def load_cookies():
     :return:
     """
     if os.path.exists(COOKIES) and os.path.isfile(COOKIES):
-        await send_data("message", "Loading cookies...", 3, "pending")
+        await send_to_client(sid, "message", "Loading cookies...", 3, "pending")
         cookies = pickle.load(open(COOKIES, "rb"))
 
         # Enables network tracking so we may use Network.setCookie method
@@ -117,69 +116,9 @@ async def load_cookies():
             send(driver, "Network.disable", {})
         else:
             driver.execute_cdp_cmd("Network.disable", {})  # type: ignore
-        await send_data("message", "Cookies loaded successfully", 5, "pending")
+        await send_to_client(sid, "message", "Cookies loaded successfully", 5, "pending")
         return 1
-    await send_data("message", "Cookies could not be loaded", 5, "pending")
-
-
-# endregion
-
-
-# region: Send data
-def send(driver, cmd, params={}):
-    """
-    This is required to send CDP command to remote driver
-    https://stackoverflow.com/questions/72121479/cdp-with-remote-webdriver-webdriver-object-has-no-attribute-execute-cdp-cmd
-    :param driver:
-    :param cmd: Mostly 'Network.<enable/setCookie/disable>'
-    :param params: Mostly '{}/cookie/{}'
-    :return:
-    """
-    resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
-    url = driver.command_executor._url + resource
-    body = json.dumps({"cmd": cmd, "params": params})
-    response = driver.command_executor._request("POST", url, body)
-    return response.get("value")
-
-
-async def send_data(key, value, percentage, status="pending", is_json=False):
-    """Sends json to client
-
-    Args:
-        key (string): message/input/restrictions/accidents/mileage
-        value (any): The value of the message
-        percentage (int): Status percentage
-        status (str, optional): pending/waiting/success/fail. Defaults to "pending".
-        is_json (bool, optional): Don't know why it's necessary, will remove it later... Defaults to False.
-    """
-    global websocket
-    global STATUS_COUNTER
-
-    if percentage != -1:
-        STATUS_COUNTER = percentage
-
-    if status == "success":
-        message_object = {"status": status, "percentage": 100, "key": "message"}
-    else:
-        # What is this is_json boolean doing here? It's literally creating the same message_object...
-        if is_json:
-            message_object = {
-                "status": status,
-                "percentage": STATUS_COUNTER,
-                "key": key,
-                "value": value,
-            }
-        else:
-            message_object = {
-                "status": status,
-                "percentage": STATUS_COUNTER,
-                "key": key,
-                "value": value,
-            }
-
-    info(message_object)
-    await websocket.send(json.dumps(message_object))
-    await asyncio.sleep(0)
+    await send_to_client(sid, "message", "Cookies could not be loaded", 5, "pending")
 
 
 # endregion
@@ -204,9 +143,12 @@ def setup_logging():
     info("Logging initialized")
 
 
+# TODO: Replace wait_for_input with an input Socket.IO event
 # MARK: Wait for verification code
+@deprecated("Will be removed in the final build, use input event instead")
 async def wait_for_input(message: str, percentage: int):
-    """Waits for an input from the client
+    """
+    Waits for an input from the client
 
     Args:
         message (str): The message that should be sent to the client before waiting for input, a headsup for the client
@@ -217,7 +159,8 @@ async def wait_for_input(message: str, percentage: int):
     """
     global websocket
 
-    await send_data("input", message, percentage, status="waiting")
+    # await send_to_client("input", message, percentage, status="waiting")
 
-    received_msg = await websocket.recv()
-    return received_msg
+    # received_msg = await websocket.recv()
+    # return received_msg
+    return None
