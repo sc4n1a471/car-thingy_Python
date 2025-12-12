@@ -52,34 +52,46 @@ async def disconnect(sid, reason):
         logging.info(f"disconnect reason: {reason}")
 
 
-# MARK: Query car
+# MARK: Request license plate
 @helpers.sio.event
-async def query_car(sid, license_plate):
+async def request_license_plate(sid, license_plate):
     logging.info(f"requested car: {license_plate} by {sid}")
     await helpers.send_to_client(
         sid, "message", f"Request received, querying license plate {license_plate}", 1, "pending"
     )
-    helpers.car_requests[sid].requested_car = license_plate
-    asyncio.create_task(request_car(helpers.car_requests, sid))
+    helpers.car_requests[sid].license_plate = license_plate
+    asyncio.create_task(request_car(sid))
 
 
-# MARK: Input event
+# MARK: Input 2FA event
 @helpers.sio.event
-async def input(sid, data):
-    """
-    data = {"id": 1, "name": "script1", "input_line": "hello\n"}
-    """
-    # TODO: Resume login, then resume tasks
+async def input_2fa(sid, data):
+    if sid not in helpers.car_requests:
+        logging.error(f"Input received from unknown sid: {sid}")
+        return
+
+    if helpers.car_requests[sid].status != "waiting":
+        logging.error(f"Input received from sid: {sid} but not waiting for input")
+        return
+
+    helpers.car_requests[sid].login_code = data
+    logging.info(f"Input received from sid: {sid}")
+    await helpers.send_to_client(sid, "message", "2FA code received, continuing...", 15, "pending")
+    asyncio.create_task(request_car(sid))
 
 
-# MARK: Stop script
+# MARK: Stop request
 @helpers.sio.event
-async def stop_script(sid, data):
-    """
-    data = {"id": 1, "name": "script1"}
-    """
-    logging.info(f"Request to stop script: {data['name']}")
-    # TODO: Close selenium session (or just leave it as it will close all sessions after some time?)
+async def stop_request(sid):
+    logging.info(f"Request to stop script received from sid: {sid}")
+    if sid not in helpers.car_requests:
+        logging.error(f"Stop request received from unknown sid: {sid}")
+        return
+    selenium = helpers.car_requests[sid].selenium_session
+    if selenium is None:
+        logging.error(f"Stop request received from sid: {sid} but selenium session is None")
+        return
+    selenium.quit()
 
 
 # endregion

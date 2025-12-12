@@ -3,10 +3,10 @@ import pickle
 import logging
 
 from selenium import webdriver
+from selenium.webdriver.remote.webdriver import WebDriver
 from logging import info
 from logging.handlers import TimedRotatingFileHandler
 from .helpers import send_to_client, send
-from warnings import deprecated
 
 COUNTER = 0
 WAIT_TIME = 30
@@ -19,8 +19,16 @@ AUTHKEY = None
 RUN_ON_SERVER = True
 
 
-async def init(sid: str, x_api_key: str):
-    global driver
+async def init(sid: str, x_api_key: str) -> WebDriver | None:
+    """Checks API key, initializes the driver and returns it
+
+    Args:
+        sid (str): ID of the client connection
+        x_api_key (str): API key
+
+    Returns:
+        WebDriver | None: Selenium WebDriver instance
+    """
     global AUTHKEY
     global RUN_ON_SERVER
 
@@ -40,7 +48,7 @@ async def init(sid: str, x_api_key: str):
 
         if grid_ip == "default":
             await send_to_client(sid, "message", "Selenium Grid IP address has the default value", 100, "fail")
-            return
+            return None
 
         driver = webdriver.Remote(grid_ip, options=chrome_options)
     else:
@@ -62,7 +70,7 @@ async def init(sid: str, x_api_key: str):
                 100,
                 "fail",
             )
-            return
+            return None
 
         s = Service(chromedriver)
 
@@ -71,22 +79,23 @@ async def init(sid: str, x_api_key: str):
 
     await send_to_client(sid, "message", "Driver initialized", 3, "pending")
 
-    await load_cookies(sid)
+    await load_cookies(sid, driver)
+    return driver
 
 
 # region: Cookie handling
-def save_cookie():
+def save_cookie(driver: WebDriver):
     with open(COOKIES, "wb") as filehandler:
         pickle.dump(driver.get_cookies(), filehandler)
 
 
-async def load_cookies(sid: str):
+async def load_cookies(sid: str, driver: WebDriver):
     """
     Loads cookies before the first GET to magyarorszag.hu as it redirects to .gov.hu
-        if no cookies were found for magyarorszag.hu domain and then these domains can't be
-        added because of domain mismatch
-        https://stackoverflow.com/questions/63220248/how-to-preload-cookies-before-first-request-with-python3-selenium-chrome-webdri
-    :return:
+
+    If no cookies were found for magyarorszag.hu domain and then these domains can't be
+    added because of domain mismatch
+    https://stackoverflow.com/questions/63220248/how-to-preload-cookies-before-first-request-with-python3-selenium-chrome-webdri
     """
     if os.path.exists(COOKIES) and os.path.isfile(COOKIES):
         await send_to_client(sid, "message", "Loading cookies...", 3, "pending")
@@ -141,26 +150,3 @@ def setup_logging():
     # https://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout
     # Log to file and console
     info("Logging initialized")
-
-
-# TODO: Replace wait_for_input with an input Socket.IO event
-# MARK: Wait for verification code
-@deprecated("Will be removed in the final build, use input event instead")
-async def wait_for_input(message: str, percentage: int):
-    """
-    Waits for an input from the client
-
-    Args:
-        message (str): The message that should be sent to the client before waiting for input, a headsup for the client
-        percentage (int): The current percentage
-
-    Returns:
-        str: Message received from the client
-    """
-    global websocket
-
-    # await send_to_client("input", message, percentage, status="waiting")
-
-    # received_msg = await websocket.recv()
-    # return received_msg
-    return None

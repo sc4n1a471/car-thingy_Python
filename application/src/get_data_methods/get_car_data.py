@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
-from application.data import settings
+from application.data import helpers, settings
 from application.data.xpaths import XPATHS
 from application.models.Car import Car
 from ..get_data_methods.get_accidents import get_accidents
@@ -15,67 +15,72 @@ from ..get_data_methods.get_restrictions import get_restrictions
 from ...models.GetDataException import GetDataException
 
 
-async def get_car_data(car: Car):
+async def get_car_data(sid: str, car: Car):
     """Gets all information on the requested car
 
     Args:
+        sid (str): ID of client connection
         car (Car): Car object
 
     Raises:
         GetDataException: Yup, you guessed it, it raises GetDataException
     """
 
+    selenium = helpers.car_requests[sid].selenium_session
+    if selenium is None:
+        raise GetDataException("Selenium session is None")
+
     # region: Specs
-    WebDriverWait(settings.driver, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.brand)))
-    car.brand = settings.driver.find_element(By.XPATH, XPATHS.brand).text
-    await settings.send_data("brand", car.brand, 25, "pending")
+    WebDriverWait(selenium, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.brand)))
+    car.brand = selenium.find_element(By.XPATH, XPATHS.brand).text
+    await helpers.send_to_client(sid, "brand", car.brand, 25, "pending")
 
     try:
-        car.model = settings.driver.find_element(By.XPATH, XPATHS.model).text
-        await settings.send_data("model", car.model, 27, "pending")
+        car.model = selenium.find_element(By.XPATH, XPATHS.model).text
+        await helpers.send_to_client(sid, "model", car.model, 27, "pending")
     except NoSuchElementException:
-        await settings.send_data("message", "NOT FOUND: Model", 27, "pending")
+        await helpers.send_to_client(sid, "message", "NOT FOUND: Model", 27, "pending")
 
     try:
-        car.type_code = settings.driver.find_element(By.XPATH, XPATHS.type_code).text
-        await settings.send_data("type_code", car.type_code, 29, "pending")
+        car.type_code = selenium.find_element(By.XPATH, XPATHS.type_code).text
+        await helpers.send_to_client(sid, "type_code", car.type_code, 29, "pending")
     except NoSuchElementException:
-        await settings.send_data("message", "NOT FOUND: Type_code", 29, "pending")
+        await helpers.send_to_client(sid, "message", "NOT FOUND: Type_code", 29, "pending")
 
     try:
-        car.status = settings.driver.find_element(By.XPATH, XPATHS.status).text
-        await settings.send_data("status", car.status, 31, "pending")
+        car.status = selenium.find_element(By.XPATH, XPATHS.status).text
+        await helpers.send_to_client(sid, "status", car.status, 31, "pending")
     except NoSuchElementException:
-        await settings.send_data("message", "NOT FOUND: Status", 29, "pending")
+        await helpers.send_to_client(sid, "message", "NOT FOUND: Status", 29, "pending")
 
     if not settings.TESTING:
-        settings.driver.switch_to.default_content()
-        iframe = settings.driver.find_element(By.XPATH, XPATHS.main_frame)
-        settings.driver.switch_to.frame(iframe)
+        selenium.switch_to.default_content()
+        iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
+        selenium.switch_to.frame(iframe)
 
-    if len(settings.driver.find_elements(By.XPATH, XPATHS.no_official_data)) != 0:
-        await settings.send_data("message", "NOT FOUND: Official records", 47, "pending")
+    if len(selenium.find_elements(By.XPATH, XPATHS.no_official_data)) != 0:
+        await helpers.send_to_client(sid, "message", "NOT FOUND: Official records", 47, "pending")
     else:
-        WebDriverWait(settings.driver, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.first_reg)))
-        car.first_reg = settings.driver.find_elements(By.XPATH, XPATHS.first_reg)[0].text
-        await settings.send_data("first_reg", car.first_reg, 31, "pending")
+        WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.first_reg)))
+        car.first_reg = selenium.find_elements(By.XPATH, XPATHS.first_reg)[0].text
+        await helpers.send_to_client(sid, "first_reg", car.first_reg, 31, "pending")
 
-        car.first_reg_hun = settings.driver.find_elements(By.XPATH, XPATHS.first_reg_hun)[0].text
-        await settings.send_data("first_reg_hun", car.first_reg_hun, 33, "pending")
+        car.first_reg_hun = selenium.find_elements(By.XPATH, XPATHS.first_reg_hun)[0].text
+        await helpers.send_to_client(sid, "first_reg_hun", car.first_reg_hun, 33, "pending")
 
-        car.num_of_owners = int(settings.driver.find_elements(By.XPATH, XPATHS.num_of_owners)[0].text)
-        await settings.send_data("num_of_owners", car.num_of_owners, 35, "pending")
+        car.num_of_owners = int(selenium.find_elements(By.XPATH, XPATHS.num_of_owners)[0].text)
+        await helpers.send_to_client(sid, "num_of_owners", car.num_of_owners, 35, "pending")
 
-        car.year = int(settings.driver.find_elements(By.XPATH, XPATHS.year)[0].text)
-        await settings.send_data("year", car.year, 37, "pending")
+        car.year = int(selenium.find_elements(By.XPATH, XPATHS.year)[0].text)
+        await helpers.send_to_client(sid, "year", car.year, 37, "pending")
 
-        car.fuel_type = settings.driver.find_elements(By.XPATH, XPATHS.fuel_type)[0].text
-        await settings.send_data("fuel_type", car.fuel_type, 39, "pending")
+        car.fuel_type = selenium.find_elements(By.XPATH, XPATHS.fuel_type)[0].text
+        await helpers.send_to_client(sid, "fuel_type", car.fuel_type, 39, "pending")
 
         if not car.fuel_type.lower() == "elektromos":
-            engine_size = settings.driver.find_elements(By.XPATH, XPATHS.engine_size)[0].text
+            engine_size = selenium.find_elements(By.XPATH, XPATHS.engine_size)[0].text
             car.engine_size = int(engine_size.replace(" ", "").replace("cm³", ""))
-            await settings.send_data("engine_size", car.engine_size, 41, "pending")
+            await helpers.send_to_client(sid, "engine_size", car.engine_size, 41, "pending")
 
         if (
             car.brand == ""
@@ -88,20 +93,20 @@ async def get_car_data(car: Car):
         ):
             raise GetDataException("All found data is empty")
 
-        performance = settings.driver.find_elements(By.XPATH, XPATHS.performance)[0].text
+        performance = selenium.find_elements(By.XPATH, XPATHS.performance)[0].text
         car.performance = int(performance.replace(" kW", ""))
         car.performance = int(int(car.performance) * 1.34)  # convert kW to HP
-        await settings.send_data("performance", car.performance, 43, "pending")
+        await helpers.send_to_client(sid, "performance", car.performance, 43, "pending")
 
-        car.gearbox = settings.driver.find_elements(By.XPATH, XPATHS.gearbox)[0].text
+        car.gearbox = selenium.find_elements(By.XPATH, XPATHS.gearbox)[0].text
         tmp = car.gearbox.split(" ")
         car.gearbox = tmp[2]
-        await settings.send_data("gearbox", car.gearbox, 45, "pending")
+        await helpers.send_to_client(sid, "gearbox", car.gearbox, 45, "pending")
 
-        car.color = settings.driver.find_elements(By.XPATH, XPATHS.color)[0].text
+        car.color = selenium.find_elements(By.XPATH, XPATHS.color)[0].text
         tmp = car.color.split(" ")
         car.color = tmp[1]
-        await settings.send_data("color", car.color, 47, "pending")
+        await helpers.send_to_client(sid, "color", car.color, 47, "pending")
     # endregion
 
     # 47%
@@ -109,27 +114,27 @@ async def get_car_data(car: Car):
     # MARK: Get restrictions
     if car.has_restriction_record:
         try:
-            await get_restrictions(car)  # 60%
+            await get_restrictions(sid, selenium, car)  # 60%
         except Exception as exc:
             raise GetDataException(f"GET_RESTRICTIONS_ERROR: {traceback.format_exc()}") from exc
 
     # MARK: Get mileage
     if car.has_mileage_record:
         try:
-            await get_mileage(car)  # 70%
+            await get_mileage(sid, selenium, car)  # 70%
         except Exception as exc:
             raise GetDataException(f"GET_MILEAGE_ERROR: {traceback.format_exc()}") from exc
 
     # MARK: Get accidents
     if car.has_accident_record:
         try:
-            await get_accidents(car)  # 80%
+            await get_accidents(sid, selenium, car)  # 80%
         except Exception as exc:
             raise GetDataException(f"GET_ACCIDENTS_ERROR: {traceback.format_exc()}") from exc
 
     # MARK: Get images
     if car.has_inspection_record and not settings.TESTING:
         try:
-            await get_images(car)  # 98%
+            await get_images(sid, selenium, car)  # 98%
         except Exception as exc:
             raise GetDataException(f"GET_IMAGES_ERROR: {traceback.format_exc()}") from exc

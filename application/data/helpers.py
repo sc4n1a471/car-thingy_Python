@@ -4,8 +4,10 @@ import os
 import requests
 from socketio import AsyncServer
 
+from application.models.CarRequest import CarRequest
+
 sio: AsyncServer
-car_requests = {}
+car_requests: dict[str, CarRequest] = {}
 # {
 #     "<sid>": CarRequest(),
 #     "<sid>": CarRequest(),
@@ -13,7 +15,7 @@ car_requests = {}
 
 
 # MARK: Send to client
-async def send_to_client(sid: str, key: str, value: str | int | None, percentage: int | float, status="pending"):
+async def send_to_client(sid: str, key: str, value: str | int | list | None, percentage: int | float, status="pending"):
     """Sends json to client
 
     Args:
