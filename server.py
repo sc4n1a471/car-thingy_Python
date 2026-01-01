@@ -118,4 +118,4 @@ async def root():
 
 # MARK: Run the server
 if __name__ == "__main__":
-    uvicorn.run(socket_app, host="0.0.0.0", port=8000)
+    uvicorn.run(socket_app, host="0.0.0.0", port=3001)
