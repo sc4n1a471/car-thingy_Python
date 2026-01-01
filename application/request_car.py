@@ -88,6 +88,8 @@ async def request_car(sid: str):
         if license_plates[0].lower() == "test113":
             info(f"Got 2FA code: {helpers.car_requests[sid].login_code} for sid: {sid}")
             helpers.car_requests[sid].status = "running"
+            await helpers.send_to_client(sid, "message", None, 100, "success")
+            return
         # endregion
 
         if helpers.car_requests[sid].status == "running":

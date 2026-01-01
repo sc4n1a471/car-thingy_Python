@@ -57,7 +57,7 @@ docker run \
 ```
 
 ## Usage ##
-- Connect to the `ws://IP:PORT` using plain websocket
+- Connect to the `http://IP:PORT` using Socket.IO client library
 - Set the `x-api-key` header of the request to your API key
 - Send a message containing the license plate
 - When it requests your 2FA key, send it as plain text

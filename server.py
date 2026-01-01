@@ -63,6 +63,13 @@ async def request_license_plate(sid, license_plate):
     asyncio.create_task(request_car(sid))
 
 
+# MARK: Ping event
+@helpers.sio.event
+async def ping(sid):
+    logging.info(f"Client pinged: {sid}")
+    await helpers.sio.emit("pong", data="heeeeee", to=sid)
+
+
 # MARK: Input 2FA event
 @helpers.sio.event
 async def input_2fa(sid, data):
@@ -91,7 +98,10 @@ async def stop_request(sid):
     if selenium is None:
         logging.error(f"Stop request received from sid: {sid} but selenium session is None")
         return
-    selenium.quit()
+    try:
+        selenium.quit()
+    except:
+        pass
 
 
 # endregion
