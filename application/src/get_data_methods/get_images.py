@@ -9,8 +9,9 @@ from typing import List
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webdriver import WebDriver
 
-from application.data import settings
+from application.data import settings, helpers
 from application.data.xpaths import XPATHS
 from application.models.Car import Car
 from application.models.Inspection import Inspection
@@ -18,10 +19,12 @@ from application.models.Inspection import Inspection
 from logging import info
 
 
-async def get_images(car: Car):
+async def get_images(sid: str, selenium: WebDriver, car: Car):
     """Downloads images associated to the inspections
 
     Args:
+        sid (str): ID of client connection
+        selenium (WebDriver): Selenium session
         car (Car): Car object
     """
 
@@ -47,24 +50,26 @@ async def get_images(car: Car):
     ]
 
     for inspection_type in inspection_types:
-        WebDriverWait(settings.driver, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)))
-        settings.driver.find_element(By.XPATH, inspection_type["tab_path"]).click()
-        await settings.send_data("message", f"Searching for {inspection_type['name']}...", percentage, "pending")
+        WebDriverWait(selenium, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)))
+        selenium.find_element(By.XPATH, inspection_type["tab_path"]).click()
+        await helpers.send_to_client(
+            sid, "message", f"Searching for {inspection_type['name']}...", percentage, "pending"
+        )
 
-        if len(settings.driver.find_elements(By.XPATH, inspection_type["no_inspection_data"])) != 0:
-            await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
+        if len(selenium.find_elements(By.XPATH, inspection_type["no_inspection_data"])) != 0:
+            await helpers.send_to_client(sid, "message", "NOT FOUND: Inspection data", max_percentage, "pending")
         else:
             car_inspections: List[Inspection] = []
 
             try:
-                WebDriverWait(settings.driver, 5).until(
+                WebDriverWait(selenium, 5).until(
                     ec.presence_of_element_located((By.XPATH, inspection_type["list_path"]))
                 )
             except:
-                await settings.send_data("message", "NOT FOUND: Inspection data", max_percentage, "pending")
+                await helpers.send_to_client(sid, "message", "NOT FOUND: Inspection data", max_percentage, "pending")
                 continue
 
-            inspections = settings.driver.find_elements(By.XPATH, inspection_type["list_path"])
+            inspections = selenium.find_elements(By.XPATH, inspection_type["list_path"])
             for inspection_data, i in zip(inspections, range(0, len(inspections))):
                 if i != 0:  # the first inspection is open on tab change
                     inspection_data.click()
@@ -74,10 +79,11 @@ async def get_images(car: Car):
                 while retry:
                     if inspection_data.text != "" or counter == 30:
                         percentage += 1
-                        await settings.send_data("message", f"FOUND: Inspection", percentage, "pending")
+                        await helpers.send_to_client(sid, "message", f"FOUND: Inspection", percentage, "pending")
                         car_inspections.append(Inspection(inspection_data.text))
                         break
-                    await settings.send_data(
+                    await helpers.send_to_client(
+                        sid,
                         "message",
                         "NOT FOUND: Inspection, searching again...",
                         -1,
@@ -91,9 +97,7 @@ async def get_images(car: Car):
             while counter < 5:
                 # MARK: Opening image panels
                 try:
-                    show_pictures_buttons = settings.driver.find_elements(
-                        By.XPATH, inspection_type["show_pictures_path"]
-                    )
+                    show_pictures_buttons = selenium.find_elements(By.XPATH, inspection_type["show_pictures_path"])
                     show_pictures_buttons.pop(0)
                     counter = 6
                 except:
@@ -109,21 +113,21 @@ async def get_images(car: Car):
                 # MARK: Opening image dialogs
                 button.click()
 
-                settings.driver.switch_to.default_content()
-                dialog_frame = settings.driver.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
-                settings.driver.switch_to.frame(dialog_frame)
+                selenium.switch_to.default_content()
+                dialog_frame = selenium.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
+                selenium.switch_to.frame(dialog_frame)
 
                 try:
-                    WebDriverWait(settings.driver, 2).until(
+                    WebDriverWait(selenium, 2).until(
                         ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures))
                     )
                     # time.sleep(1)
                 except:
-                    WebDriverWait(settings.driver, 7).until(
+                    WebDriverWait(selenium, 7).until(
                         ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures))
                     )
 
-                    imgs = settings.driver.find_elements(By.XPATH, XPATHS.inspections_pictures)
+                    imgs = selenium.find_elements(By.XPATH, XPATHS.inspections_pictures)
 
                     for img in imgs:
                         src = img.get_attribute("src")
@@ -132,35 +136,37 @@ async def get_images(car: Car):
                             if not replaced_src in images:
                                 images.append(replaced_src)
                                 percentage += 0.25
-                                await settings.send_data("message", f"FOUND: Image", percentage, "pending")
+                                await helpers.send_to_client(sid, "message", f"FOUND: Image", percentage, "pending")
 
                     car_inspections[i].images = images
 
-                WebDriverWait(settings.driver, 4).until(
+                WebDriverWait(selenium, 4).until(
                     ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button))
                 )
-                close_dialog_button = settings.driver.find_element(By.XPATH, XPATHS.inspections_close_button)
+                close_dialog_button = selenium.find_element(By.XPATH, XPATHS.inspections_close_button)
                 close_dialog_button.click()
 
-                settings.driver.switch_to.default_content()
-                iframe = settings.driver.find_element(By.XPATH, XPATHS.main_frame)
-                settings.driver.switch_to.frame(iframe)
+                selenium.switch_to.default_content()
+                iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
+                selenium.switch_to.frame(iframe)
 
-            await save_images(car.license_plate, car_inspections)
+            await save_images(sid, car.license_plate, car_inspections)
 
 
 # MARK: Save images
-async def save_images(license_plate, inspections):
+async def save_images(sid: str, license_plate: str, inspections: list[Inspection]):
     """Saves the image files into folders
 
     Args:
+        sid (str): ID of client connection
         license_plate (str): License plate of the inspections
         inspections (list[Inspection]): Inspection objects
     """
-    await settings.send_data("message", "Saving images...", 94, "pending")
+    await helpers.send_to_client(sid, "message", "Saving images...", 94, "pending")
 
     if not os.path.exists("downloaded_images"):
-        await settings.send_data(
+        await helpers.send_to_client(
+            sid,
             "message",
             "downloaded_images folder does not exist, not saving images...",
             96,
@@ -177,7 +183,8 @@ async def save_images(license_plate, inspections):
     try:
         os.mkdir(license_plate_path)
     except Exception as exc:
-        await settings.send_data(
+        await helpers.send_to_client(
+            sid,
             "message",
             f"Folder for license plate ({license_plate_path}) already exists",
             96,
@@ -203,7 +210,8 @@ async def save_images(license_plate, inspections):
         try:
             os.mkdir(unix_path)
         except Exception as exc:
-            await settings.send_data(
+            await helpers.send_to_client(
+                sid,
                 "message",
                 f"Folder for inspection ({unix_path}) already exists",
                 96,
@@ -221,14 +229,14 @@ async def save_images(license_plate, inspections):
             counter += 1
 
     try:
-        await upload_inspections(license_plate, inspections, image_paths)
+        await upload_inspections(sid, license_plate, inspections, image_paths)
     except Exception as exc:
-        await settings.send_data("message", f"Upload failed with error {exc}", 98, "fail")
+        await helpers.send_to_client(sid, "message", f"Upload failed with error {exc}", 98, "fail")
         shutil.rmtree(unix_path)
 
 
 # MARK: Upload images
-async def upload_inspections(license_plate: str, inspections: list[Inspection], image_paths: List[str]):
+async def upload_inspections(sid: str, license_plate: str, inspections: list[Inspection], image_paths: List[str]):
     """Uploads the inspection images to the GO server
 
     Args:
@@ -263,4 +271,4 @@ async def upload_inspections(license_plate: str, inspections: list[Inspection], 
     if req.status_code != 200:
         raise Exception(f"Upload failed with status code: {req.status_code} and error: {req.text}")
     else:
-        await settings.send_data("message", f"Upload successful", 98, "pending")
+        await helpers.send_to_client(sid, "message", f"Upload successful", 98, "pending")
