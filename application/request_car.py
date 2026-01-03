@@ -101,7 +101,10 @@ async def request_car(sid: str):
                 return
         except LoginException as exc:
             exception(exc)
-            selenium.quit()
+            try:
+                selenium.quit()
+            except:
+                pass
             await helpers.send_to_client(sid, "message", f"Login failed: {exc.message}", 100, "fail")
             return
         except TimeoutException as toexc:
