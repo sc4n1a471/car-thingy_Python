@@ -60,6 +60,7 @@ async def request_license_plate(sid, license_plate):
         sid, "message", f"Request received, querying license plate {license_plate}", 1, "pending"
     )
     helpers.car_requests[sid].license_plate = license_plate
+    helpers.car_requests[sid].status = "running"
     asyncio.create_task(request_car(sid))
 
 
@@ -99,6 +100,7 @@ async def stop_request(sid):
         logging.error(f"Stop request received from sid: {sid} but selenium session is None")
         return
     try:
+        helpers.car_requests[sid].set_status("cancelled")
         selenium.quit()
     except:
         pass

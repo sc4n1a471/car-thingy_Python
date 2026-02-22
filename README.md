@@ -4,7 +4,7 @@ Ez lenni repository for car-thingy_Python
 
 ---
 
-This server-side application is part of the car-thingy system. It's a Python application that sends/receives messages through the Websocket protocol. It accepts a license plate, logs in to JSZP with the given credentials, requests the 2FA code from the client, searches for the license plate and sends the following information back to the client:
+This server-side application is part of the car-thingy system. It's a Python application that sends/receives messages through Socket.IO. It accepts a license plate, logs in to JSZP with the given credentials, requests the 2FA code from the client, searches for the license plate and sends the following information back to the client:
 - Basic registration info of the car
 - Basic specs of the car
 - Odometer
@@ -36,7 +36,6 @@ terraform apply \
     -var="app_password=<Ügyfélkapu passwd>" \
     -var="app_grid_ip=<http://<selenium grid IP>:4444/wd/hub>" \
     -var="go_ip=<http:/<car-thingy_GO IP>:3000>" \
-    -var="graylog_host=<Graylog host>" \                            # Optional
     -auto-approve
 ```
 ### Docker ###

@@ -15,12 +15,12 @@ class CarRequest:
         """Sets new status for request
 
         Args:
-            new_status (str): New status [running / waiting]
+            new_status (str): New status [running / waiting / cancelled]
 
         Raises:
             ValueError: If invalid new status is provided
         """
-        if new_status in ["running", "waiting"]:
+        if new_status in ["running", "waiting", "cancelled"]:
             self.status = new_status
         else:
             raise ValueError("Invalid status value")

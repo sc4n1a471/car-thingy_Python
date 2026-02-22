@@ -23,22 +23,10 @@ async def get_data(sid: str, requested_cars: list[str]):
     selenium = helpers.car_requests[sid].selenium_session
     if selenium is None:
         raise GetDataException("Selenium session is None")
-    cold_start = True
     car_data: list[Car] = []
     for requested_car in requested_cars:
         car = Car()
         car.license_plate = requested_car.upper()
-
-        if not cold_start:
-            await helpers.send_to_client(
-                sid,
-                "message",
-                f"Already logged in, waiting {settings.WAIT_TIME} sec...",
-                -1,
-                "pending",
-            )
-            time.sleep(settings.WAIT_TIME)
-            selenium.get("https://magyarorszag.hu/jszp_szuf")
 
         try:
             WebDriverWait(selenium, 30).until(ec.presence_of_element_located((By.XPATH, XPATHS.request_page)))
@@ -47,7 +35,13 @@ async def get_data(sid: str, requested_cars: list[str]):
         except Exception as e:
             raise GetDataException(e.args) from e
 
-        await fill_search(sid, selenium, requested_car)  # 16%
+        try:
+            wait_seconds = helpers.get_query_timestemp(helpers.car_requests[sid].x_api_key)
+            if wait_seconds is None:
+                raise GetDataException("Last query is None")
+            await fill_search(sid, selenium, requested_car, wait=wait_seconds)  # 16%
+        except Exception as e:
+            raise GetDataException(e.args) from e
 
         try:
             await check_error_modal(sid, selenium, car, requested_car)  # +4%
@@ -64,7 +58,6 @@ async def get_data(sid: str, requested_cars: list[str]):
         await get_car_data(sid, car)
 
         car_data.append(car)
-        cold_start = False
         info("=================")
 
     return car_data
@@ -87,10 +80,11 @@ async def fill_search(sid: str, selenium: WebDriver, requested_car: str, wait=0)
     WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.search_input)))
     selenium.find_element(By.XPATH, XPATHS.search_input).clear()
     selenium.find_element(By.XPATH, XPATHS.search_input).send_keys(requested_car)
-    await helpers.send_to_client(sid, "message", "FILLED: license plate", 15, "pending")
+    await helpers.send_to_client(sid, "message", f"FILLED: license plate, waiting {wait} seconds", 15, "pending")
 
     await asyncio.sleep(wait)
 
+    helpers.create_query_timestamp(helpers.car_requests[sid].x_api_key, requested_car)
     selenium.find_element(By.XPATH, XPATHS.search_input).send_keys(Keys.ENTER)
     await helpers.send_to_client(sid, "message", "Searching for license plate...", 16, "pending")
 
