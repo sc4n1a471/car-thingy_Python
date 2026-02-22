@@ -36,7 +36,7 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
                 break
         except:
             counter += 1
-            time.sleep(0.25)
+            time.sleep(1)
             continue
 
     if counter == 10:
