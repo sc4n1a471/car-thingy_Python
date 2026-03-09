@@ -8,7 +8,7 @@ from application.data import helpers
 from application.data.xpaths import XPATHS
 from application.models.Car import Car
 
-import time
+import asyncio
 
 
 async def get_accidents(sid: str, selenium: WebDriver, car: Car):
@@ -27,7 +27,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
                 selenium.refresh()
             if selenium.find_element(By.XPATH, XPATHS.loading_spinner).is_displayed():
                 await helpers.send_to_client(sid, "message", "Loading spinner found, waiting...", 48, "pending")
-                time.sleep(0.5)
+                await asyncio.sleep(0.5)
                 counter += 1
                 continue
             else:
@@ -35,7 +35,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
                 break
         except:
             counter += 1
-            time.sleep(0.25)
+            await asyncio.sleep(0.25)
             continue
 
     if counter == 10:
@@ -49,7 +49,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
             selenium.find_element(By.XPATH, XPATHS.accidents_tab).click()
             break
         except ElementClickInterceptedException:
-            time.sleep(1)
+            await asyncio.sleep(1)
             counter += 1
             continue
 
@@ -89,7 +89,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
                         "pending",
                     )
                     counter += 1
-                    time.sleep(0.25)
+                    await asyncio.sleep(0.25)
                     break
             except StaleElementReferenceException:
                 continue

@@ -1,5 +1,4 @@
 import asyncio
-import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -8,7 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 
-from logging import info
+from logging import info, error, exception
 
 from application.data import helpers, settings
 from application.data.xpaths import XPATHS
@@ -19,7 +18,22 @@ from ..models.NoVehicleManagementException import NoVehicleManagementException
 from ..models.UnreleasedLPException import UnreleasedLPException
 
 
-async def get_data(sid: str, requested_cars: list[str]):
+# MARK: Get data function
+async def get_data(sid: str, requested_cars: list[str], check_cookies=False) -> list[Car]:
+    """Gets the data for the requested license plates, returns a list of Car objects
+
+    Args:
+        sid (str): ID of client connection
+        requested_cars (list[str]): List of license plates to search for
+        check_cookies (bool, optional): Whether to check cookies. Defaults to False.
+
+    Raises:
+        GetDataException: If there was an error during getting data, the exception is raised with the original exception as inner exception
+        UnreleasedLPException: If the license plate is not released
+
+    Returns:
+        list[Car]: List of Car objects
+    """
     selenium = helpers.car_requests[sid].selenium_session
     if selenium is None:
         raise GetDataException("Selenium session is None")
@@ -28,7 +42,33 @@ async def get_data(sid: str, requested_cars: list[str]):
         car = Car()
         car.license_plate = requested_car.upper()
 
+        info(f"Check cookies or not: {check_cookies}")
+        if check_cookies:
+            try:
+                counter = 0
+                while counter < 5:
+                    try:
+                        selenium.switch_to.default_content()
+                        selenium.switch_to.frame(5)
+                        WebDriverWait(selenium, 1).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accept_cookies)))
+                        break
+                    except Exception:
+                        counter += 1
+                        info(f"Accept cookies button not found, retrying... ({counter}/5)")
+                        await asyncio.sleep(1)
+                if counter == 5:
+                    info("Accept cookies button not found after 5 retries, continuing without accepting cookies")
+                else:
+                    selenium.find_element(By.XPATH, XPATHS.accept_cookies).click()
+                    await helpers.send_to_client(sid, "message", "Accepted cookies", 13, "pending")
+                    selenium.switch_to.default_content()
+            except Exception as e:
+                error(f"Accept cookies button not found or not clickable:")
+                exception(e)
+
         try:
+            selenium.switch_to.default_content()
+            selenium.switch_to.frame(1)
             WebDriverWait(selenium, 30).until(ec.presence_of_element_located((By.XPATH, XPATHS.request_page)))
             await helpers.send_to_client(sid, "message", "FOUND: Jármű Szolgáltatási Platform", 14, "pending")
             settings.save_cookie(selenium)

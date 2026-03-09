@@ -1,6 +1,6 @@
 import shutil
 import urllib.request
-import time
+import asyncio
 import os
 import requests
 
@@ -90,8 +90,8 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
                         "pending",
                     )
                     counter += 1
-                    time.sleep(0.1)
-                time.sleep(0.4)
+                    await asyncio.sleep(0.1)
+                await asyncio.sleep(0.4)
 
             counter = 0
             while counter < 5:
@@ -102,7 +102,7 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
                     counter = 6
                 except:
                     counter += 1
-                    time.sleep(0.25)
+                    await asyncio.sleep(0.25)
 
             if counter == 5:
                 return
@@ -121,7 +121,7 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
                     WebDriverWait(selenium, 2).until(
                         ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures))
                     )
-                    # time.sleep(1)
+                    # await asyncio.sleep(1)
                 except:
                     WebDriverWait(selenium, 7).until(
                         ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures))

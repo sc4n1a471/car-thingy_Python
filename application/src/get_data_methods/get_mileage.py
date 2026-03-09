@@ -1,4 +1,4 @@
-import time
+import asyncio
 
 from selenium.common.exceptions import StaleElementReferenceException, ElementClickInterceptedException
 from selenium.webdriver.common.by import By
@@ -27,7 +27,7 @@ async def get_mileage(sid: str, selenium: WebDriver, car: Car):
 
             if selenium.find_element(By.XPATH, XPATHS.loading_spinner).is_displayed():
                 await helpers.send_to_client(sid, "message", "Loading spinner found, waiting...", 48, "pending")
-                time.sleep(0.5)
+                await asyncio.sleep(0.5)
                 counter += 1
                 continue
             else:
@@ -35,7 +35,7 @@ async def get_mileage(sid: str, selenium: WebDriver, car: Car):
                 break
         except:
             counter += 1
-            time.sleep(0.25)
+            await asyncio.sleep(0.25)
             continue
 
     if counter == 10:
@@ -52,7 +52,7 @@ async def get_mileage(sid: str, selenium: WebDriver, car: Car):
             break
         except ElementClickInterceptedException:
             counter += 1
-            time.sleep(0.25)
+            await asyncio.sleep(0.25)
             continue
 
     await helpers.send_to_client(sid, "message", "Searching for mileage data...", 62, "pending")
@@ -86,7 +86,7 @@ async def get_mileage(sid: str, selenium: WebDriver, car: Car):
                         "pending",
                     )
                     counter += 1
-                    time.sleep(0.25)
+                    await asyncio.sleep(0.25)
                     break
             except StaleElementReferenceException:
                 continue

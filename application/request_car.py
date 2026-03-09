@@ -1,5 +1,4 @@
 import asyncio
-import time
 import traceback
 
 from selenium.common import TimeoutException, WebDriverException
@@ -72,7 +71,7 @@ async def request_car(sid: str):
                 counter = 5.5
 
                 for key, value in RES.items():
-                    time.sleep(0.05)
+                    await asyncio.sleep(0.05)
                     await helpers.send_to_client(sid, key, value, counter)
                     counter += 100 / 17
 
@@ -95,8 +94,10 @@ async def request_car(sid: str):
         if helpers.car_requests[sid].status == "running":
             selenium.get(settings.URL)
 
+        check_cookies = True
         try:
             wait_for_login_code = await login(sid, selenium)  # MARK: Login - 13 %
+            check_cookies = wait_for_login_code
             if wait_for_login_code:
                 return
         except LoginException as exc:
@@ -114,7 +115,7 @@ async def request_car(sid: str):
             return
 
         try:
-            await get_data(sid, license_plates)  # MARK: Get data
+            await get_data(sid, license_plates, check_cookies)  # MARK: Get data
         except UnreleasedLPException as ulp:
             exception(ulp)
             selenium.quit()

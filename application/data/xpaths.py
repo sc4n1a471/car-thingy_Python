@@ -8,7 +8,7 @@ class XPATHS:
     login_button = '//input[@value="Bejelentkezés"]'
     accident_record_checkbox = '//input[@id="checkbox-BiztositasKartortenet"]'
     inspection_record_checkbox = '//input[@id="checkbox-MuszakiAllapot"]'
-    request_page = '//title[text() = "Jármű Szolgáltatási Platform"]'
+    request_page = '//h1[text() = "Járműadatok igénylése"]'
     search_input = '//input[@id="input-rendszam"]'
     car_page = '//h1[@id="header-jarmu_adatai"]'
     no_official_data = '//p[contains(text(), "A járműhöz nem tartoznak okmányadatok.")]'
@@ -63,3 +63,5 @@ class XPATHS:
     )
     # div id="ajax_loader"
     loading_spinner = '//*[@id="ajax_loader"]'
+
+    accept_cookies = '//button[text()="Összes süti elfogadása"]'
