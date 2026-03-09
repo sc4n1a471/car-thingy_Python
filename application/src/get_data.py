@@ -67,9 +67,19 @@ async def get_data(sid: str, requested_cars: list[str], check_cookies=False) -> 
                 exception(e)
 
         try:
-            selenium.switch_to.default_content()
-            selenium.switch_to.frame(1)
-            WebDriverWait(selenium, 30).until(ec.presence_of_element_located((By.XPATH, XPATHS.request_page)))
+            counter = 0
+            while counter < 5:
+                try:
+                    selenium.switch_to.default_content()
+                    selenium.switch_to.frame(1)
+                    WebDriverWait(selenium, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.request_page)))
+                    break
+                except Exception:
+                    counter += 1
+                    info(f"Request page not found, retrying... ({counter}/5)")
+                    await asyncio.sleep(1)
+            if counter == 5:
+                raise GetDataException("Request page not found after 5 retries, maybe the page did not load?")
             await helpers.send_to_client(sid, "message", "FOUND: Jármű Szolgáltatási Platform", 14, "pending")
             settings.save_cookie(selenium)
         except Exception as e:
@@ -119,6 +129,7 @@ async def fill_search(sid: str, selenium: WebDriver, requested_car: str, wait=0)
     selenium.switch_to.frame(1)
 
     WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.search_input)))
+    WebDriverWait(selenium, 10).until(ec.element_to_be_clickable((By.XPATH, XPATHS.search_input)))
     selenium.find_element(By.XPATH, XPATHS.search_input).clear()
     selenium.find_element(By.XPATH, XPATHS.search_input).send_keys(requested_car)
     await helpers.send_to_client(sid, "message", f"FILLED: license plate, waiting {wait} seconds", 15, "pending")
