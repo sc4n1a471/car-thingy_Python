@@ -1,4 +1,4 @@
-import time
+import asyncio
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -28,7 +28,7 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
 
             if selenium.find_element(By.XPATH, XPATHS.loading_spinner).is_displayed():
                 await helpers.send_to_client(sid, "message", "Loading spinner found, waiting...", 48, "pending")
-                time.sleep(0.5)
+                await asyncio.sleep(0.5)
                 counter += 1
                 continue
             else:
@@ -36,7 +36,7 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
                 break
         except:
             counter += 1
-            time.sleep(1)
+            await asyncio.sleep(1)
             continue
 
     if counter == 10:
@@ -51,7 +51,7 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
             break
         except:
             counter += 1
-            time.sleep(0.25)
+            await asyncio.sleep(0.25)
             continue
     if counter == 5:
         await helpers.send_to_client(sid, "message", "Restrictions tab not found", 49, "pending")
@@ -81,7 +81,7 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
                         "pending",
                     )
                     counter += 1
-                    time.sleep(0.25)
+                    await asyncio.sleep(0.25)
                     break
             except:
                 continue

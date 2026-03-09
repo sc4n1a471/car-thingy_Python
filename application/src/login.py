@@ -1,6 +1,7 @@
 import asyncio
-import time
 import os
+
+from logging import exception, warning
 
 from selenium.common import TimeoutException
 from selenium.webdriver.common.keys import Keys
@@ -32,9 +33,16 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
 
     if helpers.car_requests[sid].status == "running":
         await asyncio.sleep(1)
-        if len(selenium.find_elements(By.XPATH, XPATHS.request_page)) != 0:
-            await helpers.send_to_client(sid, "message", "Already logged in", 13, "pending")
-            return False
+        try:
+            selenium.switch_to.default_content()
+            selenium.switch_to.frame(1)
+            if len(selenium.find_elements(By.XPATH, XPATHS.request_page)) != 0:
+                await helpers.send_to_client(sid, "message", "Already logged in", 13, "pending")
+                return False
+        except Exception as exc:
+            warning("Could not verify if already logged in, maybe the page did not load?")
+            exception(exc)
+            pass
 
         username = os.environ["APP_USERNAME"]
         password = os.environ["APP_PASSWORD"]
@@ -50,7 +58,7 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
                 raise LoginException("Tried logging out/in too many times...")
 
             settings.COUNTER += 1
-            time.sleep(10)
+            await asyncio.sleep(10)
             selenium.get("https://magyarorszag.hu/jszp_szuf")
 
         try:
@@ -61,7 +69,7 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
             raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
 
         # MARK: Filling inputs
-        time.sleep(0.5)
+        await asyncio.sleep(0.5)
         selenium.find_element(By.XPATH, XPATHS.login_method).click()
         await helpers.send_to_client(sid, "message", "CLICKED: Ugyfelkapu+ azonositas", 8, "pending")
 
@@ -74,7 +82,7 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
         selenium.find_element(By.XPATH, XPATHS.password_field).send_keys(password)
         await helpers.send_to_client(sid, "message", "FILLED: password", 11, "pending")
 
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)
 
         selenium.find_element(By.XPATH, XPATHS.login_button).send_keys(Keys.ENTER)
         await helpers.send_to_client(sid, "message", "CLICKED: login", 12, "pending")
@@ -88,7 +96,7 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
     await helpers.send_to_client(sid, "message", "Skipped username/password part of login", 13.5, "pending")
     WebDriverWait(selenium, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.verification_code_field)))
     selenium.find_element(By.XPATH, XPATHS.verification_code_field).send_keys(helpers.car_requests[sid].login_code)
-    time.sleep(0.1)
+    await asyncio.sleep(0.1)
 
     selenium.find_element(By.XPATH, XPATHS.login_button).send_keys(Keys.ENTER)
     await helpers.send_to_client(sid, "message", "CLICKED: login", 14, "pending")
