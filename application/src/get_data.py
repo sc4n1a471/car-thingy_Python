@@ -88,6 +88,7 @@ async def get_data(sid: str, requested_cars: list[str], check_cookies=False) -> 
         except UnreleasedLPException as ulp:
             raise UnreleasedLPException from ulp
 
+        selenium.switch_to.default_content()
         selenium.switch_to.frame(1)
 
         WebDriverWait(selenium, 180).until(ec.presence_of_element_located((By.XPATH, XPATHS.car_page)))
