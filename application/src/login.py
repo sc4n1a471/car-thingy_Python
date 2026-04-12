@@ -6,7 +6,6 @@ from logging import exception, warning
 from selenium.common import TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.remote.webdriver import WebDriver
 
@@ -62,7 +61,9 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
             selenium.get("https://magyarorszag.hu/jszp_szuf")
 
         try:
-            WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.login_methods)))
+            await helpers.async_wait_for(
+                selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.login_methods)), timeout=10
+            )
             await helpers.send_to_client(sid, "message", "FOUND: Login methods", 7, "pending")
             selenium.find_element(By.XPATH, XPATHS.login_methods).click()  # Open dropdown
         except TimeoutException as toexc:
@@ -73,7 +74,9 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
         selenium.find_element(By.XPATH, XPATHS.login_method).click()
         await helpers.send_to_client(sid, "message", "CLICKED: Ugyfelkapu+ azonositas", 8, "pending")
 
-        WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.username_field)))
+        await helpers.async_wait_for(
+            selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.username_field)), timeout=10
+        )
         await helpers.send_to_client(sid, "message", "FOUND: username input field", 9, "pending")
 
         selenium.find_element(By.XPATH, XPATHS.username_field).send_keys(username)
@@ -88,13 +91,17 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
         await helpers.send_to_client(sid, "message", "CLICKED: login", 12, "pending")
 
         # MARK: 2FA
-        WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.verification_code_field)))
+        await helpers.async_wait_for(
+            selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.verification_code_field)), timeout=10
+        )
         await helpers.send_to_client(sid, "message", "Pls gimme 2FA verification code", 13, "waiting")
         helpers.car_requests[sid].status = "waiting"
         return True
 
     await helpers.send_to_client(sid, "message", "Skipped username/password part of login", 13.5, "pending")
-    WebDriverWait(selenium, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.verification_code_field)))
+    await helpers.async_wait_for(
+        selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.verification_code_field)), timeout=1
+    )
     selenium.find_element(By.XPATH, XPATHS.verification_code_field).send_keys(helpers.car_requests[sid].login_code)
     await asyncio.sleep(0.1)
 

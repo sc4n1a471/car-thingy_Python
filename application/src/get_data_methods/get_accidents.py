@@ -1,7 +1,6 @@
 from selenium.common.exceptions import StaleElementReferenceException, ElementClickInterceptedException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.remote.webdriver import WebDriver
 
 from application.data import helpers
@@ -42,7 +41,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
         await helpers.send_to_client(sid, "message", "Loading spinner not found after 10s, aborting...", -1, "pending")
         return
 
-    WebDriverWait(selenium, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accidents_tab)))
+    await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.accidents_tab)), timeout=5)
     counter = 0
     while counter < 5:
         try:
@@ -62,7 +61,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
 
     counter = 0
     while counter < 5:
-        WebDriverWait(selenium, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.accidents)))
+        await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.accidents)), timeout=5)
         accidents_tbody = selenium.find_element(By.XPATH, XPATHS.accidents)
         accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
 

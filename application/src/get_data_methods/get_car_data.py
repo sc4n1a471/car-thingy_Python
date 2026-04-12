@@ -2,7 +2,6 @@ import traceback
 
 from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
 from application.data import helpers, settings
@@ -31,7 +30,7 @@ async def get_car_data(sid: str, car: Car):
         raise GetDataException("Selenium session is None")
 
     # region: Specs
-    WebDriverWait(selenium, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.brand)))
+    await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.brand)), timeout=5)
     car.brand = selenium.find_element(By.XPATH, XPATHS.brand).text
     await helpers.send_to_client(sid, "brand", car.brand, 25, "pending")
 
@@ -61,7 +60,7 @@ async def get_car_data(sid: str, car: Car):
     if len(selenium.find_elements(By.XPATH, XPATHS.no_official_data)) != 0:
         await helpers.send_to_client(sid, "message", "NOT FOUND: Official records", 47, "pending")
     else:
-        WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.first_reg)))
+        await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.first_reg)), timeout=10)
         car.first_reg = selenium.find_elements(By.XPATH, XPATHS.first_reg)[0].text
         await helpers.send_to_client(sid, "first_reg", car.first_reg, 31, "pending")
 

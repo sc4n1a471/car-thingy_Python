@@ -2,7 +2,10 @@ import logging
 import json
 import os
 import requests
+import time
+import asyncio
 from socketio import AsyncServer
+from selenium.common.exceptions import TimeoutException
 
 from application.models.CarRequest import CarRequest
 
@@ -99,3 +102,28 @@ def create_query_timestamp(auth_key, license_plate):
         raise ValueError("Invalid API key")
     if req.status_code != 200:
         raise ValueError("Failed to create query timestamp")
+
+
+# MARK: Async wait for
+async def async_wait_for(driver, condition, timeout=10, poll_frequency=0.5):
+    """Async version of WebDriverWait.until
+
+    Args:
+        driver: Selenium WebDriver
+        condition: Callable that takes driver and returns truthy value or raises exception
+        timeout: Max time to wait
+        poll_frequency: How often to check the condition
+
+    Raises:
+        TimeoutException: If condition not met within timeout
+    """
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            result = condition(driver)
+            if result:
+                return result
+        except Exception:
+            pass
+        await asyncio.sleep(poll_frequency)
+    raise TimeoutException(f"Timeout waiting for condition after {timeout} seconds")

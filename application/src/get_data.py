@@ -3,7 +3,6 @@ import asyncio
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webdriver import WebDriver
 
@@ -50,7 +49,9 @@ async def get_data(sid: str, requested_cars: list[str], check_cookies=False) -> 
                     try:
                         selenium.switch_to.default_content()
                         selenium.switch_to.frame(5)
-                        WebDriverWait(selenium, 1).until(ec.element_to_be_clickable((By.XPATH, XPATHS.accept_cookies)))
+                        await helpers.async_wait_for(
+                            selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.accept_cookies)), timeout=1
+                        )
                         break
                     except Exception:
                         counter += 1
@@ -72,7 +73,9 @@ async def get_data(sid: str, requested_cars: list[str], check_cookies=False) -> 
                 try:
                     selenium.switch_to.default_content()
                     selenium.switch_to.frame(1)
-                    WebDriverWait(selenium, 1).until(ec.presence_of_element_located((By.XPATH, XPATHS.request_page)))
+                    await helpers.async_wait_for(
+                        selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.request_page)), timeout=1
+                    )
                     break
                 except Exception:
                     counter += 1
@@ -101,10 +104,10 @@ async def get_data(sid: str, requested_cars: list[str], check_cookies=False) -> 
         selenium.switch_to.default_content()
         selenium.switch_to.frame(1)
 
-        WebDriverWait(selenium, 180).until(ec.presence_of_element_located((By.XPATH, XPATHS.car_page)))
+        await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.car_page)), timeout=180)
         await helpers.send_to_client(sid, "message", "FOUND: Car loaded", 20, "pending")
 
-        WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.brand)))
+        await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.brand)), timeout=10)
 
         await get_car_data(sid, car)
 
@@ -128,8 +131,8 @@ async def fill_search(sid: str, selenium: WebDriver, requested_car: str, wait=0)
     selenium.switch_to.default_content()
     selenium.switch_to.frame(1)
 
-    WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.search_input)))
-    WebDriverWait(selenium, 10).until(ec.element_to_be_clickable((By.XPATH, XPATHS.search_input)))
+    await helpers.async_wait_for(selenium, ec.presence_of_element_located((By.XPATH, XPATHS.search_input)), timeout=10)
+    await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.search_input)), timeout=10)
     selenium.find_element(By.XPATH, XPATHS.search_input).clear()
     selenium.find_element(By.XPATH, XPATHS.search_input).send_keys(requested_car)
     await helpers.send_to_client(sid, "message", f"FILLED: license plate, waiting {wait} seconds", 15, "pending")
@@ -158,7 +161,9 @@ async def check_error_modal(sid: str, selenium: WebDriver, car: Car, requested_c
     counter = 0
 
     try:
-        WebDriverWait(selenium, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.error_modal)))
+        await helpers.async_wait_for(
+            selenium, ec.presence_of_element_located((By.XPATH, XPATHS.error_modal)), timeout=5
+        )
     except TimeoutException:
         return
 
@@ -253,7 +258,9 @@ async def check_error_modal(sid: str, selenium: WebDriver, car: Car, requested_c
         counter += 1
 
         try:
-            WebDriverWait(selenium, 5).until(ec.presence_of_element_located((By.XPATH, XPATHS.error_modal)))
+            await helpers.async_wait_for(
+                selenium, ec.presence_of_element_located((By.XPATH, XPATHS.error_modal)), timeout=5
+            )
         except TimeoutException:
             return
 
