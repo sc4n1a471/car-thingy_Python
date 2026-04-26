@@ -1,5 +1,6 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from selenium.webdriver.remote.webdriver import WebDriver
+from asyncio import Task
 
 
 @dataclass
@@ -10,6 +11,7 @@ class CarRequest:
     status: str = "running"  # running/waiting
     selenium_session: WebDriver | None = None
     login_code: str = ""
+    task: Task | None = None
 
     def set_status(self, new_status: str):
         """Sets new status for request

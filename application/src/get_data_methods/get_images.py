@@ -6,7 +6,6 @@ import requests
 
 from typing import List
 
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -50,7 +49,9 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
     ]
 
     for inspection_type in inspection_types:
-        WebDriverWait(selenium, 5).until(ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)))
+        await helpers.async_wait_for(
+            selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)), timeout=5
+        )
         selenium.find_element(By.XPATH, inspection_type["tab_path"]).click()
         await helpers.send_to_client(
             sid, "message", f"Searching for {inspection_type['name']}...", percentage, "pending"
@@ -62,8 +63,8 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
             car_inspections: List[Inspection] = []
 
             try:
-                WebDriverWait(selenium, 5).until(
-                    ec.presence_of_element_located((By.XPATH, inspection_type["list_path"]))
+                await helpers.async_wait_for(
+                    selenium, ec.presence_of_element_located((By.XPATH, inspection_type["list_path"])), timeout=5
                 )
             except:
                 await helpers.send_to_client(sid, "message", "NOT FOUND: Inspection data", max_percentage, "pending")
@@ -118,13 +119,13 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
                 selenium.switch_to.frame(dialog_frame)
 
                 try:
-                    WebDriverWait(selenium, 2).until(
-                        ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures))
+                    await helpers.async_wait_for(
+                        selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures)), timeout=2
                     )
                     # await asyncio.sleep(1)
                 except:
-                    WebDriverWait(selenium, 7).until(
-                        ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures))
+                    await helpers.async_wait_for(
+                        selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures)), timeout=7
                     )
 
                     imgs = selenium.find_elements(By.XPATH, XPATHS.inspections_pictures)
@@ -140,8 +141,8 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
 
                     car_inspections[i].images = images
 
-                WebDriverWait(selenium, 4).until(
-                    ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button))
+                await helpers.async_wait_for(
+                    selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button)), timeout=4
                 )
                 close_dialog_button = selenium.find_element(By.XPATH, XPATHS.inspections_close_button)
                 close_dialog_button.click()

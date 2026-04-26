@@ -135,6 +135,10 @@ async def request_car(sid: str):
         selenium.quit()
         await helpers.send_to_client(sid, "message", None, 100, "success")
         return
+    except asyncio.CancelledError:
+        if "selenium" in locals() and selenium:
+            selenium.quit()
+        raise
     except Exception as exc:
         exception(exc)
         return

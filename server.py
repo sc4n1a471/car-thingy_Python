@@ -61,7 +61,8 @@ async def request_license_plate(sid, license_plate):
     )
     helpers.car_requests[sid].license_plate = license_plate
     helpers.car_requests[sid].status = "running"
-    asyncio.create_task(request_car(sid))
+    task = asyncio.create_task(request_car(sid))
+    helpers.car_requests[sid].task = task
 
 
 # MARK: Ping event
@@ -85,7 +86,8 @@ async def input_2fa(sid, data):
     helpers.car_requests[sid].login_code = data
     logging.info(f"Input received from sid: {sid}")
     await helpers.send_to_client(sid, "message", "2FA code received, continuing...", 15, "pending")
-    asyncio.create_task(request_car(sid))
+    task = asyncio.create_task(request_car(sid))
+    helpers.car_requests[sid].task = task
 
 
 # MARK: Stop request
@@ -101,6 +103,9 @@ async def stop_request(sid):
         return
     try:
         helpers.car_requests[sid].set_status("cancelled")
+        task = helpers.car_requests[sid].task
+        if task is not None:
+            task.cancel()
         selenium.quit()
     except:
         pass
