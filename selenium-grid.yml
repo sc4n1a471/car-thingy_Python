@@ -1,0 +1,20 @@
+services:
+  selenium-grid:
+    container_name: "selenium-grid"
+    environment:
+      - "TZ=Europe/Budapest"
+      - "SE_NODE_MAX_SESSIONS=16"
+      - "SE_NODE_SESSION_TIMEOUT=300"
+      - "SE_NODE_OVERRIDE_MAX_SESSIONS=true"
+    image: "selenium/standalone-chrome:142.0-20251101"
+    ports:
+      - "4444:4444/tcp"
+      - "7900:7900/tcp"
+    restart: "on-failure"
+    shm_size: 1500MB
+    networks:
+      car-thingy:
+        ipv4_address: "172.18.0.9"
+  # network:
+  #   car-thingy:
+  #     external: true
