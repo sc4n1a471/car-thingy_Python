@@ -51,7 +51,6 @@ async def init(sid: str, x_api_key: str) -> WebDriver | None:
             return None
 
         driver = webdriver.Remote(grid_ip, options=chrome_options)
-        driver.command_executor.set_timeout(60)
     else:
         from selenium.webdriver.chrome.service import Service
 

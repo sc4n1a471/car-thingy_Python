@@ -61,12 +61,12 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
 
     counter = 0
     while counter < 5:
-        await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.accidents)), timeout=5)
-        accidents_tbody = selenium.find_element(By.XPATH, XPATHS.accidents)
-        accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
+        try:
+            await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.accidents)), timeout=5)
+            accidents_tbody = selenium.find_element(By.XPATH, XPATHS.accidents)
+            accidents_rows = accidents_tbody.find_elements(By.TAG_NAME, "tr")
 
-        for row in accidents_rows:
-            try:
+            for row in accidents_rows:
                 tmp = row.text.split(" ")
                 if tmp != [""]:
                     role = "".join(tmp[1:])
@@ -90,7 +90,7 @@ async def get_accidents(sid: str, selenium: WebDriver, car: Car):
                     counter += 1
                     await asyncio.sleep(0.25)
                     break
-            except StaleElementReferenceException:
-                continue
+        except:
+            break
 
     await helpers.send_to_client(sid, "accidents", car.accidents, 80, "pending")

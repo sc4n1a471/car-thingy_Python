@@ -12,9 +12,9 @@ services:
       - "7900:7900/tcp"
     restart: "on-failure"
     shm_size: 1500MB
-    networks:
-      car-thingy:
-        ipv4_address: "172.18.0.9"
+    # networks:
+    #   car-thingy:
+    #     ipv4_address: "172.18.0.9"
   # network:
   #   car-thingy:
-  #     external: true
+      # external: true

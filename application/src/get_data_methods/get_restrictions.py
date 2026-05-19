@@ -60,14 +60,14 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
 
     counter = 0
     while counter < 5:
-        await helpers.async_wait_for(
-            selenium, ec.presence_of_element_located((By.XPATH, XPATHS.restrictions)), timeout=5
-        )
-        restrictions = selenium.find_element(By.XPATH, XPATHS.restrictions)
-        restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
+        try:
+            await helpers.async_wait_for(
+                selenium, ec.presence_of_element_located((By.XPATH, XPATHS.restrictions)), timeout=5
+            )
+            restrictions = selenium.find_element(By.XPATH, XPATHS.restrictions)
+            restrictions_rows = restrictions.find_elements(By.TAG_NAME, "tr")
 
-        for row in restrictions_rows:
-            try:
+            for row in restrictions_rows:
                 tmp = row.text
                 if tmp != "":
                     await helpers.send_to_client(sid, "message", "FOUND: Restrictions", 60, "pending")
@@ -84,7 +84,7 @@ async def get_restrictions(sid: str, selenium: WebDriver, car: Car):
                     counter += 1
                     await asyncio.sleep(0.25)
                     break
-            except:
-                continue
+        except:
+            break
 
     await helpers.send_to_client(sid, "restrictions", car.restrictions, 60, "pending")

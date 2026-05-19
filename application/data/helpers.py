@@ -108,7 +108,7 @@ def create_query_timestamp(auth_key, license_plate):
 
 
 # MARK: Async wait for
-async def async_wait_for(driver, condition, timeout=10, poll_frequency=1, xpath=""):
+async def async_wait_for(driver, condition, timeout=10, poll_frequency=0.25, xpath=""):
     """Async version of WebDriverWait.until
 
     Args:
@@ -124,7 +124,6 @@ async def async_wait_for(driver, condition, timeout=10, poll_frequency=1, xpath=
     while time.time() - start_time < timeout:
         try:
             WebDriverWait(driver, poll_frequency).until(condition)
-            # WebDriverWait(driver, 1).until(ec.presence_of_element_located((By.XPATH, xpath)))
             return
         except Exception:
             pass
