@@ -57,12 +57,12 @@ async def get_mileage(sid: str, selenium: WebDriver, car: Car):
 
     counter = 0
     while counter < 5:
-        await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.mileage)), timeout=5)
-        mileage_tbody = selenium.find_element(By.XPATH, XPATHS.mileage)
-        mileage_rows = mileage_tbody.find_elements(By.TAG_NAME, "tr")
+        try:
+            await helpers.async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.mileage)), timeout=5)
+            mileage_tbody = selenium.find_element(By.XPATH, XPATHS.mileage)
+            mileage_rows = mileage_tbody.find_elements(By.TAG_NAME, "tr")
 
-        for row in mileage_rows:
-            try:
+            for row in mileage_rows:
                 tmp = row.text.split(" ")
                 if tmp != [""]:
                     await helpers.send_to_client(sid, "message", "FOUND: Mileage data", 70, "pending")
@@ -86,7 +86,7 @@ async def get_mileage(sid: str, selenium: WebDriver, car: Car):
                     counter += 1
                     await asyncio.sleep(0.25)
                     break
-            except StaleElementReferenceException:
-                continue
+        except:
+            break
 
     await helpers.send_to_client(sid, "mileage", car.mileage, 70, "pending")

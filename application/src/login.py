@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support.ui import WebDriverWait
 
 from application.data import settings
 from application.data.xpaths import XPATHS
@@ -61,11 +62,12 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
             selenium.get("https://magyarorszag.hu/jszp_szuf")
 
         try:
-            await helpers.async_wait_for(
-                selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.login_methods)), timeout=10
-            )
+            # await helpers.async_wait_for(
+            #     selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.login_methods)), timeout=10
+            # )
             await helpers.send_to_client(sid, "message", "FOUND: Login methods", 7, "pending")
-            selenium.find_element(By.XPATH, XPATHS.login_methods).click()  # Open dropdown
+            temp = selenium.find_element(By.XPATH, XPATHS.login_methods)
+            temp.click()  # Open dropdown
         except TimeoutException as toexc:
             raise TimeoutException("Could not find login page, maybe the page does not load?") from toexc
 
@@ -74,8 +76,13 @@ async def login(sid: str, selenium: WebDriver, retry=False) -> bool:
         selenium.find_element(By.XPATH, XPATHS.login_method).click()
         await helpers.send_to_client(sid, "message", "CLICKED: Ugyfelkapu+ azonositas", 8, "pending")
 
+        WebDriverWait(selenium, 10).until(ec.presence_of_element_located((By.XPATH, XPATHS.username_field)))
+
         await helpers.async_wait_for(
-            selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.username_field)), timeout=10
+            selenium,
+            ec.element_to_be_clickable((By.XPATH, XPATHS.username_field)),
+            timeout=10,
+            xpath=XPATHS.username_field,
         )
         await helpers.send_to_client(sid, "message", "FOUND: username input field", 9, "pending")
 

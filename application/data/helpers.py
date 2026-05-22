@@ -6,6 +6,9 @@ import time
 import asyncio
 from socketio import AsyncServer
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as ec
 
 from application.models.CarRequest import CarRequest
 
@@ -105,7 +108,7 @@ def create_query_timestamp(auth_key, license_plate):
 
 
 # MARK: Async wait for
-async def async_wait_for(driver, condition, timeout=10, poll_frequency=0.5):
+async def async_wait_for(driver, condition, timeout=10, poll_frequency=0.25, xpath=""):
     """Async version of WebDriverWait.until
 
     Args:
@@ -120,9 +123,8 @@ async def async_wait_for(driver, condition, timeout=10, poll_frequency=0.5):
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            result = condition(driver)
-            if result:
-                return result
+            WebDriverWait(driver, poll_frequency).until(condition)
+            return
         except Exception:
             pass
         await asyncio.sleep(poll_frequency)
