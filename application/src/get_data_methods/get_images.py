@@ -124,9 +124,16 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
                     )
                     # await asyncio.sleep(1)
                 except:
-                    await helpers.async_wait_for(
-                        selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures)), timeout=7
-                    )
+                    try:
+                        await helpers.async_wait_for(
+                            selenium,
+                            ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures)),
+                            timeout=15,
+                        )
+                    except:
+                        raise Exception(
+                            "Couldn't find the pictures element nor the no pictures element for some reason"
+                        )
 
                     imgs = selenium.find_elements(By.XPATH, XPATHS.inspections_pictures)
 
