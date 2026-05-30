@@ -18,7 +18,13 @@ from application.models.Inspection import Inspection
 from logging import info
 
 
-async def get_images(sid: str, selenium: WebDriver, car: Car, skippable_inspection_index: int = 0) -> int:
+async def get_images(
+    sid: str,
+    selenium: WebDriver,
+    car: Car,
+    skippable_inspection_index: int = 0,
+    skippable_inspection_type: str | None = None,
+) -> tuple[int, str | None]:
     """Downloads images associated to the inspections.
     If there is an error regarding an empty image dialog, it needs to be re-run with skipping that one inspection
 
@@ -27,9 +33,10 @@ async def get_images(sid: str, selenium: WebDriver, car: Car, skippable_inspecti
         selenium (WebDriver): Selenium session
         car (Car): Car object
         skippable_inspection_index (int): Index of the inspection to skip, defaults to 0, meaning that no inspection will be skipped
+        skippable_inspection_type (str | None): Type of the inspection to skip, defaults to None, meaning that no inspection will be skipped
 
     Returns:
-        int: 0 if the images were downloaded successfully, index of the inspection that needs to be skipped if there was an error regarding an empty image dialog
+        tuple[int, str | None]: A tuple containing the index of the inspection that needs to be skipped and its type, or (0, None) if no inspection needs to be skipped
     """
 
     percentage = 82
@@ -58,8 +65,10 @@ async def get_images(sid: str, selenium: WebDriver, car: Car, skippable_inspecti
         iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
         selenium.switch_to.frame(iframe)
 
-    car_inspections: List[Inspection] = []
+    debug_car_inspections: List[Inspection] = []
     for inspection_type in inspection_types:
+        car_inspections: List[Inspection] = []
+
         await helpers.async_wait_for(
             selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)), timeout=5
         )
@@ -117,10 +126,10 @@ async def get_images(sid: str, selenium: WebDriver, car: Car, skippable_inspecti
                 await asyncio.sleep(0.25)
 
         if counter == 5:
-            return 0
+            return 0, None
 
         for button, i in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
-            if i == skippable_inspection_index:
+            if i == skippable_inspection_index and inspection_type["name"] == skippable_inspection_type:
                 continue
             images = []
 
@@ -154,7 +163,7 @@ async def get_images(sid: str, selenium: WebDriver, car: Car, skippable_inspecti
                         replaced_src = src.replace("data:image/jpeg;base64,", "")
                         if not replaced_src in images:
                             images.append(replaced_src)
-                            percentage += 0.25
+                            percentage += 0.1
                             await helpers.send_to_client(sid, "message", f"FOUND: Image", percentage, "pending")
 
                 car_inspections[i].images = images
@@ -177,14 +186,19 @@ async def get_images(sid: str, selenium: WebDriver, car: Car, skippable_inspecti
                     "pending",
                 )
                 selenium.refresh()
-                return i
+                return i, inspection_type["name"]
 
             selenium.switch_to.default_content()
             iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
             selenium.switch_to.frame(iframe)
 
-    await save_images(sid, car.license_plate, car_inspections)
-    return 0
+        await save_images(sid, car.license_plate, car_inspections)
+        debug_car_inspections.extend(car_inspections)
+
+    for inspection in debug_car_inspections:
+        info(f"Inspection name: {inspection.name}, number of images: {len(inspection.images)}")
+
+    return 0, None
 
 
 # MARK: Save images

@@ -135,9 +135,14 @@ async def get_car_data(sid: str, car: Car):
     if car.has_inspection_record and not settings.TESTING:
         try:
             skippable_inspection_index = 0
-            skippable_inspection_index = await get_images(sid, selenium, car, skippable_inspection_index)  # 98%
+            skippable_inspection_type: str | None = None
+            skippable_inspection_index, skippable_inspection_type = await get_images(
+                sid, selenium, car, skippable_inspection_index, skippable_inspection_type
+            )  # 98%
             while skippable_inspection_index != 0:
                 await helpers.check_cookies_banner(selenium, sid, 81)
-                skippable_inspection_index = await get_images(sid, selenium, car, skippable_inspection_index)  # 98%
+                skippable_inspection_index, skippable_inspection_type = await get_images(
+                    sid, selenium, car, skippable_inspection_index, skippable_inspection_type
+                )  # 98%
         except Exception as exc:
             raise GetDataException(f"GET_IMAGES_ERROR: {traceback.format_exc()}") from exc
