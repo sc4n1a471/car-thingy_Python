@@ -4,12 +4,16 @@ import os
 import requests
 import time
 import asyncio
+
 from socketio import AsyncServer
+from logging import info, error, exception
+
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 
+from application.data.xpaths import XPATHS
 from application.models.CarRequest import CarRequest
 
 sio: AsyncServer
@@ -129,3 +133,27 @@ async def async_wait_for(driver, condition, timeout=10, poll_frequency=0.25, xpa
             pass
         await asyncio.sleep(poll_frequency)
     raise TimeoutException(f"Timeout waiting for condition after {timeout} seconds")
+
+
+async def check_cookies_banner(selenium, sid, percentage=13):
+    try:
+        counter = 0
+        while counter < 5:
+            try:
+                selenium.switch_to.default_content()
+                selenium.switch_to.frame(5)
+                await async_wait_for(selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.accept_cookies)), timeout=1)
+                break
+            except Exception:
+                counter += 1
+                info(f"Accept cookies button not found, retrying... ({counter}/5)")
+                await asyncio.sleep(1)
+        if counter == 5:
+            info("Accept cookies button not found after 5 retries, continuing without accepting cookies")
+        else:
+            selenium.find_element(By.XPATH, XPATHS.accept_cookies).click()
+            await send_to_client(sid, "message", "Accepted cookies", percentage, "pending")
+            selenium.switch_to.default_content()
+    except Exception as e:
+        error(f"Accept cookies button not found or not clickable:")
+        exception(e)

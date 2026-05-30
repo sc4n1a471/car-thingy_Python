@@ -18,13 +18,25 @@ from application.models.Inspection import Inspection
 from logging import info
 
 
-async def get_images(sid: str, selenium: WebDriver, car: Car):
-    """Downloads images associated to the inspections
+async def get_images(
+    sid: str,
+    selenium: WebDriver,
+    car: Car,
+    skippable_inspection_index: int = 0,
+    skippable_inspection_type: str | None = None,
+) -> tuple[int, str | None]:
+    """Downloads images associated to the inspections.
+    If there is an error regarding an empty image dialog, it needs to be re-run with skipping that one inspection
 
     Args:
         sid (str): ID of client connection
         selenium (WebDriver): Selenium session
         car (Car): Car object
+        skippable_inspection_index (int): Index of the inspection to skip, defaults to 0, meaning that no inspection will be skipped
+        skippable_inspection_type (str | None): Type of the inspection to skip, defaults to None, meaning that no inspection will be skipped
+
+    Returns:
+        tuple[int, str | None]: A tuple containing the index of the inspection that needs to be skipped and its type, or (0, None) if no inspection needs to be skipped
     """
 
     percentage = 82
@@ -48,7 +60,15 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
         },
     ]
 
+    if skippable_inspection_index != 0:
+        selenium.switch_to.default_content()
+        iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
+        selenium.switch_to.frame(iframe)
+
+    debug_car_inspections: List[Inspection] = []
     for inspection_type in inspection_types:
+        car_inspections: List[Inspection] = []
+
         await helpers.async_wait_for(
             selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_tab)), timeout=5
         )
@@ -59,106 +79,126 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
 
         if len(selenium.find_elements(By.XPATH, inspection_type["no_inspection_data"])) != 0:
             await helpers.send_to_client(sid, "message", "NOT FOUND: Inspection data", max_percentage, "pending")
-        else:
-            car_inspections: List[Inspection] = []
+            continue
+
+        try:
+            await helpers.async_wait_for(
+                selenium, ec.presence_of_element_located((By.XPATH, inspection_type["list_path"])), timeout=5
+            )
+        except:
+            await helpers.send_to_client(sid, "message", "NOT FOUND: Inspection data", max_percentage, "pending")
+            continue
+
+        inspections = selenium.find_elements(By.XPATH, inspection_type["list_path"])
+
+        for inspection_data, i in zip(inspections, range(0, len(inspections))):
+            if i != 0:  # the first inspection is open on tab change
+                inspection_data.click()
+
+            counter = 0
+            retry = True
+            while retry:
+                if inspection_data.text != "" or counter == 30:
+                    percentage += 1
+                    await helpers.send_to_client(sid, "message", f"FOUND: Inspection", percentage, "pending")
+                    car_inspections.append(Inspection(inspection_data.text))
+                    break
+                await helpers.send_to_client(
+                    sid,
+                    "message",
+                    "NOT FOUND: Inspection, searching again...",
+                    -1,
+                    "pending",
+                )
+                counter += 1
+                await asyncio.sleep(0.1)
+            await asyncio.sleep(0.4)
+
+        counter = 0
+        while counter < 5:
+            # MARK: Opening image panels
+            try:
+                show_pictures_buttons = selenium.find_elements(By.XPATH, inspection_type["show_pictures_path"])
+                show_pictures_buttons.pop(0)
+                counter = 6
+            except:
+                counter += 1
+                await asyncio.sleep(0.25)
+
+        if counter == 5:
+            return 0, None
+
+        for button, i in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
+            if i == skippable_inspection_index and inspection_type["name"] == skippable_inspection_type:
+                continue
+            images = []
+
+            # MARK: Opening image dialogs
+            button.click()
+
+            selenium.switch_to.default_content()
+            dialog_frame = selenium.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
+            selenium.switch_to.frame(dialog_frame)
 
             try:
                 await helpers.async_wait_for(
-                    selenium, ec.presence_of_element_located((By.XPATH, inspection_type["list_path"])), timeout=5
+                    selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures)), timeout=2
                 )
+                # await asyncio.sleep(1)
             except:
-                await helpers.send_to_client(sid, "message", "NOT FOUND: Inspection data", max_percentage, "pending")
-                continue
-
-            inspections = selenium.find_elements(By.XPATH, inspection_type["list_path"])
-            for inspection_data, i in zip(inspections, range(0, len(inspections))):
-                if i != 0:  # the first inspection is open on tab change
-                    inspection_data.click()
-
-                counter = 0
-                retry = True
-                while retry:
-                    if inspection_data.text != "" or counter == 30:
-                        percentage += 1
-                        await helpers.send_to_client(sid, "message", f"FOUND: Inspection", percentage, "pending")
-                        car_inspections.append(Inspection(inspection_data.text))
-                        break
-                    await helpers.send_to_client(
-                        sid,
-                        "message",
-                        "NOT FOUND: Inspection, searching again...",
-                        -1,
-                        "pending",
-                    )
-                    counter += 1
-                    await asyncio.sleep(0.1)
-                await asyncio.sleep(0.4)
-
-            counter = 0
-            while counter < 5:
-                # MARK: Opening image panels
-                try:
-                    show_pictures_buttons = selenium.find_elements(By.XPATH, inspection_type["show_pictures_path"])
-                    show_pictures_buttons.pop(0)
-                    counter = 6
-                except:
-                    counter += 1
-                    await asyncio.sleep(0.25)
-
-            if counter == 5:
-                return
-
-            for button, i in zip(show_pictures_buttons, range(0, len(inspections) + 1)):
-                images = []
-
-                # MARK: Opening image dialogs
-                button.click()
-
-                selenium.switch_to.default_content()
-                dialog_frame = selenium.find_element(By.XPATH, XPATHS.inspections_pictures_dialog_frame)
-                selenium.switch_to.frame(dialog_frame)
-
                 try:
                     await helpers.async_wait_for(
-                        selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_no_pictures)), timeout=2
+                        selenium,
+                        ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures)),
+                        timeout=15,
                     )
-                    # await asyncio.sleep(1)
                 except:
-                    try:
-                        await helpers.async_wait_for(
-                            selenium,
-                            ec.presence_of_element_located((By.XPATH, XPATHS.inspections_pictures)),
-                            timeout=15,
-                        )
-                    except:
-                        raise Exception(
-                            "Couldn't find the pictures element nor the no pictures element for some reason"
-                        )
+                    raise Exception("Couldn't find the pictures element nor the no pictures element for some reason")
 
-                    imgs = selenium.find_elements(By.XPATH, XPATHS.inspections_pictures)
+                imgs = selenium.find_elements(By.XPATH, XPATHS.inspections_pictures)
 
-                    for img in imgs:
-                        src = img.get_attribute("src")
-                        if src is not None:
-                            replaced_src = src.replace("data:image/jpeg;base64,", "")
-                            if not replaced_src in images:
-                                images.append(replaced_src)
-                                percentage += 0.25
-                                await helpers.send_to_client(sid, "message", f"FOUND: Image", percentage, "pending")
+                for img in imgs:
+                    src = img.get_attribute("src")
+                    if src is not None:
+                        replaced_src = src.replace("data:image/jpeg;base64,", "")
+                        if not replaced_src in images:
+                            images.append(replaced_src)
+                            percentage += 0.1
+                            await helpers.send_to_client(sid, "message", f"FOUND: Image", percentage, "pending")
 
-                    car_inspections[i].images = images
+                car_inspections[i].images = images
 
+            await helpers.async_wait_for(
+                selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button)), timeout=4
+            )
+            close_dialog_button = selenium.find_element(By.XPATH, XPATHS.inspections_close_button)
+            try:
                 await helpers.async_wait_for(
-                    selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button)), timeout=4
+                    selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_close_button)), timeout=5
                 )
-                close_dialog_button = selenium.find_element(By.XPATH, XPATHS.inspections_close_button)
                 close_dialog_button.click()
+            except:
+                await helpers.send_to_client(
+                    sid,
+                    "message",
+                    f"No images found in this inspection and cannot close dialog, retrying...",
+                    82,
+                    "pending",
+                )
+                selenium.refresh()
+                return i, inspection_type["name"]
 
-                selenium.switch_to.default_content()
-                iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
-                selenium.switch_to.frame(iframe)
+            selenium.switch_to.default_content()
+            iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
+            selenium.switch_to.frame(iframe)
 
-            await save_images(sid, car.license_plate, car_inspections)
+        await save_images(sid, car.license_plate, car_inspections)
+        debug_car_inspections.extend(car_inspections)
+
+    for inspection in debug_car_inspections:
+        info(f"Inspection name: {inspection.name}, number of images: {len(inspection.images)}")
+
+    return 0, None
 
 
 # MARK: Save images
@@ -170,6 +210,8 @@ async def save_images(sid: str, license_plate: str, inspections: list[Inspection
         license_plate (str): License plate of the inspections
         inspections (list[Inspection]): Inspection objects
     """
+    if len(inspections) == 0:
+        return
     await helpers.send_to_client(sid, "message", "Saving images...", 94, "pending")
 
     if not os.path.exists("downloaded_images"):
