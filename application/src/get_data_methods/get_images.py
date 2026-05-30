@@ -152,7 +152,20 @@ async def get_images(sid: str, selenium: WebDriver, car: Car):
                     selenium, ec.presence_of_element_located((By.XPATH, XPATHS.inspections_close_button)), timeout=4
                 )
                 close_dialog_button = selenium.find_element(By.XPATH, XPATHS.inspections_close_button)
-                close_dialog_button.click()
+                try:
+                    await helpers.async_wait_for(
+                        selenium, ec.element_to_be_clickable((By.XPATH, XPATHS.inspections_close_button)), timeout=5
+                    )
+                    close_dialog_button.click()
+                except:
+                    await helpers.send_to_client(
+                        sid,
+                        "message",
+                        f"No images found in this inspection and cannot close dialog, skipping the rest of the inspections",
+                        percentage,
+                        "pending",
+                    )
+                    break
 
                 selenium.switch_to.default_content()
                 iframe = selenium.find_element(By.XPATH, XPATHS.main_frame)
